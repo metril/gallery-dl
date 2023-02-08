@@ -1,4 +1,5 @@
 start-github-runner:
+    stage: build
     image: alpine
     before_script:
         - apk add --update curl && rm -rf /var/cache/apk/*
