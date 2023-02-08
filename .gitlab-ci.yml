@@ -1,0 +1,10 @@
+build:linux:
+    stage: build
+    image: python:3.11
+    script:
+        - pip install requests requests[socks] yt-dlp pyinstaller
+        - python scripts/pyinstaller.py
+    tags:
+        - docker
+        - heavy
+
