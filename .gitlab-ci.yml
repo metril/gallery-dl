@@ -16,6 +16,5 @@ build:debian:
         - pip install requests requests[socks] yt-dlp pyinstaller
         - python scripts/pyinstaller.py
     tags:
-        - docker
-        - heavy
+        - githubrunner
 
