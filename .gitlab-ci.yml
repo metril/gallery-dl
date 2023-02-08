@@ -16,5 +16,5 @@ build:windows:
         - python scripts/pyinstaller.py
     tags:
         - docker
-        - heavy
+        - amd64
 
