@@ -8,13 +8,3 @@ build:debian:
         - docker
         - heavy
 
-build:windows:
-    stage: build
-    image: python:3.11.1-windowsservercore-1809
-    script:
-        - pip install requests requests[socks] yt-dlp pyinstaller
-        - python scripts/pyinstaller.py
-    tags:
-        - docker
-        - amd64
-
