@@ -1,6 +1,16 @@
-build:linux:
+build:debian:
     stage: build
-    image: python:3.11
+    image: python:3.11.1-bullseye
+    script:
+        - pip install requests requests[socks] yt-dlp pyinstaller
+        - python scripts/pyinstaller.py
+    tags:
+        - docker
+        - heavy
+
+build:windows:
+    stage: build
+    image: python:3.11.1-windowsservercore-1809
     script:
         - pip install requests requests[socks] yt-dlp pyinstaller
         - python scripts/pyinstaller.py
