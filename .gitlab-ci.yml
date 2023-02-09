@@ -12,6 +12,7 @@ start-github-runner:
 
 build:debian:
     stage: build
+    image: python:3.11.1-bullseye
     script:
         - pip install requests requests[socks] yt-dlp pyinstaller
         - python scripts/pyinstaller.py
