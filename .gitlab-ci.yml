@@ -9,17 +9,6 @@ start-github-runner-ubuntu:
         "https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/gitlab-runner-ubuntu.yaml/dispatches" \
         -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'https://gitlab.azureolympos.com'", "tailscale_authkey": "'${TAILSCALE_EPHEMERAL_KEY}'","docker_image": "'docker:19.03.12'"}}'
 
-start-github-runner-windows:
-    stage: build
-    image: alpine
-    before_script:
-        - apk add --update curl && rm -rf /var/cache/apk/*
-    script: |
-        curl -H "Authorization: token ${GITHUB_TOKEN}" \
-        -H 'Accept: application/vnd.github.everest-preview+json' \
-        "https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/gitlab-runner-windows.yaml/dispatches" \
-        -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'https://gitlab.azureolympos.com'", "tailscale_authkey": "'${TAILSCALE_EPHEMERAL_KEY}'","docker_image": "'docker:19.03.12'"}}'
-
 start-github-runner-macos:
     stage: build
     image: alpine
@@ -31,7 +20,6 @@ start-github-runner-macos:
         "https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/gitlab-runner-macos.yaml/dispatches" \
         -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'https://gitlab.azureolympos.com'", "tailscale_authkey": "'${TAILSCALE_EPHEMERAL_KEY}'","docker_image": "'docker:19.03.12'"}}'
 
-
 build:linux:
     stage: build
     image: python:3.11.1-bullseye
@@ -40,15 +28,6 @@ build:linux:
         - python scripts/pyinstaller.py
     tags:
         - githubrunner-ubuntu
-
-build:windows:
-    stage: build
-    image: python:3.11.1-windowsservercore-1809
-    script:
-        - pip install requests requests[socks] yt-dlp pyinstaller
-        - python scripts/pyinstaller.py
-    tags:
-        - githubrunner-windows
 
 build:macos:
     stage: build
