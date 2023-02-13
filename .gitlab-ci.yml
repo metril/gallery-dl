@@ -5,7 +5,7 @@ start-github-runner-ubuntu:
         - apk add --update curl && rm -rf /var/cache/apk/*
     script: |
         export VAULT_ADDR=https://vault.azureolympos.com
-        export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=tailscale-machine jwt=$CI_JOB_JWT)"
+        export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_JWT)"
         export TAILSCALE_EPHEMERAL_KEY="$(vault kv get -field=ephemeral tailscale/authkeys)"
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
@@ -19,7 +19,7 @@ start-github-runner-windows:
         - apk add --update curl && rm -rf /var/cache/apk/*
     script: |
         export VAULT_ADDR=https://vault.azureolympos.com
-        export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=tailscale-machine jwt=$CI_JOB_JWT)"
+        export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_JWT)"
         export TAILSCALE_EPHEMERAL_KEY="$(vault kv get -field=ephemeral tailscale/authkeys)"
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
@@ -33,7 +33,7 @@ start-github-runner-macos:
         - apk add --update curl && rm -rf /var/cache/apk/*
     script: |
         export VAULT_ADDR=https://vault.azureolympos.com
-        export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=tailscale-machine jwt=$CI_JOB_JWT)"
+        export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_JWT)"
         export TAILSCALE_EPHEMERAL_KEY="$(vault kv get -field=ephemeral tailscale/authkeys)"
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
