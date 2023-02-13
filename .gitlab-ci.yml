@@ -1,6 +1,6 @@
 start-github-runner-ubuntu:
     stage: build
-    image: alpine
+    image: vault:latest
     before_script:
         - apk add --update curl && rm -rf /var/cache/apk/*
     script: |
@@ -14,7 +14,7 @@ start-github-runner-ubuntu:
 
 start-github-runner-windows:
     stage: build
-    image: alpine
+    image: vault:latest
     before_script:
         - apk add --update curl && rm -rf /var/cache/apk/*
     script: |
@@ -28,7 +28,7 @@ start-github-runner-windows:
 
 start-github-runner-macos:
     stage: build
-    image: alpine
+    image: vault:latest
     before_script:
         - apk add --update curl && rm -rf /var/cache/apk/*
     script: |
