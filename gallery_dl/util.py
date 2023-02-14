@@ -204,6 +204,10 @@ def datetime_to_timestamp_string(dt):
         return ""
 
 
+json_loads = json._default_decoder.decode
+json_dumps = json.JSONEncoder(default=str).encode
+
+
 def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
     """Serialize 'obj' as JSON and write it to 'fp'"""
     json.dump(
@@ -513,7 +517,7 @@ def parse_inputfile(file, log):
                 continue
 
             try:
-                value = json.loads(value.strip())
+                value = json_loads(value.strip())
             except ValueError as exc:
                 log.warning("input file: unable to parse '%s': %s", value, exc)
                 continue
@@ -588,6 +592,7 @@ GLOBALS = {
     "timedelta": datetime.timedelta,
     "abort"    : raises(exception.StopExtraction),
     "terminate": raises(exception.TerminateExtraction),
+    "restart"  : raises(exception.RestartExtraction),
     "re"       : re,
 }
 
@@ -733,7 +738,8 @@ class RangePredicate():
             self.lower = min(r.start for r in ranges)
             self.upper = max(r.stop for r in ranges) - 1
         else:
-            self.lower = self.upper = 0
+            self.lower = 0
+            self.upper = 0
 
     def __call__(self, _url, _kwdict):
         self.index = index = self.index + 1

@@ -76,7 +76,8 @@ class OAuthBase(Extractor):
             browser = webbrowser.get()
 
         if browser and browser.open(url):
-            self.log.info("Opening URL in %s:", browser.name.capitalize())
+            name = getattr(browser, "name", "Browser")
+            self.log.info("Opening URL in %s:", name.capitalize())
         else:
             self.log.info("Please open this URL in your browser:")
 
