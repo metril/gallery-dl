@@ -70,6 +70,7 @@ build:linux:
         - gh repo clone metril/gallery-dl metril_gallery-dl
         - mv ./dist ./metril_gallery-dl/dist
         - cd metril_gallery-dl
+        - gh release delete latest --yes
         - gh release create --latest --target master -t $TITLE latest ./dist/*
     tags:
         - githubrunner-ubuntu
