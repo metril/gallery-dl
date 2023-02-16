@@ -50,6 +50,7 @@ build:linux:
     stage: build
     image: ubuntu:latest
     before_script:
+        - apt update
         - apt install curl -y
         - curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
         - chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
