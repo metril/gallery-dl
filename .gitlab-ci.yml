@@ -62,7 +62,7 @@ build:linux:
     script:
         - pip install requests requests[socks] yt-dlp pyinstaller
         - python3 scripts/pyinstaller.py
-        - export GITHUB_TOKEN="$(vault kv get -field=token github/developer)"
+        - export GH_TOKEN="$(vault kv get -field=token github/developer)"
         - DATE=`TZ=":America/New_York" date +%Y-%m-%d_%H-%M`
         - TITLE=gallery-dl_${DATE}
         - gh repo clone metril/gallery-dl metril_gallery-dl
