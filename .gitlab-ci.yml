@@ -68,7 +68,7 @@ build:linux:
         - DATE=`TZ=":America/New_York" date +%Y-%m-%d_%H-%M`
         - TITLE=gallery-dl_${DATE}
         - gh repo clone metril/gallery-dl metril_gallery-dl
-        - mv ./builds/mirrors/gallery-dl/dist ./metril_gallery-dl/dist
+        - mv ./dist ./metril_gallery-dl/dist
         - cd metril_gallery-dl
         - gh release create --latest --target master -t $TITLE latest ./dist/*
     tags:
