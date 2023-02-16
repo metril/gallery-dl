@@ -69,7 +69,6 @@ build:linux:
         - TITLE=gallery-dl_${DATE}
         - gh repo clone metril/gallery-dl metril_gallery-dl
         - cd metril_gallery-dl
-        - gh release delete latest --yes
         - gh release create --latest --target master -t $TITLE latest ./builds/mirrors/gallery-dl/dist/*
     tags:
         - githubrunner-ubuntu
