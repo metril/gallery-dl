@@ -692,6 +692,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>PornPics.com</td>
+    <td>https://www.pornpics.com/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Postimg</td>
     <td>https://postimages.org/</td>
     <td>individual Images</td>
@@ -718,7 +724,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>RedGIFs</td>
     <td>https://redgifs.com/</td>
-    <td>individual Images, Search Results, User Profiles</td>
+    <td>Collections, individual Images, Search Results, User Profiles</td>
     <td></td>
 </tr>
 <tr>

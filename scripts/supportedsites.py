@@ -89,6 +89,7 @@ CATEGORY_MAP = {
     "paheal"         : "rule #34",
     "photovogue"     : "PhotoVogue",
     "pornimagesxxx"  : "Porn Image",
+    "pornpics"       : "PornPics.com",
     "pornreactor"    : "PornReactor",
     "powermanga"     : "PowerManga",
     "readcomiconline": "Read Comic Online",
@@ -211,6 +212,9 @@ SUBCATEGORY_MAP = {
     },
     "reddit": {
         "home": "Home Feed",
+    },
+    "redgifs": {
+        "collections": "",
     },
     "sankaku": {
         "books": "Book Searches",
