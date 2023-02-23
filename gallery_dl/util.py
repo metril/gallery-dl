@@ -14,6 +14,7 @@ import sys
 import json
 import time
 import random
+import hashlib
 import sqlite3
 import binascii
 import datetime
@@ -23,7 +24,7 @@ import subprocess
 import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
-from . import text, exception
+from . import text, version, exception
 
 
 def bencode(num, alphabet="0123456789"):
@@ -110,6 +111,24 @@ def false(_):
 
 def noop():
     """Does nothing"""
+
+
+def md5(s):
+    """Generate MD5 hexdigest of 's'"""
+    if not s:
+        s = b""
+    elif isinstance(s, str):
+        s = s.encode()
+    return hashlib.md5(s).hexdigest()
+
+
+def sha1(s):
+    """Generate SHA1 hexdigest of 's'"""
+    if not s:
+        s = b""
+    elif isinstance(s, str):
+        s = s.encode()
+    return hashlib.sha1(s).hexdigest()
 
 
 def generate_token(size=16):
@@ -583,6 +602,7 @@ EPOCH = datetime.datetime(1970, 1, 1)
 SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
+USERAGENT = "gallery-dl/" + version.__version__
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
 GLOBALS = {
     "contains" : contains,
@@ -593,6 +613,8 @@ GLOBALS = {
     "abort"    : raises(exception.StopExtraction),
     "terminate": raises(exception.TerminateExtraction),
     "restart"  : raises(exception.RestartExtraction),
+    "hash_sha1": sha1,
+    "hash_md5" : md5,
     "re"       : re,
 }
 
