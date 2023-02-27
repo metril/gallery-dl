@@ -34,7 +34,6 @@ class DeviantartExtractor(Extractor):
     filename_fmt = "{category}_{index}_{title}.{extension}"
     cookiedomain = None
     cookienames = ("auth", "auth_secure", "userinfo")
-    _warning = True
     _last_request = 0
 
     def __init__(self, match):
@@ -74,13 +73,10 @@ class DeviantartExtractor(Extractor):
     def login(self):
         if not self._check_cookies(self.cookienames):
             username, password = self._get_auth_info()
-            if username:
-                self._update_cookies(_login_impl(self, username, password))
-            elif self._warning:
-                self.log.warning(
-                    "No session cookies or login credentials available. "
-                    "Unable to fetch mature-rated content.")
-            DeviantartExtractor._warning = False
+            if not username:
+                return False
+            self._update_cookies(_login_impl(self, username, password))
+        return True
 
     def items(self):
         self.api = DeviantartOAuthAPI(self)
@@ -366,9 +362,7 @@ class DeviantartExtractor(Extractor):
         kwargs["fatal"] = None
         diff = time.time() - DeviantartExtractor._last_request
         if diff < 2.0:
-            delay = 2.0 - diff
-            self.log.debug("Sleeping %.2f seconds", delay)
-            time.sleep(delay)
+            self.sleep(2.0 - diff, "request")
 
         while True:
             response = self.request(url, **kwargs)
@@ -1154,20 +1148,47 @@ class DeviantartSearchExtractor(DeviantartExtractor):
         ("https://www.deviantart.com/search/deviations?order=popular-1-week"),
     )
 
-    def deviations(self):
-        self.login()
+    skip = Extractor.skip
 
-        query = text.parse_query(self.user)
-        self.search = query.get("q", "")
+    def __init__(self, match):
+        DeviantartExtractor.__init__(self, match)
+        self.query = text.parse_query(self.user)
+        self.search = self.query.get("q", "")
         self.user = ""
 
+    def deviations(self):
+        logged_in = self.login()
+
         eclipse_api = DeviantartEclipseAPI(self)
-        return self._eclipse_to_oauth(
-            eclipse_api, eclipse_api.search_deviations(query))
+        search = (eclipse_api.search_deviations
+                  if logged_in else self._search_html)
+        return self._eclipse_to_oauth(eclipse_api, search(self.query))
 
     def prepare(self, deviation):
         DeviantartExtractor.prepare(self, deviation)
         deviation["search_tags"] = self.search
+
+    def _search_html(self, params):
+        url = self.root + "/search"
+        deviation = {
+            "deviationId": None,
+            "author": {"username": "u"},
+            "isJournal": False,
+        }
+
+        while True:
+            page = self.request(url, params=params).text
+
+            items , pos = text.rextract(page, r'\"items\":[', ']')
+            cursor, pos = text.extract(page, r'\"cursor\":\"', '\\', pos)
+
+            for deviation_id in items.split(","):
+                deviation["deviationId"] = deviation_id
+                yield deviation
+
+            if not cursor:
+                return
+            params["cursor"] = cursor
 
 
 class DeviantartGallerySearchExtractor(DeviantartExtractor):
@@ -1496,7 +1517,7 @@ class DeviantartOAuthAPI():
 
         while True:
             if self.delay:
-                time.sleep(self.delay)
+                self.extractor.sleep(self.delay, "api")
 
             self.authenticate(None if public else self.refresh_token_key)
             kwargs["headers"] = self.headers
@@ -1737,12 +1758,21 @@ class DeviantartEclipseAPI():
             return {"error": response.text}
 
     def _pagination(self, endpoint, params, key="results"):
+        limit = params.get("limit", 24)
+        warn = True
+
         while True:
             data = self._call(endpoint, params)
 
             results = data.get(key)
             if results is None:
                 return
+            if len(results) < limit and warn and data.get("hasMore"):
+                warn = False
+                self.log.warning(
+                    "Private deviations detected! "
+                    "Provide login credentials or session cookies "
+                    "to be able to access them.")
             yield from results
 
             if not data.get("hasMore"):
