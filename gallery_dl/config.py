@@ -38,7 +38,7 @@ else:
     ]
 
 
-if getattr(sys, "frozen", False):
+if util.EXECUTABLE:
     # look for config file in PyInstaller executable directory (#682)
     _default_configs.append(os.path.join(
         os.path.dirname(sys.executable),
@@ -49,18 +49,49 @@ if getattr(sys, "frozen", False):
 # --------------------------------------------------------------------
 # public interface
 
-def load(files=None, strict=False, fmt="json"):
-    """Load JSON configuration files"""
-    if fmt == "yaml":
-        try:
-            import yaml
-            load = yaml.safe_load
-        except ImportError:
-            log.error("Could not import 'yaml' module")
-            return
-    else:
-        load = util.json_loads
 
+def initialize():
+    paths = list(map(util.expand_path, _default_configs))
+
+    for path in paths:
+        if os.access(path, os.R_OK | os.W_OK):
+            log.error("There is already a configuration file at '%s'", path)
+            return 1
+
+    for path in paths:
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "x", encoding="utf-8") as fp:
+                fp.write("""\
+{
+    "extractor": {
+
+    },
+    "downloader": {
+
+    },
+    "output": {
+
+    },
+    "postprocessor": {
+
+    }
+}
+""")
+            break
+        except OSError as exc:
+            log.debug("%s: %s", exc.__class__.__name__, exc)
+    else:
+        log.error("Unable to create a new configuration file "
+                  "at any of the default paths")
+        return 1
+
+    log.info("Created a basic configuration file at '%s'", path)
+    return 0
+
+
+def load(files=None, strict=False, load=util.json_loads):
+    """Load JSON configuration files"""
     for pathfmt in files or _default_configs:
         path = util.expand_path(pathfmt)
         try:

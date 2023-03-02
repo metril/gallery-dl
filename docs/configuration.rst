@@ -2647,6 +2647,17 @@ Description
     Download video files.
 
 
+extractor.[szurubooru].username & .token
+----------------------------------------
+Type
+    ``string``
+Description
+    Username and login token of your account to access private resources.
+
+    To generate a token, visit ``/user/USERNAME/list-tokens``
+    and click ``Create Token``.
+
+
 extractor.tumblr.avatar
 -----------------------
 Type
@@ -4692,6 +4703,29 @@ Description
     Note: ``null`` references internal extractors defined in
     `extractor/__init__.py <../gallery_dl/extractor/__init__.py#L12>`__
     or by `extractor.modules`_.
+
+
+globals
+-------
+Type
+    * |Path|_
+    * ``string``
+Example
+    * ``"~/.local/share/gdl-globals.py"``
+    * ``"gdl-globals"``
+Default
+    The ``GLOBALS`` dict in
+    `util.py <../gallery_dl/util.py>`__
+Description
+    Path to or name of an
+    `importable <https://docs.python.org/3/reference/import.html>`__
+    Python module whose namespace gets used as an alternative
+    |globals parameter|__
+    for compiled Python expressions.
+
+.. |globals parameter| replace:: ``globals`` parameter
+.. __: https://docs.python.org/3/library/functions.html#eval
+
 
 
 cache.file

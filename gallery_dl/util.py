@@ -603,6 +603,7 @@ SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
 USERAGENT = "gallery-dl/" + version.__version__
+EXECUTABLE = getattr(sys, "frozen", False)
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
 GLOBALS = {
     "contains" : contains,
@@ -619,9 +620,28 @@ GLOBALS = {
 }
 
 
-def compile_expression(expr, name="<expr>", globals=GLOBALS):
+def compile_expression(expr, name="<expr>", globals=None):
     code_object = compile(expr, name, "eval")
-    return functools.partial(eval, code_object, globals)
+    return functools.partial(eval, code_object, globals or GLOBALS)
+
+
+def import_file(path):
+    """Import a Python module from a filesystem path"""
+    path, name = os.path.split(path)
+
+    name, sep, ext = name.rpartition(".")
+    if not sep:
+        name = ext
+
+    if path:
+        path = expand_path(path)
+        sys.path.insert(0, path)
+        try:
+            return __import__(name)
+        finally:
+            del sys.path[0]
+    else:
+        return __import__(name)
 
 
 def build_duration_func(duration, min=0.0):

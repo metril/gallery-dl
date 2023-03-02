@@ -38,12 +38,19 @@ def main():
         log = output.initialize_logging(args.loglevel)
 
         # configuration
-        if args.load_config:
+        if args.config_load:
             config.load()
-        if args.cfgfiles:
-            config.load(args.cfgfiles, strict=True)
-        if args.yamlfiles:
-            config.load(args.yamlfiles, strict=True, fmt="yaml")
+        if args.configs_json:
+            config.load(args.configs_json, strict=True)
+        if args.configs_yaml:
+            import yaml
+            config.load(args.configs_yaml, strict=True, load=yaml.safe_load)
+        if args.configs_toml:
+            try:
+                import tomllib as toml
+            except ImportError:
+                import toml
+            config.load(args.configs_toml, strict=True, load=toml.loads)
         if args.filename:
             filename = args.filename
             if filename == "/O":
@@ -110,6 +117,11 @@ def main():
             from . import formatter
             formatter._SEPARATOR = separator
 
+        # eval globals
+        path = config.get((), "globals")
+        if path:
+            util.GLOBALS = util.import_file(path).__dict__
+
         # loglevels
         output.configure_logging(args.loglevel)
         if args.loglevel >= logging.ERROR:
@@ -119,7 +131,7 @@ def main():
             import requests
 
             extra = ""
-            if getattr(sys, "frozen", False):
+            if util.EXECUTABLE:
                 extra = " - Executable"
             else:
                 git_head = util.git_head()
@@ -206,6 +218,10 @@ def main():
                     "Deleted %d %s from '%s'",
                     cnt, "entry" if cnt == 1 else "entries", cache._path(),
                 )
+
+        elif args.config_init:
+            return config.initialize()
+
         else:
             if not args.urls and not args.inputfiles:
                 parser.error(

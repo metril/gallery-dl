@@ -61,18 +61,15 @@ class OptionAction(argparse.Action):
 
 class Formatter(argparse.HelpFormatter):
     """Custom HelpFormatter class to customize help output"""
-    def __init__(self, *args, **kwargs):
-        super().__init__(max_help_position=30, *args, **kwargs)
+    def __init__(self, prog):
+        argparse.HelpFormatter.__init__(self, prog, max_help_position=30)
 
-    def _format_action_invocation(self, action):
-        opts = action.option_strings[:]
-        if opts:
-            if action.nargs != 0:
-                args_string = self._format_args(action, "ARG")
-                opts[-1] += " " + args_string
-            return ', '.join(opts)
-        else:
-            return self._metavar_formatter(action, action.dest)(1)[0]
+    def _format_action_invocation(self, action, join=", ".join):
+        opts = action.option_strings
+        if action.metavar:
+            opts = opts.copy()
+            opts[-1] += " " + action.metavar
+        return join(opts)
 
 
 def _parse_option(opt):
@@ -324,24 +321,40 @@ def build_parser():
 
     configuration = parser.add_argument_group("Configuration Options")
     configuration.add_argument(
+        "-o", "--option",
+        dest="options", metavar="KEY=VALUE", action=ParseAction, default=[],
+        help=("Additional options. "
+              "Example: -o browser=firefox")   ,
+    )
+    configuration.add_argument(
         "-c", "--config",
-        dest="cfgfiles", metavar="FILE", action="append",
+        dest="configs_json", metavar="FILE", action="append",
         help="Additional configuration files",
     )
     configuration.add_argument(
         "--config-yaml",
-        dest="yamlfiles", metavar="FILE", action="append",
-        help=argparse.SUPPRESS,
+        dest="configs_yaml", metavar="FILE", action="append",
+        help="Additional configuration files in YAML format",
     )
     configuration.add_argument(
-        "-o", "--option",
-        dest="options", metavar="OPT", action=ParseAction, default=[],
-        help="Additional '<key>=<value>' option values",
+        "--config-toml",
+        dest="configs_toml", metavar="FILE", action="append",
+        help="Additional configuration files in TOML format",
+    )
+    configuration.add_argument(
+        "--config-create",
+        dest="config_init", action="store_true",
+        help="Create a basic configuration file",
+    )
+    configuration.add_argument(
+        "--config-ignore",
+        dest="config_load", action="store_false",
+        help="Do not read default configuration files",
     )
     configuration.add_argument(
         "--ignore-config",
-        dest="load_config", action="store_false",
-        help="Do not read default configuration files",
+        dest="config_load", action="store_false",
+        help=argparse.SUPPRESS,
     )
 
     authentication = parser.add_argument_group("Authentication Options")
