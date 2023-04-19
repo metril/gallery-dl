@@ -15,7 +15,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tbody valign="top">
 <tr>
     <td>2chen</td>
-    <td>https://2chen.moe/</td>
+    <td>https://sturdychan.help/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
@@ -400,7 +400,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Imxto</td>
     <td>https://imx.to/</td>
-    <td>individual Images</td>
+    <td>Galleries, individual Images</td>
     <td></td>
 </tr>
 <tr>
@@ -881,6 +881,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Uploadir</td>
     <td>https://uploadir.com/</td>
     <td>Files</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Vipergirls</td>
+    <td>https://vipergirls.to/</td>
+    <td>Posts, Threads</td>
     <td></td>
 </tr>
 <tr>
