@@ -235,6 +235,12 @@ class Test_CommandlineArguments(unittest.TestCase):
 class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
     module_name = "yt_dlp"
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        if cls.module.version.__version__ > "2023.03.04":
+            cls.test_geo_bypass = cls._test_geo_bypass_xff
+
     def test_retries_extractor(self):
         inf = float("inf")
 
@@ -268,6 +274,16 @@ class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
             "actions": [self.module.MetadataFromFieldPP.to_action(
                 "title:%(artist)s - %(title)s")],
         })
+
+    def _test_geo_bypass_xff(self):
+        self._("--geo-bypass",
+               "geo_bypass", "default")
+        self._("--no-geo-bypass",
+               "geo_bypass", "never")
+        self._(["--geo-bypass-country", "EN"],
+               "geo_bypass", "EN")
+        self._(["--geo-bypass-ip-block", "198.51.100.14/24"],
+               "geo_bypass", "198.51.100.14/24")
 
 
 if __name__ == "__main__":
