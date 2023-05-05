@@ -32,12 +32,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>420chan</td>
-    <td>https://420chan.org/</td>
-    <td>Boards, Threads</td>
-    <td></td>
-</tr>
-<tr>
     <td>4chan</td>
     <td>https://www.4chan.org/</td>
     <td>Boards, Threads</td>
@@ -545,12 +539,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>My Hentai Gallery</td>
     <td>https://myhentaigallery.com/</td>
     <td>Galleries</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Nana</td>
-    <td>https://nana.my.id/</td>
-    <td>Galleries, Favorites, Search Results</td>
     <td></td>
 </tr>
 <tr>
@@ -1416,14 +1404,8 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Rozen Arcana</td>
-    <td>https://archive.alice.al/</td>
-    <td>Boards, Galleries, Search Results, Threads</td>
-    <td></td>
-</tr>
-<tr>
-    <td>TokyoChronos</td>
-    <td>https://www.tokyochronos.net/</td>
+    <td>Palanq</td>
+    <td>https://archive.palanq.win/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
@@ -1446,12 +1428,6 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>PowerManga</td>
     <td>https://read.powermanga.org/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Sense-Scans</td>
-    <td>https://sensescans.com/reader/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>

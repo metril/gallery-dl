@@ -90,6 +90,21 @@ class Extractor():
     def config(self, key, default=None):
         return config.interpolate(self._cfgpath, key, default)
 
+    def config_deprecated(self, key, deprecated, default=None,
+                          sentinel=util.SENTINEL, history=set()):
+        value = self.config(deprecated, sentinel)
+        if value is not sentinel:
+            if deprecated not in history:
+                history.add(deprecated)
+                self.log.warning("'%s' is deprecated. Use '%s' instead.",
+                                 deprecated, key)
+            default = value
+
+        value = self.config(key, sentinel)
+        if value is not sentinel:
+            return value
+        return default
+
     def config_accumulate(self, key):
         return config.accumulate(self._cfgpath, key)
 
@@ -106,7 +121,7 @@ class Extractor():
             values[:0] = config.accumulate((self.subcategory,), key, conf=conf)
         return values
 
-    def request(self, url, *, method="GET", session=None,
+    def request(self, url, method="GET", session=None,
                 retries=None, retry_codes=None, encoding=None,
                 fatal=True, notfound=None, **kwargs):
         if session is None:
@@ -180,7 +195,7 @@ class Extractor():
 
         raise exception.HttpError(msg, response)
 
-    def wait(self, *, seconds=None, until=None, adjust=1.0,
+    def wait(self, seconds=None, until=None, adjust=1.0,
              reason="rate limit reset"):
         now = time.time()
 
@@ -364,14 +379,24 @@ class Extractor():
 
     def _store_cookies(self):
         """Store the session's cookiejar in a cookies.txt file"""
-        if self._cookiefile and self.config("cookies-update", True):
-            try:
-                with open(self._cookiefile, "w") as fp:
-                    util.cookiestxt_store(fp, self._cookiejar)
-            except OSError as exc:
-                self.log.warning("cookies: %s", exc)
+        export = self.config("cookies-update", True)
+        if not export:
+            return
 
-    def _update_cookies(self, cookies, *, domain=""):
+        if isinstance(export, str):
+            path = util.expand_path(export)
+        else:
+            path = self._cookiefile
+            if not path:
+                return
+
+        try:
+            with open(path, "w") as fp:
+                util.cookiestxt_store(fp, self._cookiejar)
+        except OSError as exc:
+            self.log.warning("cookies: %s", exc)
+
+    def _update_cookies(self, cookies, domain=""):
         """Update the session's cookiejar with 'cookies'"""
         if isinstance(cookies, dict):
             self._update_cookies_dict(cookies, domain or self.cookiedomain)
@@ -391,7 +416,7 @@ class Extractor():
         for name, value in cookiedict.items():
             setcookie(name, value, domain=domain)
 
-    def _check_cookies(self, cookienames, *, domain=None):
+    def _check_cookies(self, cookienames, domain=None):
         """Check if all 'cookienames' are in the session's cookiejar"""
         if not self._cookiejar:
             return False

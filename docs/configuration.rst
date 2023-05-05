@@ -457,13 +457,17 @@ Description
 extractor.*.cookies-update
 --------------------------
 Type
-    ``bool``
+    * ``bool``
+    * |Path|_
 Default
     ``true``
 Description
-    If `extractor.*.cookies`_ specifies the |Path|_ of a cookies.txt
-    file and it can be opened and parsed without errors,
-    update its contents with cookies received during data extraction.
+    Export session cookies in cookies.txt format.
+
+    * If this is a |Path|_, write cookies to the given file path.
+
+    * If this is ``true`` and `extractor.*.cookies`_ specifies the |Path|_
+      of a valid cookies.txt file, update its contents.
 
 
 extractor.*.proxy
@@ -2072,17 +2076,6 @@ Default
     ``true``
 Description
     Fetch media from replies to other notes.
-
-
-extractor.nana.favkey
----------------------
-Type
-    ``string``
-Default
-    ``null``
-Description
-    Your `Nana Favorite Key <https://nana.my.id/tutorial>`__,
-    used to access your favorite archives.
 
 
 extractor.newgrounds.flash
