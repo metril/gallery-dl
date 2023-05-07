@@ -38,6 +38,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>4chanarchives</td>
+    <td>https://4chanarchives.com/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>500px</td>
     <td>https://500px.com/</td>
     <td>Favorites, Galleries, individual Images, User Profiles</td>
@@ -388,7 +394,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>imgur</td>
     <td>https://imgur.com/</td>
-    <td>Albums, Favorites, Galleries, individual Images, Search Results, Subreddits, Tag Searches, User Profiles</td>
+    <td>Albums, Favorites, Favorites Folders, Galleries, individual Images, Search Results, Subreddits, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
 <tr>
