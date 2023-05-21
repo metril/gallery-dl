@@ -1686,15 +1686,14 @@ extractor.gofile.website-token
 ------------------------------
 Type
     ``string``
-Default
-    ``"12345"``
 Description
     API token value used during API requests.
 
-    A not up-to-date value will result in ``401 Unauthorized`` errors.
+    An invalid or not up-to-date value
+    will result in ``401 Unauthorized`` errors.
 
-    Setting this value to ``null`` will do an extra HTTP request to fetch
-    the current value used by gofile.
+    Keeping this option unset will use an extra HTTP request
+    to attempt to fetch the current value used by gofile.
 
 
 extractor.gofile.recursive
@@ -1740,6 +1739,21 @@ Description
 
     ``"original"`` will try to download the original ``jpg`` or ``png`` versions,
     but is most likely going to fail with ``403 Forbidden`` errors.
+
+
+extractor.imagechest.access-token
+---------------------------------
+Type
+    ``string``
+Description
+    Your personal Image Chest access token.
+
+    These tokens allow using the API instead of having to scrape HTML pages,
+    providing more detailed metadata.
+    (``date``, ``description``, etc)
+
+    See https://imgchest.com/docs/api/1.0/general/authorization
+    for instructions on how to generate such a token.
 
 
 extractor.imgur.client-id
@@ -1815,6 +1829,41 @@ Description
     ``"avatar"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
+
+
+extractor.instagram.order-files
+-------------------------------
+Type
+    ``string``
+Default
+    ``"asc"``
+Description
+    Controls the order in which files of each post are returned.
+
+    * ``"asc"``: Same order as displayed in a post
+    * ``"desc"``: Reverse order as displayed in a post
+    * ``"reverse"``: Same as ``"desc"``
+
+    Note: This option does *not* affect ``{num}``.
+    To enumerate files in reverse order, use ``count - num + 1``.
+
+
+extractor.instagram.order-posts
+-------------------------------
+Type
+    ``string``
+Default
+    ``"asc"``
+Description
+    Controls the order in which posts are returned.
+
+    * ``"asc"``: Same order as displayed
+    * ``"desc"``: Reverse order as displayed
+    * ``"id"`` or ``"id_asc"``: Ascending order by ID
+    * ``"id_desc"``: Descending order by ID
+    * ``"reverse"``: Same as ``"desc"``
+
+    Note: This option only affects ``highlights``.
 
 
 extractor.instagram.previews
