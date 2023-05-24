@@ -11,14 +11,16 @@ Field names select the metadata value to use in a replacement field.
 
 While simple names are usually enough, more complex forms like accessing values by attribute, element index, or slicing are also supported.
 
-|                      | Example           | Result                 |
-| -------------------- | ----------------- | ---------------------- |
-| Name                 | `{title}`         | `Hello World`          |
-| Element Index        | `{title[6]}`      | `W`                    |
-| Slicing              | `{title[3:8]}`    | `lo Wo`                |
-| Alternatives         | `{empty\|title}`  | `Hello World`          |
-| Element Access       | `{user[name]}`    | `John Doe`             |
-| Attribute Access     | `{extractor.url}` | `https://example.org/` |
+|                      | Example             | Result                 |
+| -------------------- | ------------------- | ---------------------- |
+| Name                 | `{title}`           | `Hello World`          |
+| Element Index        | `{title[6]}`        | `W`                    |
+| Slicing              | `{title[3:8]}`      | `lo Wo`                |
+| Slicing (Bytes)      | `{title_ja[b3:18]}` | `ロー・ワー`           |
+| Alternatives         | `{empty\|title}`    | `Hello World`          |
+| Attribute Access     | `{extractor.url}`   | `https://example.org/` |
+| Element Access       | `{user[name]}`      | `John Doe`             |
+|                      | `{user['name']}`    | `John Doe`             |
 
 All of these methods can be combined as needed.
 For example `{title[24]|empty|extractor.url[15:-1]}` would result in `.org`.
@@ -151,6 +153,12 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>oo&nbsp;Ba</code></td>
 </tr>
 <tr>
+    <td><code>[b&lt;start&gt;:&lt;stop&gt;]</code></td>
+    <td>Same as above, but applies to the <a href="https://docs.python.org/3/library/stdtypes.html#bytes"><code>bytes()</code></a> representation of a string in <a href="https://docs.python.org/3/library/sys.html#sys.getfilesystemencoding">filesystem encoding</a></td>
+    <td><code>{foo_ja:[b3:-1]}</code></td>
+    <td><code>ー・バ</code></td>
+</tr>
+<tr>
     <td rowspan="2"><code>L&lt;maxlen&gt;/&lt;repl&gt;/</code></td>
     <td rowspan="2">Replaces the entire output with <code>&lt;repl&gt;</code> if its length exceeds <code>&lt;maxlen&gt;</code></td>
     <td><code>{foo:L15/long/}</code></td>
@@ -193,7 +201,9 @@ Format specifiers can be used for advanced formatting by using the options provi
 </tbody>
 </table>
 
-All special format specifiers (`?`, `L`, `J`, `R`, `D`, `O`) can be chained and combined with one another, but must always come before any standard format specifiers:
+All special format specifiers (`?`, `L`, `J`, `R`, `D`, `O`, etc)
+can be chained and combined with one another,
+but must always appear before any standard format specifiers:
 
 For example `{foo:?//RF/B/Ro/e/> 10}` -> `   Bee Bar`
 - `?//` - Tests if `foo` has a value
@@ -244,7 +254,7 @@ Replacement field names that are available in all format strings.
 
 ## Special Type Format Strings
 
-Starting a format string with '\f<Type> ' allows to set a different format string type than the default. Available ones are:
+Starting a format string with `\f<Type> ` allows to set a different format string type than the default. Available ones are:
 
 <table>
 <thead>
@@ -285,13 +295,3 @@ Starting a format string with '\f<Type> ' allows to set a different format strin
 </tr>
 </tbody>
 </table>
-
-> **Note:**
->
-> `\f` is the [Form Feed](https://en.wikipedia.org/w/index.php?title=Page_break&oldid=1027475805#Form_feed)
-> character. (ASCII code 12 or 0xc)
->
-> Writing it as `\f` is native to JSON, but will *not* get interpreted
-> as such by most shells. To use this character there:
-> * hold `Ctrl`, then press `v` followed by `l`, resulting in `^L` or
-> * use `echo` or `printf` (e.g. `gallery-dl -f "$(echo -ne \\fM) my_module:generate_text"`)
