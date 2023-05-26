@@ -434,6 +434,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>JPG Fish</td>
+    <td>https://jpg.fishing/</td>
+    <td>Albums, individual Images, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Keenspot</td>
     <td>http://www.keenspot.com/</td>
     <td>Comics</td>
@@ -526,6 +532,12 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>MangaPark</td>
     <td>https://mangapark.net/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>MangaRead</td>
+    <td>https://mangaread.org/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -1132,19 +1144,19 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Misskey.io</td>
     <td>https://misskey.io/</td>
-    <td>Images from Notes, User Profiles</td>
+    <td>Favorites, Images from Notes, User Profiles</td>
     <td></td>
 </tr>
 <tr>
     <td>Lesbian.energy</td>
     <td>https://lesbian.energy/</td>
-    <td>Images from Notes, User Profiles</td>
+    <td>Favorites, Images from Notes, User Profiles</td>
     <td></td>
 </tr>
 <tr>
     <td>Sushi.ski</td>
     <td>https://sushi.ski/</td>
-    <td>Images from Notes, User Profiles</td>
+    <td>Favorites, Images from Notes, User Profiles</td>
     <td></td>
 </tr>
 

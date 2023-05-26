@@ -2037,8 +2037,8 @@ Example
 Description
     Additional query parameters to send when fetching manga chapters.
 
-    (See `/manga/{id}/feed <https://api.mangadex.org/docs.html#operation/get-manga-id-feed>`_
-    and `/user/follows/manga/feed <https://api.mangadex.org/docs.html#operation/get-user-follows-manga-feed>`_)
+    (See `/manga/{id}/feed <https://api.mangadex.org/docs/swagger.html#/Manga/get-manga-id-feed>`__
+    and `/user/follows/manga/feed <https://api.mangadex.org/docs/swagger.html#/Feed/get-user-follows-manga-feed>`__)
 
 
 extractor.mangadex.lang
@@ -2108,8 +2108,16 @@ Description
     Also emit metadata for text-only posts without media content.
 
 
+extractor.[misskey].access-token
+--------------------------------
+Type
+    ``string``
+Description
+    Your access token, necessary to fetch favorited notes.
+
+
 extractor.[misskey].renotes
-----------------------------
+---------------------------
 Type
     ``bool``
 Default
@@ -2119,7 +2127,7 @@ Description
 
 
 extractor.[misskey].replies
-----------------------------
+---------------------------
 Type
     ``bool``
 Default
