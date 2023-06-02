@@ -2436,6 +2436,17 @@ Description
     Download images embedded in novels.
 
 
+extractor.pixiv.novel.full-series
+---------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    When downloading a novel being part of a series,
+    download all novels of that series.
+
+
 extractor.pixiv.metadata
 ------------------------
 Type
@@ -3142,6 +3153,20 @@ Description
 
     If this value is ``"original"``, metadata for these files
     will be taken from the original Tweets, not the Retweets.
+
+
+extractor.twitter.search-endpoint
+---------------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Selects the API endpoint used to retrieve search results.
+
+    * ``"rest"``: Legacy REST endpoint - returns a ``403 Forbidden`` error when not logged in
+    * ``"graphql"``: New GraphQL endpoint
+    * ``"auto"``: ``"rest"`` when logged in, ``"graphql"`` otherwise
 
 
 extractor.twitter.timeline.strategy
