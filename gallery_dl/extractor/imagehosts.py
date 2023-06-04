@@ -164,17 +164,17 @@ class AcidimgImageExtractor(ImagehostImageExtractor):
     pattern = r"(?:https?://)?((?:www\.)?acidimg\.cc/img-([a-z0-9]+)\.html)"
     test = ("https://acidimg.cc/img-5acb6b9de4640.html", {
         "url": "f132a630006e8d84f52d59555191ed82b3b64c04",
-        "keyword": "a8bb9ab8b2f6844071945d31f8c6e04724051f37",
+        "keyword": "135347ab4345002fc013863c0d9419ba32d98f78",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
     params = "simple"
     encoding = "utf-8"
 
     def get_info(self, page):
-        url, pos = text.extract(page, "<img class='centred' src='", "'")
+        url, pos = text.extract(page, '<img class="centred" src="', '"')
         if not url:
             raise exception.NotFoundError("image")
-        filename, pos = text.extract(page, " alt='", "'", pos)
+        filename, pos = text.extract(page, ' alt="', '"', pos)
         return url, (filename + splitext(url)[1]) if filename else url
 
 
@@ -295,17 +295,36 @@ class PostimgImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from postimages.org"""
     category = "postimg"
     pattern = (r"(?:https?://)?((?:www\.)?(?:postimg|pixxxels)\.(?:cc|org)"
-               r"/(?:image/)?([^/?#]+)/?)")
+               r"/(?!gallery/)(?:image/)?([^/?#]+)/?)")
     test = ("https://postimg.cc/Wtn2b3hC", {
-        "url": "0794cfda9b8951a8ac3aa692472484200254ab86",
+        "url": "72f3c8b1d6c6601a20ad58f35635494b4891a99e",
         "keyword": "2d05808d04e4e83e33200db83521af06e3147a84",
         "content": "cfaa8def53ed1a575e0c665c9d6d8cf2aac7a0ee",
     })
 
     def get_info(self, page):
-        url     , pos = text.extract(page, 'id="main-image" src="', '"')
+        pos = page.index(' id="download"')
+        url     , pos = text.rextract(page, ' href="', '"', pos)
         filename, pos = text.extract(page, 'class="imagename">', '<', pos)
         return url, text.unescape(filename)
+
+
+class PostimgGalleryExtractor(ImagehostImageExtractor):
+    """Extractor for images galleries from postimages.org"""
+    category = "postimg"
+    subcategory = "gallery"
+    pattern = (r"(?:https?://)?((?:www\.)?(?:postimg|pixxxels)\.(?:cc|org)"
+               r"/(?:gallery/)([^/?#]+)/?)")
+    test = ("https://postimg.cc/gallery/wxpDLgX", {
+        "pattern": PostimgImageExtractor.pattern,
+        "count": 22,
+    })
+
+    def items(self):
+        page = self.request(self.page_url).text
+        data = {"_extractor": PostimgImageExtractor}
+        for url in text.extract_iter(page, ' class="thumb"><a href="', '"'):
+            yield Message.Queue, url, data
 
 
 class TurboimagehostImageExtractor(ImagehostImageExtractor):
