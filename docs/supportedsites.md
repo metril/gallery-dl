@@ -111,7 +111,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Bunkr</td>
-    <td>https://bunkr.la/</td>
+    <td>https://bunkrr.su/</td>
     <td>Albums</td>
     <td></td>
 </tr>
@@ -1119,6 +1119,16 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Hypnohub</td>
     <td>https://hypnohub.net/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>jschan Imageboards</strong></td>
+</tr>
+<tr>
+    <td>94chan</td>
+    <td>https://94chan.org/</td>
+    <td>Boards, Threads</td>
     <td></td>
 </tr>
 
