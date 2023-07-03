@@ -1541,6 +1541,18 @@ Description
     from `linking your Flickr account to gallery-dl <OAuth_>`__.
 
 
+extractor.flickr.exif
+---------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch `exif` and `camera` metadata for each photo.
+
+    Note: This requires 1 additional API call per photo.
+
+
 extractor.flickr.metadata
 -------------------------
 Type
@@ -2096,6 +2108,24 @@ Default
     ``["safe", "suggestive", "erotica", "pornographic"]``
 Description
     List of acceptable content ratings for returned chapters.
+
+
+extractor.mangapark.source
+--------------------------
+Type
+    * ``string``
+    * ``integer``
+Example
+    * ``"koala:en"``
+    * ``15150116``
+Description
+    Select chapter source and language for a manga.
+
+    | The general syntax is ``"<source name>:<ISO 639-1 language code>"``.
+    | Both are optional, meaning ``"koala"``, ``"koala:"``, ``":en"``,
+      or even just ``":"`` are possible as well.
+
+    Specifying the numeric ``ID`` of a source is also supported.
 
 
 extractor.[mastodon].access-token
