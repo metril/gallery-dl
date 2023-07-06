@@ -382,6 +382,7 @@ Description
     * ``e621`` (*)
     * ``e926`` (*)
     * ``exhentai``
+    * ``gfycat``
     * ``idolcomplex``
     * ``imgbb``
     * ``inkbunny``
@@ -525,7 +526,7 @@ extractor.*.user-agent
 Type
     ``string``
 Default
-    ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0"``
+    ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:115.0) Gecko/20100101 Firefox/115.0"``
 Description
     User-Agent header value to be used for HTTP requests.
 
@@ -3183,6 +3184,19 @@ Description
     a quoted (original) Tweet when it sees the Tweet which quotes it.
 
 
+extractor.twitter.ratelimit
+---------------------------
+Type
+    ``string``
+Default
+    ``"wait"``
+Description
+    Selects how to handle exceeding the API rate limit.
+
+    * ``"abort"``: Raise an error and stop extraction
+    * ``"wait"``: Wait until rate limit reset
+
+
 extractor.twitter.replies
 -------------------------
 Type
@@ -3221,13 +3235,12 @@ extractor.twitter.search-endpoint
 Type
     ``string``
 Default
-    ``"auto"``
+    ``"graphql"``
 Description
     Selects the API endpoint used to retrieve search results.
 
-    * ``"rest"``: Legacy REST endpoint - returns a ``403 Forbidden`` error when not logged in
-    * ``"graphql"``: New GraphQL endpoint
-    * ``"auto"``: ``"rest"`` when logged in, ``"graphql"`` otherwise
+    * ``"graphql"``: GraphQL endpoint
+    * ``"rest"``: Legacy REST endpoint
 
 
 extractor.twitter.timeline.strategy
