@@ -435,7 +435,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>JPG Fish</td>
-    <td>https://jpg.pet/</td>
+    <td>https://jpeg.pet/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
@@ -479,12 +479,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Lightroom</td>
     <td>https://lightroom.adobe.com/</td>
     <td>Galleries</td>
-    <td></td>
-</tr>
-<tr>
-    <td>LINE BLOG</td>
-    <td>https://www.lineblog.me/</td>
-    <td>Blogs, Posts</td>
     <td></td>
 </tr>
 <tr>
@@ -1009,12 +1003,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
-    <td>半次元</td>
-    <td>https://bcy.net/</td>
-    <td>Posts, User Profiles</td>
-    <td></td>
-</tr>
 
 <tr>
     <td colspan="4"><strong>Danbooru Instances</strong></td>
@@ -1082,8 +1070,8 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>/v/idyart</td>
-    <td>https://vidyart.booru.org/</td>
+    <td>/v/idyart2</td>
+    <td>https://vidyart2.booru.org/</td>
     <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
