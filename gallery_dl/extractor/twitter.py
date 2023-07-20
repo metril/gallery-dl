@@ -461,23 +461,18 @@ class TwitterExtractor(Extractor):
                 self._update_cookies(_login_impl(self, username, password))
 
 
-class TwitterTimelineExtractor(TwitterExtractor):
-    """Extractor for a Twitter user timeline"""
-    subcategory = "timeline"
+class TwitterUserExtractor(TwitterExtractor):
+    """Extractor for a Twitter user"""
+    subcategory = "user"
     pattern = (BASE_PATTERN + r"/(?!search)(?:([^/?#]+)/?(?:$|[?#])"
                r"|i(?:/user/|ntent/user\?user_id=)(\d+))")
     test = (
         ("https://twitter.com/supernaturepics", {
-            "range": "1-40",
-            "url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
-        }),
-        # suspended account (#2216)
-        ("https://twitter.com/OptionalTypo", {
-            "exception": exception.NotFoundError,
-        }),
-        # suspended account user ID
-        ("https://twitter.com/id:772949683521978368", {
-            "exception": exception.NotFoundError,
+            "options": (("include", "all"),),
+            "pattern": r"https://twitter\.com/supernaturepics"
+                       r"/(photo|header_photo|timeline|tweets"
+                       r"|media|with_replies|likes)$",
+            "count": 7,
         }),
         ("https://mobile.twitter.com/supernaturepics?p=i"),
         ("https://www.twitter.com/id:2976459548"),
@@ -492,6 +487,40 @@ class TwitterTimelineExtractor(TwitterExtractor):
         user_id = match.group(2)
         if user_id:
             self.user = "id:" + user_id
+
+    def items(self):
+        base = "{}/{}/".format(self.root, self.user)
+        return self._dispatch_extractors((
+            (TwitterAvatarExtractor    , base + "photo"),
+            (TwitterBackgroundExtractor, base + "header_photo"),
+            (TwitterTimelineExtractor  , base + "timeline"),
+            (TwitterTweetsExtractor    , base + "tweets"),
+            (TwitterMediaExtractor     , base + "media"),
+            (TwitterRepliesExtractor   , base + "with_replies"),
+            (TwitterLikesExtractor     , base + "likes"),
+        ), ("timeline",))
+
+
+class TwitterTimelineExtractor(TwitterExtractor):
+    """Extractor for a Twitter user timeline"""
+    subcategory = "timeline"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/timeline(?!\w)"
+    test = (
+        ("https://twitter.com/supernaturepics/timeline", {
+            "range": "1-40",
+            "url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
+        }),
+        # suspended account (#2216)
+        ("https://twitter.com/OptionalTypo/timeline", {
+            "exception": exception.NotFoundError,
+        }),
+        # suspended account user ID
+        ("https://twitter.com/id:772949683521978368/timeline", {
+            "exception": exception.NotFoundError,
+        }),
+        ("https://mobile.twitter.com/supernaturepics/timeline#t"),
+        ("https://www.twitter.com/id:2976459548/timeline"),
+    )
 
     def tweets(self):
         # yield initial batch of (media) tweets
@@ -923,8 +952,13 @@ Your reaction.""",
         if conversations:
             self._accessible = (conversations == "accessible")
             return self._tweets_conversation(self.tweet_id)
-        else:
-            return self._tweets_single(self.tweet_id)
+
+        endpoint = self.config("tweet-endpoint")
+        if endpoint == "detail" or endpoint in (None, "auto") and \
+                self.api.headers["x-twitter-auth-type"]:
+            return self._tweets_detail(self.tweet_id)
+
+        return self._tweets_single(self.tweet_id)
 
     def _tweets_single(self, tweet_id):
         tweets = []
@@ -938,6 +972,22 @@ Your reaction.""",
             if not tweet_id:
                 break
             tweet = self.api.tweet_result_by_rest_id(tweet_id)
+
+        return tweets
+
+    def _tweets_detail(self, tweet_id):
+        tweets = []
+
+        for tweet in self.api.tweet_detail(tweet_id):
+            if tweet["rest_id"] == tweet_id or \
+                    tweet.get("_retweet_id_str") == tweet_id:
+                if self._user_obj is None:
+                    self._assign_user(tweet["core"]["user_results"]["result"])
+                tweets.append(tweet)
+
+                tweet_id = tweet["legacy"].get("quoted_status_id_str")
+                if not tweet_id:
+                    break
 
         return tweets
 
@@ -1084,10 +1134,6 @@ class TwitterAPI():
             cookies.set("ct0", csrf_token, domain=cookiedomain)
 
         auth_token = cookies.get("auth_token", domain=cookiedomain)
-
-        search = extractor.config("search-endpoint")
-        if search == "rest":
-            self.search_timeline = self.search_adaptive
 
         self.headers = {
             "Accept": "*/*",
@@ -1323,16 +1369,6 @@ class TwitterAPI():
         }
         return self._pagination_tweets(
             endpoint, variables, ("list", "tweets_timeline", "timeline"))
-
-    def search_adaptive(self, query):
-        endpoint = "/2/search/adaptive.json"
-        params = self.params.copy()
-        params["q"] = query
-        params["tweet_search_mode"] = "live"
-        params["query_source"] = "typed_query"
-        params["pc"] = "1"
-        params["spelling_corrections"] = "1"
-        return self._pagination_legacy(endpoint, params)
 
     def search_timeline(self, query):
         endpoint = "/graphql/7jT5GT59P8IFjgxwqnEdQw/SearchTimeline"

@@ -3102,6 +3102,32 @@ Description
     `syndication <extractor.twitter.syndication_>`__ API.
 
 
+extractor.twitter.include
+-------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"timeline"``
+Example
+    * ``"avatar,background,media"``
+    * ``["avatar", "background", "media"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"avatar"``,
+    ``"background"``,
+    ``"timeline"``,
+    ``"tweets"``,
+    ``"media"``,
+    ``"replies"``,
+    ``"likes"``.
+
+    It is possible to use ``"all"`` instead of listing all values separately.
+
+
 extractor.twitter.transform
 ---------------------------
 Type
@@ -3110,6 +3136,20 @@ Default
     ``true``
 Description
     Transform Tweet and User metadata into a simpler, uniform format.
+
+
+extractor.twitter.tweet-endpoint
+--------------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Selects the API endpoint used to retrieve single Tweets.
+
+    * ``"restid"``: ``/TweetResultByRestId`` - accessible to guest users
+    * ``"detail"``: ``/TweetDetail`` - more stable
+    * ``"auto"``: ``"detail"`` when logged in, ``"restid"`` otherwise
 
 
 extractor.twitter.size
@@ -3228,19 +3268,6 @@ Description
 
     If this value is ``"original"``, metadata for these files
     will be taken from the original Tweets, not the Retweets.
-
-
-extractor.twitter.search-endpoint
----------------------------------
-Type
-    ``string``
-Default
-    ``"graphql"``
-Description
-    Selects the API endpoint used to retrieve search results.
-
-    * ``"graphql"``: GraphQL endpoint
-    * ``"rest"``: Legacy REST endpoint
 
 
 extractor.twitter.timeline.strategy

@@ -730,7 +730,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>RedGIFs</td>
     <td>https://redgifs.com/</td>
-    <td>Collections, individual Images, Search Results, User Profiles</td>
+    <td>Collections, individual Images, Niches, Search Results, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -874,7 +874,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Twitter</td>
     <td>https://twitter.com/</td>
-    <td>Avatars, Backgrounds, Bookmarks, Events, Hashtags, individual Images, Likes, Lists, List Members, Media Timelines, Search Results, Timelines, Tweets</td>
+    <td>Avatars, Backgrounds, Bookmarks, Events, Hashtags, individual Images, Likes, Lists, List Members, Media Timelines, Search Results, Timelines, Tweets, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -1025,6 +1025,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
+<tr>
+    <td>Booruvar</td>
+    <td>https://booru.borvar.art/</td>
+    <td>Pools, Popular Images, Posts, Tag Searches</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>e621 Instances</strong></td>
@@ -1040,6 +1046,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>https://e926.net/</td>
     <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
+</tr>
+<tr>
+    <td>e6AI</td>
+    <td>https://e6ai.net/</td>
+    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
+    <td></td>
 </tr>
 
 <tr>
