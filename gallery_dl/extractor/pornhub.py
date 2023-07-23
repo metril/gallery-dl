@@ -58,7 +58,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
         self._first = None
 
     def items(self):
-        self.session.cookies.set(
+        self.cookies.set(
             "accessAgeDisclaimerPH", "1", domain=".pornhub.com")
 
         data = self.metadata()
@@ -111,7 +111,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
                 "views"  : text.parse_int(img["times_viewed"]),
                 "score"  : text.parse_int(img["vote_percent"]),
             }
-            key = img["next"]
+            key = str(img["next"])
             if key == end:
                 return
 
