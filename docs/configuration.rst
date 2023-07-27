@@ -442,7 +442,7 @@ Description
             "isAdult"    : "1"
         }
 
-    * A ``list`` with up to 4 entries specifying a browser profile.
+    * A ``list`` with up to 5 entries specifying a browser profile.
 
       * The first entry is the browser name
       * The optional second entry is a profile name or an absolute path to a profile directory
@@ -1158,7 +1158,7 @@ Description
     Note: This requires 1 additional HTTP request per 200-post batch.
 
 
-extractor.{Danbooru].threshold
+extractor.[Danbooru].threshold
 ------------------------------
 Type
     * ``string``
@@ -3277,8 +3277,8 @@ Type
 Default
     ``"auto"``
 Description
-    Controls the strategy / tweet source used for user URLs
-    (``https://twitter.com/USER``).
+    Controls the strategy / tweet source used for timeline URLs
+    (``https://twitter.com/USER/timeline``).
 
     * ``"tweets"``: `/tweets <https://twitter.com/USER/tweets>`__ timeline + search
     * ``"media"``: `/media <https://twitter.com/USER/media>`__ timeline + search
@@ -4726,7 +4726,7 @@ Default
 Description
     Name of the metadata field whose value should be used.
 
-    This value must either be a UNIX timestamp or a
+    This value must be either a UNIX timestamp or a
     |datetime|_ object.
 
     Note: This option gets ignored if `mtime.value`_ is set.
@@ -4744,8 +4744,52 @@ Example
 Description
     A `format string`_ whose value should be used.
 
-    The resulting value must either be a UNIX timestamp or a
+    The resulting value must be either a UNIX timestamp or a
     |datetime|_ object.
+
+
+python.archive
+--------------
+Type
+    |Path|_
+Description
+    File to store IDs of called Python functions in,
+    similar to `extractor.*.archive`_.
+
+    ``archive-format``, ``archive-prefix``, and ``archive-pragma`` options,
+    akin to
+    `extractor.*.archive-format`_,
+    `extractor.*.archive-prefix`_, and
+    `extractor.*.archive-pragma`_, are supported as well.
+
+
+python.event
+------------
+Type
+    ``string``
+Default
+    ``"file"``
+Description
+    The event for which `python.function`_ gets called.
+
+    See `metadata.event`_ for a list of available events.
+
+
+python.function
+---------------
+Type
+    ``string``
+Example
+    * ``"my_module:generate_text"``
+    * ``"~/.local/share/gdl-utils.py:resize"``
+Description
+    The Python function to call.
+
+    This function gets specified as ``<module>:<function name>``
+    and gets called with the current metadata dict as argument.
+
+    ``module`` is either an importable Python module name
+    or the |Path|_ to a `.py` file,
 
 
 ugoira.extension
@@ -5345,6 +5389,8 @@ Description
         Write metadata to separate files
     ``mtime``
         Set file modification time according to its metadata
+    ``python``
+        Call Python functions
     ``ugoira``
         Convert Pixiv Ugoira to WebM using `FFmpeg <https://www.ffmpeg.org/>`__
     ``zip``
