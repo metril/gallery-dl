@@ -4512,8 +4512,15 @@ Description
         and before the first file download
     ``finalize``
         On extractor shutdown, e.g. after all files were downloaded
+    ``finalize-success``
+        On extractor shutdown when no error occurred
+    ``finalize-error``
+        On extractor shutdown when at least one error occurred
     ``prepare``
         Before a file download
+    ``prepare-after``
+        Before a file download,
+        but after building and checking file paths
     ``file``
         When completing a file download,
         but before it gets moved to its target location

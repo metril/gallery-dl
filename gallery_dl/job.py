@@ -18,7 +18,7 @@ from .output import stdout_write
 
 
 class Job():
-    """Base class for Job-types"""
+    """Base class for Job types"""
     ulog = None
 
     def __init__(self, extr, parent=None):
@@ -33,15 +33,29 @@ class Job():
         self.status = 0
 
         cfgpath = []
-        if parent and parent.extractor.category != extr.category:
-            cat = "{}>{}".format(
-                parent.extractor.category, extr.category)
-            cfgpath.append((cat, extr.subcategory))
-            cfgpath.append((extr.category, extr.subcategory))
+        if parent:
+            if extr.category == parent.extractor.category or \
+                    extr.category in parent.parents:
+                parents = parent.parents
+            else:
+                parents = parent.parents + (parent.extractor.category,)
+
+            if parents:
+                for category in parents:
+                    cat = "{}>{}".format(category, extr.category)
+                    cfgpath.append((cat, extr.subcategory))
+                cfgpath.append((extr.category, extr.subcategory))
+                self.parents = parents
+            else:
+                self.parents = ()
+        else:
+            self.parents = ()
+
         if extr.basecategory:
             if not cfgpath:
                 cfgpath.append((extr.category, extr.subcategory))
             cfgpath.append((extr.basecategory, extr.subcategory))
+
         if cfgpath:
             extr._cfgpath = cfgpath
             extr.config = extr._config_shared
@@ -273,6 +287,10 @@ class DownloadJob(Job):
                 self.handle_skip()
                 return
 
+        if "prepare-after" in hooks:
+            for callback in hooks["prepare-after"]:
+                callback(pathfmt)
+
         if self.sleep:
             self.extractor.sleep(self.sleep(), "download")
 
@@ -393,10 +411,18 @@ class DownloadJob(Job):
                     callback(pathfmt)
 
             self.extractor.cookies_store()
+
             if "finalize" in hooks:
-                status = self.status
                 for callback in hooks["finalize"]:
-                    callback(pathfmt, status)
+                    callback(pathfmt)
+            if self.status:
+                if "finalize-error" in hooks:
+                    for callback in hooks["finalize-error"]:
+                        callback(pathfmt)
+            else:
+                if "finalize-success" in hooks:
+                    for callback in hooks["finalize-success"]:
+                        callback(pathfmt)
 
     def handle_skip(self):
         pathfmt = self.pathfmt
