@@ -10,6 +10,17 @@
 
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text
+from urllib.parse import urlsplit, urlunsplit
+
+MEDIA_DOMAIN_OVERRIDES = {
+    "cdn9.bunkr.ru" : "c9.bunkr.ru",
+    "cdn12.bunkr.ru": "media-files12.bunkr.la",
+}
+
+CDN_HOSTED_EXTENSIONS = (
+    ".mp4", ".m4v", ".mov", ".webm", ".mkv", ".ts", ".wmv",
+    ".zip", ".rar", ".7z",
+)
 
 
 class BunkrAlbumExtractor(LolisafeAlbumExtractor):
@@ -90,13 +101,13 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 url = cdn + url[2:]
 
             url = text.unescape(url)
-            if url.endswith((".mp4", ".m4v", ".mov", ".webm", ".mkv", ".ts",
-                             ".zip", ".rar", ".7z")):
-                if url.startswith("https://cdn12."):
-                    url = ("https://media-files12.bunkr.la" +
-                           url[url.find("/", 14):])
+            if url.lower().endswith(CDN_HOSTED_EXTENSIONS):
+                scheme, domain, path, query, fragment = urlsplit(url)
+                if domain in MEDIA_DOMAIN_OVERRIDES:
+                    domain = MEDIA_DOMAIN_OVERRIDES[domain]
                 else:
-                    url = url.replace("://cdn", "://media-files", 1)
+                    domain = domain.replace("cdn", "media-files", 1)
+                url = urlunsplit((scheme, domain, path, query, fragment))
             append({"file": url, "_http_headers": headers})
 
         return files, {

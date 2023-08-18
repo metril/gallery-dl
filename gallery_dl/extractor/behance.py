@@ -9,7 +9,7 @@
 """Extractors for https://www.behance.net/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, util, exception
 
 
 class BehanceExtractor(Extractor):
@@ -26,14 +26,36 @@ class BehanceExtractor(Extractor):
     def galleries(self):
         """Return all relevant gallery URLs"""
 
-    @staticmethod
-    def _update(data):
+    def _request_graphql(self, endpoint, variables):
+        url = self.root + "/v3/graphql"
+        headers = {
+            "Origin" : self.root,
+            "Referer": self.root + "/",
+            "X-BCP"           : "4c34489d-914c-46cd-b44c-dfd0e661136d",
+            "X-NewRelic-ID"   : "VgUFVldbGwsFU1BRDwUBVw==",
+            "X-Requested-With": "XMLHttpRequest",
+        }
+        cookies = {
+            "bcp"    : "4c34489d-914c-46cd-b44c-dfd0e661136d",
+            "gk_suid": "62735605",
+            "ilo0"   : "true",
+        }
+        data = {
+            "query"    : GRAPHQL_QUERIES[endpoint],
+            "variables": variables,
+        }
+
+        return self.request(url, method="POST", headers=headers,
+                            cookies=cookies, json=data).json()["data"]
+
+    def _update(self, data):
         # compress data to simple lists
         if data["fields"] and isinstance(data["fields"][0], dict):
             data["fields"] = [
                 field.get("name") or field.get("label")
                 for field in data["fields"]
             ]
+
         data["owners"] = [
             owner.get("display_name") or owner.get("displayName")
             for owner in data["owners"]
@@ -43,6 +65,9 @@ class BehanceExtractor(Extractor):
         if tags and isinstance(tags[0], dict):
             tags = [tag["title"] for tag in tags]
         data["tags"] = tags
+
+        data["date"] = text.parse_timestamp(
+            data.get("publishedOn") or data.get("conceived_on") or 0)
 
         # backwards compatibility
         data["gallery_id"] = data["id"]
@@ -70,6 +95,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 "fields": ["Animation", "Character Design", "Directing"],
                 "tags": list,
                 "module": dict,
+                "date": "dt:2014-06-03 15:41:51",
             },
         }),
         ("https://www.behance.net/gallery/21324767/Nevada-City", {
@@ -89,6 +115,10 @@ class BehanceGalleryExtractor(BehanceExtractor):
             "pattern": r"https://cdn-prod-ccv\.adobe\.com/\w+"
                        r"/rend/\w+_720\.mp4\?",
             "count": 3,
+        }),
+        # mature content (#4417)
+        ("https://www.behance.net/gallery/177464639/Kimori", {
+            "exception": exception.AuthorizationError,
         }),
     )
 
@@ -128,6 +158,18 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
     def get_images(self, data):
         """Extract image results from an API response"""
+        if not data["modules"]:
+            access = data.get("matureAccess")
+            if access == "logged-out":
+                raise exception.AuthorizationError(
+                    "Logged-in cookies required to access mature content")
+            if access == "restricted-safe":
+                raise exception.AuthorizationError(
+                    "Mature content blocked in account settings")
+            if access and access != "allowed":
+                raise exception.AuthorizationError()
+            return ()
+
         result = []
         append = result.append
 
@@ -173,7 +215,7 @@ class BehanceUserExtractor(BehanceExtractor):
     categorytransfer = True
     pattern = r"(?:https?://)?(?:www\.)?behance\.net/([^/?#]+)/?$"
     test = ("https://www.behance.net/alexstrohl", {
-        "count": ">= 8",
+        "count": ">= 11",
         "pattern": BehanceGalleryExtractor.pattern,
     })
 
@@ -182,17 +224,20 @@ class BehanceUserExtractor(BehanceExtractor):
         self.user = match.group(1)
 
     def galleries(self):
-        url = "{}/{}/projects".format(self.root, self.user)
-        params = {"offset": 0}
-        headers = {"X-Requested-With": "XMLHttpRequest"}
+        endpoint = "GetProfileProjects"
+        variables = {
+            "username": self.user,
+            "after"   : "MAo=",
+        }
 
         while True:
-            data = self.request(url, params=params, headers=headers).json()
-            work = data["profile"]["activeSection"]["work"]
-            yield from work["projects"]
-            if not work["hasMore"]:
+            data = self._request_graphql(endpoint, variables)
+            items = data["user"]["profileProjects"]
+            yield from items["nodes"]
+
+            if not items["pageInfo"]["hasNextPage"]:
                 return
-            params["offset"] += len(work["projects"])
+            variables["after"] = items["pageInfo"]["endCursor"]
 
 
 class BehanceCollectionExtractor(BehanceExtractor):
@@ -201,7 +246,7 @@ class BehanceCollectionExtractor(BehanceExtractor):
     categorytransfer = True
     pattern = r"(?:https?://)?(?:www\.)?behance\.net/collection/(\d+)"
     test = ("https://www.behance.net/collection/71340149/inspiration", {
-        "count": ">= 145",
+        "count": ">= 150",
         "pattern": BehanceGalleryExtractor.pattern,
     })
 
@@ -210,21 +255,186 @@ class BehanceCollectionExtractor(BehanceExtractor):
         self.collection_id = match.group(1)
 
     def galleries(self):
-        url = self.root + "/v3/graphql"
-        headers = {
-            "Origin" : self.root,
-            "Referer": self.root + "/collection/" + self.collection_id,
-            "X-BCP"           : "4c34489d-914c-46cd-b44c-dfd0e661136d",
-            "X-NewRelic-ID"   : "VgUFVldbGwsFU1BRDwUBVw==",
-            "X-Requested-With": "XMLHttpRequest",
-        }
-        cookies = {
-            "bcp"    : "4c34489d-914c-46cd-b44c-dfd0e661136d",
-            "gk_suid": "66981391",
-            "ilo0"   : "true",
+        endpoint = "GetMoodboardItemsAndRecommendations"
+        variables = {
+            "afterItem": "MAo=",
+            "firstItem": 40,
+            "id"       : int(self.collection_id),
+            "shouldGetItems"          : True,
+            "shouldGetMoodboardFields": False,
+            "shouldGetRecommendations": False,
         }
 
-        query = """
+        while True:
+            data = self._request_graphql(endpoint, variables)
+            items = data["moodboard"]["items"]
+
+            for node in items["nodes"]:
+                yield node["entity"]
+
+            if not items["pageInfo"]["hasNextPage"]:
+                return
+            variables["afterItem"] = items["pageInfo"]["endCursor"]
+
+
+GRAPHQL_QUERIES = {
+    "GetProfileProjects": """\
+query GetProfileProjects($username: String, $after: String) {
+  user(username: $username) {
+    profileProjects(first: 12, after: $after) {
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+      nodes {
+        __typename
+        adminFlags {
+          mature_lock
+          privacy_lock
+          dmca_lock
+          flagged_lock
+          privacy_violation_lock
+          trademark_lock
+          spam_lock
+          eu_ip_lock
+        }
+        colors {
+          r
+          g
+          b
+        }
+        covers {
+          size_202 {
+            url
+          }
+          size_404 {
+            url
+          }
+          size_808 {
+            url
+          }
+        }
+        features {
+          url
+          name
+          featuredOn
+          ribbon {
+            image
+            image2x
+            image3x
+          }
+        }
+        fields {
+          id
+          label
+          slug
+          url
+        }
+        hasMatureContent
+        id
+        isFeatured
+        isHiddenFromWorkTab
+        isMatureReviewSubmitted
+        isOwner
+        isFounder
+        isPinnedToSubscriptionOverview
+        isPrivate
+        linkedAssets {
+          ...sourceLinkFields
+        }
+        linkedAssetsCount
+        sourceFiles {
+          ...sourceFileFields
+        }
+        matureAccess
+        modifiedOn
+        name
+        owners {
+          ...OwnerFields
+          images {
+            size_50 {
+              url
+            }
+          }
+        }
+        premium
+        publishedOn
+        stats {
+          appreciations {
+            all
+          }
+          views {
+            all
+          }
+          comments {
+            all
+          }
+        }
+        slug
+        tools {
+          id
+          title
+          category
+          categoryLabel
+          categoryId
+          approved
+          url
+          backgroundColor
+        }
+        url
+      }
+    }
+  }
+}
+
+fragment sourceFileFields on SourceFile {
+  __typename
+  sourceFileId
+  projectId
+  userId
+  title
+  assetId
+  renditionUrl
+  mimeType
+  size
+  category
+  licenseType
+  unitAmount
+  currency
+  tier
+  hidden
+  extension
+  hasUserPurchased
+}
+
+fragment sourceLinkFields on LinkedAsset {
+  __typename
+  name
+  premium
+  url
+  category
+  licenseType
+}
+
+fragment OwnerFields on User {
+  displayName
+  hasPremiumAccess
+  id
+  isFollowing
+  isProfileOwner
+  location
+  locationUrl
+  url
+  username
+  availabilityInfo {
+    availabilityTimeline
+    isAvailableFullTime
+    isAvailableFreelance
+  }
+}
+""",
+
+    "GetMoodboardItemsAndRecommendations": """\
 query GetMoodboardItemsAndRecommendations(
   $id: Int!
   $firstItem: Int!
@@ -269,13 +479,7 @@ fragment moodboardFields on Moodboard {
   url
   isOwner
   owners {
-    id
-    displayName
-    url
-    firstName
-    location
-    locationUrl
-    isFollowing
+    ...OwnerFields
     images {
       size_50 {
         url
@@ -300,6 +504,7 @@ fragment moodboardFields on Moodboard {
 }
 
 fragment projectFields on Project {
+  __typename
   id
   isOwner
   publishedOn
@@ -328,13 +533,7 @@ fragment projectFields on Project {
     b
   }
   owners {
-    url
-    displayName
-    id
-    location
-    locationUrl
-    isProfileOwner
-    isFollowing
+    ...OwnerFields
     images {
       size_50 {
         url
@@ -468,26 +667,23 @@ fragment nodesFields on MoodboardItem {
     }
   }
 }
-"""
-        variables = {
-            "afterItem": "MAo=",
-            "firstItem": 40,
-            "id"       : int(self.collection_id),
-            "shouldGetItems"          : True,
-            "shouldGetMoodboardFields": False,
-            "shouldGetRecommendations": False,
-        }
-        data = {"query": query, "variables": variables}
 
-        while True:
-            items = self.request(
-                url, method="POST", headers=headers,
-                cookies=cookies, json=data,
-            ).json()["data"]["moodboard"]["items"]
+fragment OwnerFields on User {
+  displayName
+  hasPremiumAccess
+  id
+  isFollowing
+  isProfileOwner
+  location
+  locationUrl
+  url
+  username
+  availabilityInfo {
+    availabilityTimeline
+    isAvailableFullTime
+    isAvailableFreelance
+  }
+}
+""",
 
-            for node in items["nodes"]:
-                yield node["entity"]
-
-            if not items["pageInfo"]["hasNextPage"]:
-                return
-            variables["afterItem"] = items["pageInfo"]["endCursor"]
+}
