@@ -179,6 +179,20 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if source == "hitomi":
             self.items = self._items_hitomi
 
+    def favorite(self, slot="0"):
+        url = self.root + "/gallerypopups.php"
+        params = {
+            "gid": self.gallery_id,
+            "t"  : self.gallery_token,
+            "act": "addfav",
+        }
+        data = {
+            "favcat" : slot,
+            "apply"  : "Apply Changes",
+            "update" : "1",
+        }
+        self.request(url, method="POST", params=params, data=data)
+
     def items(self):
         self.login()
 
@@ -222,6 +236,10 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             else:
                 data["_http_validate"] = None
             yield Message.Url, url, data
+
+        fav = self.config("fav")
+        if fav is not None:
+            self.favorite(fav)
 
     def _items_hitomi(self):
         if self.config("metadata", False):
@@ -482,7 +500,6 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
 
     def __init__(self, match):
         ExhentaiExtractor.__init__(self, match)
-        self.search_url = self.root
 
         _, query, tag = match.groups()
         if tag:
@@ -496,6 +513,9 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
             self.params = text.parse_query(query)
             if "next" not in self.params:
                 self.params["page"] = text.parse_int(self.params.get("page"))
+
+    def _init(self):
+        self.search_url = self.root
 
     def items(self):
         self.login()
@@ -542,6 +562,5 @@ class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
          "&f_apply=Search+Favorites"),
     )
 
-    def __init__(self, match):
-        ExhentaiSearchExtractor.__init__(self, match)
+    def _init(self):
         self.search_url = self.root + "/favorites.php"

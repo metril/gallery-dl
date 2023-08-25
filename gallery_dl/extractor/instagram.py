@@ -90,7 +90,9 @@ class InstagramExtractor(Extractor):
                         file["_http_headers"] = video_headers
                         text.nameext_from_url(url, file)
                         yield Message.Url, url, file
-                    if not previews:
+                    if previews:
+                        file["media_id"] += "p"
+                    else:
                         continue
 
                 url = file["display_url"]
@@ -592,6 +594,23 @@ class InstagramHighlightsExtractor(InstagramExtractor):
         return self.api.highlights_media(uid)
 
 
+class InstagramFollowingExtractor(InstagramExtractor):
+    """Extractor for an Instagram user's followed users"""
+    subcategory = "following"
+    pattern = USER_PATTERN + r"/following"
+    test = ("https://www.instagram.com/instagram/following", {
+        "range": "1-16",
+        "count": ">= 16",
+    })
+
+    def items(self):
+        uid = self.api.user_id(self.item)
+        for user in self.api.user_following(uid):
+            user["_extractor"] = InstagramUserExtractor
+            url = "{}/{}".format(self.root, user["username"])
+            yield Message.Queue, url, user
+
+
 class InstagramTagExtractor(InstagramExtractor):
     """Extractor for Instagram tags"""
     subcategory = "tag"
@@ -869,6 +888,11 @@ class InstagramRestAPI():
         params = {"count": 30}
         return self._pagination(endpoint, params)
 
+    def user_following(self, user_id):
+        endpoint = "/v1/friendships/{}/following/".format(user_id)
+        params = {"count": 12}
+        return self._pagination_following(endpoint, params)
+
     def user_saved(self):
         endpoint = "/v1/feed/saved/posts/"
         params = {"count": 50}
@@ -957,6 +981,20 @@ class InstagramRestAPI():
             if "next_max_id" not in data:
                 return extr._update_cursor(None)
             params["max_id"] = extr._update_cursor(data["next_max_id"])
+
+    def _pagination_following(self, endpoint, params):
+        extr = self.extractor
+        params["max_id"] = text.parse_int(extr._init_cursor())
+
+        while True:
+            data = self._call(endpoint, params=params)
+
+            yield from data["users"]
+
+            if len(data["users"]) < params["count"]:
+                return extr._update_cursor(None)
+            params["max_id"] = extr._update_cursor(
+                params["max_id"] + params["count"])
 
 
 class InstagramGraphqlAPI():
