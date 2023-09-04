@@ -864,8 +864,13 @@ class PixivNovelExtractor(PixivExtractor):
 
             yield Message.Directory, novel
 
+            try:
+                content = self.api.novel_text(novel["id"])["novel_text"]
+            except Exception:
+                self.log.warning("Unable to download novel %s", novel["id"])
+                continue
+
             novel["extension"] = "txt"
-            content = self.api.novel_text(novel["id"])["novel_text"]
             yield Message.Url, "text:" + content, novel
 
             if embeds:

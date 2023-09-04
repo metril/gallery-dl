@@ -22,6 +22,9 @@ class HiperdexBase():
     category = "hiperdex"
     root = "https://hiperdex.com"
 
+    def _init(self):
+        self.session.headers["Referer"] = self.root + "/"
+
     @memcache(keyarg=1)
     def manga_data(self, manga, page=None):
         if not page:
@@ -31,7 +34,7 @@ class HiperdexBase():
 
         return {
             "manga"  : text.unescape(extr(
-                "<title>", "<").rpartition(" - ")[0].strip()),
+                "<title>", "<").rpartition(" Manga - ")[0].strip()),
             "url"    : text.unescape(extr(
                 'property="og:url" content="', '"')),
             "score"  : text.parse_float(extr(
