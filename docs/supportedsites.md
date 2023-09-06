@@ -248,12 +248,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Gfycat</td>
-    <td>https://gfycat.com/</td>
-    <td>Collections, individual Images, Search Results, User Profiles</td>
-    <td>Supported</td>
-</tr>
-<tr>
     <td>Gofile</td>
     <td>https://gofile.io/</td>
     <td>Folders</td>
@@ -435,7 +429,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>JPG Fish</td>
-    <td>https://jpeg.pet/</td>
+    <td>https://jpg1.su/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
@@ -1118,6 +1112,12 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Hypnohub</td>
     <td>https://hypnohub.net/</td>
+    <td>Favorites, Pools, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Xbooru</td>
+    <td>https://xbooru.com/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
 </tr>
