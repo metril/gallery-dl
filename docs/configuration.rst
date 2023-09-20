@@ -565,6 +565,21 @@ Description
     browser would use HTTP/2.
 
 
+extractor.*.referer
+-------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Description
+    Send `Referer <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referer>`__
+    headers with all outgoing HTTP requests.
+
+    If this is a ``string``, send it as Referer
+    instead of the extractor's ``root`` domain.
+
+
 extractor.*.headers
 -------------------
 Type
@@ -576,7 +591,8 @@ Default
           "User-Agent"     : "<extractor.*.user-agent>",
           "Accept"         : "*/*",
           "Accept-Language": "en-US,en;q=0.5",
-          "Accept-Encoding": "gzip, deflate"
+          "Accept-Encoding": "gzip, deflate",
+          "Referer"        : "<extractor.*.referer>"
       }
 
 Description
@@ -3328,7 +3344,7 @@ extractor.twitter.users
 Type
     ``string``
 Default
-    ``"timeline"``
+    ``"user"``
 Example
     ``"https://twitter.com/search?q=from:{legacy[screen_name]}"``
 Description
@@ -3339,7 +3355,8 @@ Description
 
     Special values:
 
-    * ``"timeline"``: ``https://twitter.com/i/user/{rest_id}``
+    * ``"user"``: ``https://twitter.com/i/user/{rest_id}``
+    * ``"timeline"``: ``https://twitter.com/id:{rest_id}/timeline``
     * ``"tweets"``: ``https://twitter.com/id:{rest_id}/tweets``
     * ``"media"``: ``https://twitter.com/id:{rest_id}/media``
 

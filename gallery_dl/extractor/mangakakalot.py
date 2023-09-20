@@ -19,7 +19,7 @@ BASE_PATTERN = r"(?:https?://)?(?:ww[\dw]?\.)?mangakakalot\.tv"
 class MangakakalotBase():
     """Base class for mangakakalot extractors"""
     category = "mangakakalot"
-    root = "https://ww3.mangakakalot.tv"
+    root = "https://ww6.mangakakalot.tv"
 
 
 class MangakakalotChapterExtractor(MangakakalotBase, ChapterExtractor):
@@ -30,9 +30,6 @@ class MangakakalotChapterExtractor(MangakakalotBase, ChapterExtractor):
     def __init__(self, match):
         self.path = match.group(1)
         ChapterExtractor.__init__(self, match, self.root + self.path)
-
-    def _init(self):
-        self.session.headers['Referer'] = self.root + "/"
 
     def metadata(self, page):
         _     , pos = text.extract(page, '<span itemprop="title">', '<')
