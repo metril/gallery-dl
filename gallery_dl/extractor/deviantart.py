@@ -39,8 +39,10 @@ class DeviantartExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1) or match.group(2)
+        self.offset = 0
 
     def _init(self):
+        self.jwt = self.config("jwt", False)
         self.flat = self.config("flat", True)
         self.extra = self.config("extra", False)
         self.original = self.config("original", True)
@@ -48,7 +50,6 @@ class DeviantartExtractor(Extractor):
 
         self.api = DeviantartOAuthAPI(self)
         self.group = False
-        self.offset = 0
         self._premium_cache = {}
 
         unwatch = self.config("auto-unwatch")
@@ -122,21 +123,24 @@ class DeviantartExtractor(Extractor):
 
                 if self.original and deviation["is_downloadable"]:
                     self._update_content(deviation, content)
-                else:
+                elif self.jwt:
                     self._update_token(deviation, content)
 
                 yield self.commit(deviation, content)
 
             elif deviation["is_downloadable"]:
                 content = self.api.deviation_download(deviation["deviationid"])
+                deviation["is_original"] = True
                 yield self.commit(deviation, content)
 
             if "videos" in deviation and deviation["videos"]:
                 video = max(deviation["videos"],
                             key=lambda x: text.parse_int(x["quality"][:-1]))
+                deviation["is_original"] = False
                 yield self.commit(deviation, video)
 
             if "flash" in deviation:
+                deviation["is_original"] = True
                 yield self.commit(deviation, deviation["flash"])
 
             if self.commit_journal:
@@ -150,6 +154,7 @@ class DeviantartExtractor(Extractor):
                 if journal:
                     if self.extra:
                         deviation["_journal"] = journal["html"]
+                    deviation["is_original"] = True
                     yield self.commit_journal(deviation, journal)
 
             if not self.extra:
@@ -227,6 +232,8 @@ class DeviantartExtractor(Extractor):
         target["filename"] = deviation["filename"]
         deviation["target"] = target
         deviation["extension"] = target["extension"] = text.ext_from_url(name)
+        if "is_original" not in deviation:
+            deviation["is_original"] = ("/v1/" not in url)
         return Message.Url, url, deviation
 
     def _commit_journal_html(self, deviation, journal):
@@ -328,6 +335,7 @@ class DeviantartExtractor(Extractor):
         public = False if "premium_folder_data" in deviation else None
         data = self.api.deviation_download(deviation["deviationid"], public)
         content.update(data)
+        deviation["is_original"] = True
 
     def _update_content_image(self, deviation, content):
         data = self.api.deviation_download(deviation["deviationid"])
@@ -335,6 +343,7 @@ class DeviantartExtractor(Extractor):
         mtype = mimetypes.guess_type(url, False)[0]
         if mtype and mtype.startswith("image/"):
             content.update(data)
+            deviation["is_original"] = True
 
     def _update_token(self, deviation, content):
         """Replace JWT to be able to remove width/height limits
@@ -444,6 +453,8 @@ class DeviantartUserExtractor(DeviantartExtractor):
 
     def initialize(self):
         pass
+
+    skip = Extractor.skip
 
     def items(self):
         base = "{}/{}/".format(self.root, self.user)
@@ -880,14 +891,12 @@ class DeviantartGallerySearchExtractor(DeviantartExtractor):
         self.login()
 
         eclipse_api = DeviantartEclipseAPI(self)
-        info = eclipse_api.user_info(self.user)
-
         query = text.parse_query(self.query)
         self.search = query["q"]
 
         return self._eclipse_to_oauth(
             eclipse_api, eclipse_api.galleries_search(
-                info["user"]["userId"],
+                self.user,
                 self.search,
                 self.offset,
                 query.get("sort", "most-recent"),
@@ -1368,7 +1377,7 @@ class DeviantartEclipseAPI():
         self.csrf_token = None
 
     def deviation_extended_fetch(self, deviation_id, user, kind=None):
-        endpoint = "/da-browse/shared_api/deviation/extended_fetch"
+        endpoint = "/_napi/da-browse/shared_api/deviation/extended_fetch"
         params = {
             "deviationid"    : deviation_id,
             "username"       : user,
@@ -1377,58 +1386,58 @@ class DeviantartEclipseAPI():
         }
         return self._call(endpoint, params)
 
-    def gallery_scraps(self, user, offset=None):
-        endpoint = "/da-user-profile/api/gallery/contents"
+    def gallery_scraps(self, user, offset=0):
+        endpoint = "/_puppy/dashared/gallection/contents"
         params = {
             "username"     : user,
+            "type"         : "gallery",
             "offset"       : offset,
             "limit"        : 24,
             "scraps_folder": "true",
         }
         return self._pagination(endpoint, params)
 
-    def galleries_search(self, user_id, query,
-                         offset=None, order="most-recent"):
-        endpoint = "/shared_api/galleries/search"
-        params = {
-            "userid": user_id,
-            "order" : order,
-            "q"     : query,
-            "offset": offset,
-            "limit" : 24,
-        }
-        return self._pagination(endpoint, params)
-
-    def search_deviations(self, params):
-        endpoint = "/da-browse/api/networkbar/search/deviations"
-        return self._pagination(endpoint, params, key="deviations")
-
-    def user_info(self, user, expand=False):
-        endpoint = "/shared_api/user/info"
-        params = {"username": user}
-        if expand:
-            params["expand"] = "user.stats,user.profile,user.watch"
-        return self._call(endpoint, params)
-
-    def user_watching(self, user, offset=None):
-        endpoint = "/da-user-profile/api/module/watching"
+    def galleries_search(self, user, query, offset=0, order="most-recent"):
+        endpoint = "/_puppy/dashared/gallection/search"
         params = {
             "username": user,
-            "moduleid": self._module_id_watching(user),
+            "type"    : "gallery",
+            "order"   : order,
+            "q"       : query,
             "offset"  : offset,
             "limit"   : 24,
         }
         return self._pagination(endpoint, params)
 
+    def search_deviations(self, params):
+        endpoint = "/_napi/da-browse/api/networkbar/search/deviations"
+        return self._pagination(endpoint, params, key="deviations")
+
+    def user_info(self, user, expand=False):
+        endpoint = "/_puppy/dauserprofile/init/about"
+        params = {"username": user}
+        return self._call(endpoint, params)
+
+    def user_watching(self, user, offset=0):
+        gruserid, moduleid = self._ids_watching(user)
+
+        endpoint = "/_puppy/gruser/module/watching"
+        params = {
+            "gruserid"     : gruserid,
+            "gruser_typeid": "4",
+            "username"     : user,
+            "moduleid"     : moduleid,
+            "offset"       : offset,
+            "limit"        : 24,
+        }
+        return self._pagination(endpoint, params)
+
     def _call(self, endpoint, params):
-        url = "https://www.deviantart.com/_napi" + endpoint
+        url = "https://www.deviantart.com" + endpoint
         params["csrf_token"] = self.csrf_token or self._fetch_csrf_token()
 
         response = self.request(url, params=params, fatal=None)
 
-        if response.status_code == 404:
-            raise exception.StopExtraction(
-                "Your account must use the Eclipse interface.")
         try:
             return response.json()
         except Exception:
@@ -1466,14 +1475,19 @@ class DeviantartEclipseAPI():
             else:
                 params["offset"] = int(params["offset"]) + len(results)
 
-    def _module_id_watching(self, user):
+    def _ids_watching(self, user):
         url = "{}/{}/about".format(self.extractor.root, user)
         page = self.request(url).text
-        pos = page.find('\\"type\\":\\"watching\\"')
+
+        gruserid, pos = text.extract(page, ' data-userid="', '"')
+
+        pos = page.find('\\"type\\":\\"watching\\"', pos)
         if pos < 0:
             raise exception.NotFoundError("module")
+        moduleid = text.rextract(page, '\\"id\\":', ',', pos)[0].strip('" ')
+
         self._fetch_csrf_token(page)
-        return text.rextract(page, '\\"id\\":', ',', pos)[0].strip('" ')
+        return gruserid, moduleid
 
     def _fetch_csrf_token(self, page=None):
         if page is None:

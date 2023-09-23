@@ -30,6 +30,7 @@ class RedditExtractor(Extractor):
 
         parentdir = self.config("parent-directory")
         max_depth = self.config("recursion", 0)
+        previews = self.config("previews", True)
 
         videos = self.config("videos", True)
         if videos:
@@ -99,11 +100,15 @@ class RedditExtractor(Extractor):
                     for comment in comments:
                         html = comment["body_html"] or ""
                         if ' href="' in html:
-                            comment["submission"] = submission
                             comment["date"] = text.parse_timestamp(
                                 comment["created_utc"])
+                            if submission:
+                                data = submission.copy()
+                                data["comment"] = comment
+                            else:
+                                data = comment
                             for url in text.extract_iter(html, ' href="', '"'):
-                                urls.append((url, comment))
+                                urls.append((url, data))
 
                 for url, data in urls:
                     if not url or url[0] == "#":
@@ -115,7 +120,7 @@ class RedditExtractor(Extractor):
                     if match:
                         extra.append(match.group(1))
                     elif not match_user(url) and not match_subreddit(url):
-                        if "preview" in data:
+                        if previews and "preview" in data:
                             data["_fallback"] = self._previews(data)
                         yield Message.Queue, text.unescape(url), data
                         if "_fallback" in data:
