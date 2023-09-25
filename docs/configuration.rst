@@ -1354,13 +1354,11 @@ extractor.deviantart.jwt
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
     Update `JSON Web Tokens <https://jwt.io/>`__ (the ``token`` URL parameter)
     of otherwise non-downloadable, low-resolution images
     to be able to download them in full resolution.
-
-    Note: This got patched by DeviantArt on 2023-09-19 and no longer works.
 
 
 extractor.deviantart.mature
@@ -1427,6 +1425,19 @@ Description
 
     Disable this option to *force* using a private token for all requests
     when a `refresh token <extractor.deviantart.refresh-token_>`__ is provided.
+
+
+extractor.deviantart.quality
+----------------------------
+Type
+    ``integer``
+Default
+    ``100``
+Description
+    JPEG quality level of newer images for which
+    an original file download is not available.
+
+    Note: Only has an effect when `deviantart.jwt <extractor.deviantart.jwt_>`__ is disabled.
 
 
 extractor.deviantart.refresh-token

@@ -56,7 +56,7 @@ class PillowfortExtractor(Extractor):
 
             post["num"] = 0
             for file in files:
-                url = file["url"]
+                url = file["url"] or file.get("b2_lg_url")
                 if not url:
                     continue
 
@@ -132,7 +132,7 @@ class PillowfortPostExtractor(PillowfortExtractor):
 class PillowfortUserExtractor(PillowfortExtractor):
     """Extractor for all posts of a pillowfort user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
+    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+(?:/tagged/[^/?#]+)?)"
     example = "https://www.pillowfort.social/USER"
 
     def posts(self):
