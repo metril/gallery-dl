@@ -72,13 +72,13 @@ class TestExtractorResults(unittest.TestCase):
             content = ("#sha1_content" in result)
 
         tjob = ResultJob(result["#url"], content=content)
-        self.assertEqual(result["#class"], tjob.extractor.__class__)
+        self.assertEqual(result["#class"], tjob.extractor.__class__, "#class")
 
         if only_matching:
             return
 
         if "#exception" in result:
-            with self.assertRaises(result["#exception"]):
+            with self.assertRaises(result["#exception"], msg="#exception"):
                 tjob.run()
             return
 
@@ -98,8 +98,7 @@ class TestExtractorResults(unittest.TestCase):
             self.assertEqual(
                 len(set(tjob.archive_list)),
                 len(tjob.archive_list),
-                "archive-id uniqueness",
-            )
+                msg="archive-id uniqueness")
 
         if tjob.queue:
             # test '_extractor' entries
@@ -113,49 +112,58 @@ class TestExtractorResults(unittest.TestCase):
         else:
             # test 'extension' entries
             for kwdict in tjob.kwdict_list:
-                self.assertIn("extension", kwdict)
+                self.assertIn("extension", kwdict, msg="#extension")
 
         # test extraction results
         if "#sha1_url" in result:
             self.assertEqual(
-                result["#sha1_url"], tjob.url_hash.hexdigest())
+                result["#sha1_url"],
+                tjob.url_hash.hexdigest(),
+                msg="#sha1_url")
 
         if "#sha1_content" in result:
             expected = result["#sha1_content"]
             digest = tjob.content_hash.hexdigest()
             if isinstance(expected, str):
-                self.assertEqual(
-                    expected, digest, "content")
+                self.assertEqual(expected, digest, msg="#sha1_content")
             else:  # iterable
-                self.assertIn(
-                    digest, expected, "content")
+                self.assertIn(digest, expected, msg="#sha1_content")
 
         if "#sha1_metadata" in result:
             self.assertEqual(
-                result["#sha1_metadata"], tjob.kwdict_hash.hexdigest())
+                result["#sha1_metadata"],
+                tjob.kwdict_hash.hexdigest(),
+                "#sha1_metadata")
 
         if "#count" in result:
             count = result["#count"]
             len_urls = len(tjob.url_list)
             if isinstance(count, str):
-                self.assertRegex(count, r"^ *(==|!=|<|<=|>|>=) *\d+ *$")
+                self.assertRegex(
+                    count, r"^ *(==|!=|<|<=|>|>=) *\d+ *$", msg="#count")
                 expr = "{} {}".format(len_urls, count)
                 self.assertTrue(eval(expr), msg=expr)
             elif isinstance(count, range):
-                self.assertRange(len_urls, count)
+                self.assertRange(len_urls, count, msg="#count")
             else:  # assume integer
-                self.assertEqual(len_urls, count)
+                self.assertEqual(len_urls, count, msg="#count")
 
         if "#pattern" in result:
-            self.assertGreater(len(tjob.url_list), 0)
-            for url in tjob.url_list:
-                self.assertRegex(url, result["#pattern"])
+            self.assertGreater(len(tjob.url_list), 0, msg="#pattern")
+            pattern = result["#pattern"]
+            if isinstance(pattern, str):
+                for url in tjob.url_list:
+                    self.assertRegex(url, pattern, msg="#pattern")
+            else:
+                for url, pat in zip(tjob.url_list, pattern):
+                    self.assertRegex(url, pat, msg="#pattern")
 
         if "#urls" in result:
             expected = result["#urls"]
             if isinstance(expected, str):
-                expected = (expected,)
-            self.assertSequenceEqual(tjob.url_list, expected)
+                self.assertEqual(tjob.url_list[0], expected, msg="#urls")
+            else:
+                self.assertSequenceEqual(tjob.url_list, expected, msg="#urls")
 
         metadata = {k: v for k, v in result.items() if k[0] != "#"}
         if metadata:
@@ -168,7 +176,7 @@ class TestExtractorResults(unittest.TestCase):
                 key = key[1:]
                 if key not in kwdict:
                     continue
-            self.assertIn(key, kwdict)
+            self.assertIn(key, kwdict, msg=key)
             value = kwdict[key]
 
             if isinstance(test, dict):
@@ -217,6 +225,8 @@ class ResultJob(job.DownloadJob):
 
         if content:
             self.fileobj = TestPathfmt(self.content_hash)
+        else:
+            self._update_content = lambda url, kwdict: None
 
         self.format_directory = TestFormatter(
             "".join(self.extractor.directory_fmt)).format_map
@@ -264,10 +274,17 @@ class ResultJob(job.DownloadJob):
         self.archive_hash.update(archive_id.encode())
 
     def _update_content(self, url, kwdict):
-        if self.content:
-            scheme = url.partition(":")[0]
-            self.fileobj.kwdict = kwdict
-            self.get_downloader(scheme).download(url, self.fileobj)
+        self.fileobj.kwdict = kwdict
+
+        downloader = self.get_downloader(url.partition(":")[0])
+        if downloader.download(url, self.fileobj):
+            return
+
+        for num, url in enumerate(kwdict.get("_fallback") or (), 1):
+            self.log.warning("Trying fallback URL #%d", num)
+            downloader = self.get_downloader(url.partition(":")[0])
+            if downloader.download(url, self.fileobj):
+                return
 
 
 class TestPathfmt():
@@ -393,7 +410,13 @@ def generate_tests():
         category, _, subcategory = sys.argv[1].partition(":")
         del sys.argv[1:]
 
-        tests = results.category(category)
+        if category.startswith("+"):
+            basecategory = category[1:].lower()
+            tests = [t for t in results.all()
+                     if t["#category"][0].lower() == basecategory]
+        else:
+            tests = results.category(category)
+
         if subcategory:
             tests = [t for t in tests if t["#category"][-1] == subcategory]
     else:
