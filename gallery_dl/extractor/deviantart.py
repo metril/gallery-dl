@@ -42,7 +42,7 @@ class DeviantartExtractor(Extractor):
         self.offset = 0
 
     def _init(self):
-        self.jwt = self.config("jwt", True)
+        self.jwt = self.config("jwt", False)
         self.flat = self.config("flat", True)
         self.extra = self.config("extra", False)
         self.quality = self.config("quality", "100")
@@ -91,14 +91,20 @@ class DeviantartExtractor(Extractor):
             return True
 
     def items(self):
-        if self.user and self.config("group", True):
-            profile = self.api.user_profile(self.user)
-            self.group = not profile
-            if self.group:
-                self.subcategory = "group-" + self.subcategory
-                self.user = self.user.lower()
-            else:
-                self.user = profile["user"]["username"]
+        if self.user:
+            group = self.config("group", True)
+            if group:
+                profile = self.api.user_profile(self.user)
+                if profile:
+                    self.user = profile["user"]["username"]
+                    self.group = False
+                elif group == "skip":
+                    self.log.info("Skipping group '%s'", self.user)
+                    raise exception.StopExtraction()
+                else:
+                    self.subcategory = "group-" + self.subcategory
+                    self.user = self.user.lower()
+                    self.group = True
 
         for deviation in self.deviations():
             if isinstance(deviation, tuple):

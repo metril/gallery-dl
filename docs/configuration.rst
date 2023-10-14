@@ -1306,12 +1306,20 @@ Description
 extractor.deviantart.group
 --------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
     Check whether the profile name in a given URL
     belongs to a group or a regular user.
+
+    When disabled, assume every given profile name
+    belongs to a regular user.
+
+    Special values:
+
+    * ``"skip"``: Skip groups
 
 
 extractor.deviantart.include
@@ -1354,11 +1362,13 @@ extractor.deviantart.jwt
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
     Update `JSON Web Tokens <https://jwt.io/>`__ (the ``token`` URL parameter)
     of otherwise non-downloadable, low-resolution images
     to be able to download them in full resolution.
+
+    Note: No longer functional as of 2023-10-11
 
 
 extractor.deviantart.mature
@@ -2245,6 +2255,18 @@ Default
     ``true``
 Description
     Fetch media from replies to other notes.
+
+
+extractor.[moebooru].pool.metadata
+----------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract extended ``pool`` metadata.
+
+    Note: Not supported by all ``moebooru`` instances.
 
 
 extractor.newgrounds.flash
