@@ -21,7 +21,6 @@ start-github-runner-windows:
     image:
         name: hashicorp/vault:latest
         pull_policy: if-not-present
-    pull_policy: if-not-present
     before_script:
         - apk add --update curl && rm -rf /var/cache/apk/*
     script: |
@@ -40,7 +39,6 @@ start-github-runner-macos:
     image:
         name: hashicorp/vault:latest
         pull_policy: if-not-present
-    pull_policy: if-not-present
     before_script:
         - apk add --update curl && rm -rf /var/cache/apk/*
     script: |
