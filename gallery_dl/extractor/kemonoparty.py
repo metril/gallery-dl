@@ -211,6 +211,10 @@ class KemonopartyExtractor(Extractor):
             self.root, server)
         return self.request(url).json()
 
+    @memcache(keyarg=1)
+    def _post_revisions(self, url):
+        return self.request(url + "/revisions").json()
+
 
 def _validate(response):
     return (response.headers["content-length"] != "9" or
@@ -220,25 +224,39 @@ def _validate(response):
 class KemonopartyUserExtractor(KemonopartyExtractor):
     """Extractor for all posts from a kemono.party user listing"""
     subcategory = "user"
-    pattern = USER_PATTERN + r"/?(?:\?o=(\d+))?(?:$|[?#])"
+    pattern = USER_PATTERN + r"/?(?:\?([^#]+))?(?:$|[?#])"
     example = "https://kemono.party/SERVICE/user/12345"
 
     def __init__(self, match):
-        _, _, service, user_id, offset = match.groups()
+        _, _, service, user_id, self.query = match.groups()
         self.subcategory = service
         KemonopartyExtractor.__init__(self, match)
         self.api_url = "{}/api/v1/{}/user/{}".format(
             self.root, service, user_id)
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
-        self.offset = text.parse_int(offset)
 
     def posts(self):
         url = self.api_url
-        params = {"o": self.offset}
+        params = text.parse_query(self.query)
+        params["o"] = text.parse_int(params.get("o"))
+        revisions = self.config("revisions")
 
         while True:
             posts = self.request(url, params=params).json()
-            yield from posts
+
+            if revisions:
+                for post in posts:
+                    post["revision_id"] = 0
+                    yield post
+                    post_url = "{}/post/{}".format(self.api_url, post["id"])
+                    try:
+                        revs = self._post_revisions(post_url)
+                    except exception.HttpError:
+                        pass
+                    else:
+                        yield from revs
+            else:
+                yield from posts
 
             if len(posts) < 50:
                 break
@@ -248,11 +266,12 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
 class KemonopartyPostExtractor(KemonopartyExtractor):
     """Extractor for a single kemono.party post"""
     subcategory = "post"
-    pattern = USER_PATTERN + r"/post/([^/?#]+)"
+    pattern = USER_PATTERN + r"/post/([^/?#]+)(/revisions?(?:/(\d*))?)?"
     example = "https://kemono.party/SERVICE/user/12345/post/12345"
 
     def __init__(self, match):
-        _, _, service, user_id, post_id = match.groups()
+        _, _, service, user_id, post_id, self.revision, self.revision_id = \
+            match.groups()
         self.subcategory = service
         KemonopartyExtractor.__init__(self, match)
         self.api_url = "{}/api/v1/{}/user/{}/post/{}".format(
@@ -260,7 +279,27 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
 
     def posts(self):
-        return (self.request(self.api_url).json(),)
+        if not self.revision:
+            post = self.request(self.api_url).json()
+            if self.config("revisions"):
+                post["revision_id"] = 0
+                try:
+                    revs = self._post_revisions(self.api_url)
+                except exception.HttpError:
+                    pass
+                else:
+                    return itertools.chain((post,), revs)
+            return (post,)
+
+        revs = self._post_revisions(self.api_url)
+        if not self.revision_id:
+            return revs
+
+        for rev in revs:
+            if str(rev["revision_id"]) == self.revision_id:
+                return (rev,)
+
+        raise exception.NotFoundError("revision")
 
 
 class KemonopartyDiscordExtractor(KemonopartyExtractor):
@@ -344,8 +383,15 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
     def posts(self):
         url = "{}/api/v1/discord/channel/{}".format(
             self.root, self.channel_id)
-        params = {"skip": 0}
-        return self.request(url, params=params).json()
+        params = {"o": 0}
+
+        while True:
+            posts = self.request(url, params=params).json()
+            yield from posts
+
+            if len(posts) < 150:
+                break
+            params["o"] += 150
 
 
 class KemonopartyDiscordServerExtractor(KemonopartyExtractor):

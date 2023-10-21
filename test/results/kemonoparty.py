@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import kemonoparty
+from gallery_dl import exception
 
 
 __tests__ = (
@@ -22,6 +23,19 @@ __tests__ = (
     "#class"   : kemonoparty.KemonopartyUserExtractor,
     "#options" : {"max-posts": 100},
     "#count"   : range(200, 300),
+},
+
+{
+    "#url"     : "https://kemono.party/fanbox/user/6993449?q=お蔵入りになった",
+    "#comment" : "search / 'q' query parameter (#3385, #4057)",
+    "#category": ("", "kemonoparty", "fanbox"),
+    "#class"   : kemonoparty.KemonopartyUserExtractor,
+    "#urls"    : (
+        "https://kemono.party/data/ef/7b/ef7b4398a2f4ada597421fd3c116cff86e85695911f7cd2a459b0e566b864e46.png",
+        "https://kemono.party/data/73/e6/73e615f6645b9d1af6329448601673c9275f07fd11eb37670c97e307e29a9ee9.png",
+    ),
+
+    "id": "8779",
 },
 
 {
@@ -155,6 +169,37 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.party/patreon/user/3161935/post/68231671/revision/134996",
+    "#comment" : "revisions (#4498)",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#urls"    : "https://kemono.party/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
+
+    "revision_id": 134996,
+},
+
+{
+    "#url"     : "https://kemono.party/patreon/user/3161935/post/68231671/revisions",
+    "#comment" : "revisions (#4498)",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#pattern" : r"https://kemono\.party/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86\.jpg",
+    "#count"   : 9,
+    "#archive" : False,
+
+    "revision_id": range(134996, 3052965),
+},
+
+
+{
+    "#url"     : "https://kemono.party/patreon/user/3161935/post/68231671/revision/12345",
+    "#comment" : "revisions (#4498)",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#exception": exception.NotFoundError,
+},
+
+{
     "#url"     : "https://kemono.party/discord/server/488668827274444803#608504710906904576",
     "#category": ("", "kemonoparty", "discord"),
     "#class"   : kemonoparty.KemonopartyDiscordExtractor,
@@ -183,6 +228,18 @@ __tests__ = (
     "channel"     : "608504710906904576",
     "channel_name": "finish-work",
     "date"        : "type:datetime",
+},
+
+{
+    "#url"     : "https://kemono.party/discord/server/818188637329031199#818343747275456522",
+    "#comment" : "pagination",
+    "#category": ("", "kemonoparty", "discord"),
+    "#class"   : kemonoparty.KemonopartyDiscordExtractor,
+    "#range"   : "1-250",
+    "#count"   : 250,
+
+    "channel"     : "818343747275456522",
+    "channel_name": "wraith-sfw-gallery",
 },
 
 {
