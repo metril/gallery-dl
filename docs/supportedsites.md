@@ -32,6 +32,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>4archive</td>
+    <td>https://4archive.org/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>4chan</td>
     <td>https://www.4chan.org/</td>
     <td>Boards, Threads</td>
@@ -712,7 +718,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Reddit</td>
     <td>https://www.reddit.com/</td>
-    <td>Home Feed, individual Images, Submissions, Subreddits, User Profiles</td>
+    <td>Home Feed, individual Images, Redirects, Submissions, Subreddits, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
@@ -1182,6 +1188,12 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Misskey.io</td>
     <td>https://misskey.io/</td>
+    <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Misskey.design</td>
+    <td>https://misskey.design/</td>
     <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
     <td></td>
 </tr>
