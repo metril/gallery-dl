@@ -69,8 +69,9 @@ class KemonopartyExtractor(Extractor):
             headers["Referer"] = "{}/{}/user/{}/post/{}".format(
                 self.root, post["service"], post["user"], post["id"])
             post["_http_headers"] = headers
-            post["date"] = text.parse_datetime(
-                post["published"] or post["added"], "%Y-%m-%dT%H:%M:%S")
+            post["date"] = self._parse_datetime(
+                post["published"] or post["added"])
+
             if username:
                 post["username"] = username
             if comments:
@@ -205,6 +206,11 @@ class KemonopartyExtractor(Extractor):
             })
         return dms
 
+    def _parse_datetime(self, date_string):
+        if len(date_string) > 19:
+            date_string = date_string[:19]
+        return text.parse_datetime(date_string, "%Y-%m-%dT%H:%M:%S")
+
     @memcache(keyarg=1)
     def _discord_channels(self, server):
         url = "{}/api/v1/discord/channel/lookup/{}".format(
@@ -213,7 +219,14 @@ class KemonopartyExtractor(Extractor):
 
     @memcache(keyarg=1)
     def _post_revisions(self, url):
-        return self.request(url + "/revisions").json()
+        revs = self.request(url + "/revisions").json()
+
+        idx = len(revs)
+        for rev in revs:
+            rev["revision_index"] = idx
+            idx -= 1
+
+        return revs
 
 
 def _validate(response):
@@ -247,13 +260,15 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
             if revisions:
                 for post in posts:
                     post["revision_id"] = 0
-                    yield post
                     post_url = "{}/post/{}".format(self.api_url, post["id"])
                     try:
                         revs = self._post_revisions(post_url)
                     except exception.HttpError:
-                        pass
+                        post["revision_index"] = 1
+                        yield post
                     else:
+                        post["revision_index"] = len(revs) + 1
+                        yield post
                         yield from revs
             else:
                 yield from posts
@@ -286,8 +301,9 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
                 try:
                     revs = self._post_revisions(self.api_url)
                 except exception.HttpError:
-                    pass
+                    post["revision_index"] = 1
                 else:
+                    post["revision_index"] = len(revs) + 1
                     return itertools.chain((post,), revs)
             return (post,)
 
@@ -360,8 +376,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                         "name": path, "type": "inline", "hash": ""})
 
             post["channel_name"] = self.channel_name
-            post["date"] = text.parse_datetime(
-                post["published"], "%Y-%m-%dT%H:%M:%S.%f")
+            post["date"] = self._parse_datetime(post["published"])
             post["count"] = len(files)
             yield Message.Directory, post
 
