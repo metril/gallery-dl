@@ -1568,6 +1568,20 @@ Description
     to already favorited galleries.
 
 
+extractor.exhentai.gp
+---------------------
+Type
+    ``string``
+Example
+    ``"resized"``
+Description
+    Selects how to handle "you do not have enough GP" errors.
+
+    * `"resized"`: Continue downloading `non-original <extractor.exhentai.original_>`__ images.
+    * `"stop"`: Stop the current extractor run.
+    * `"wait"`: Wait for user input before retrying the current image.
+
+
 extractor.exhentai.limits
 -------------------------
 Type
@@ -2551,6 +2565,14 @@ Default
     ``true``
 Description
     Download from video pins.
+
+
+extractor.pixeldrain.api-key
+----------------------------
+Type
+    ``string``
+Description
+    Your account's `API key <https://pixeldrain.com/user/api_keys>`__
 
 
 extractor.pixiv.include
