@@ -152,7 +152,7 @@ class MastodonFollowingExtractor(MastodonExtractor):
 class MastodonStatusExtractor(MastodonExtractor):
     """Extractor for images from a status"""
     subcategory = "status"
-    pattern = BASE_PATTERN + r"/@[^/?#]+/(\d+)"
+    pattern = BASE_PATTERN + r"/@[^/?#]+/(?!following)([^/?#]+)"
     example = "https://mastodon.social/@USER/12345"
 
     def statuses(self):
@@ -277,6 +277,6 @@ class MastodonAPI():
             params = None
 
 
-@cache(maxage=100*365*24*3600, keyarg=0)
+@cache(maxage=36500*86400, keyarg=0)
 def _access_token_cache(instance):
     return None

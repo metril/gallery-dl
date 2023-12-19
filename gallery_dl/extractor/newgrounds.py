@@ -23,7 +23,7 @@ class NewgroundsExtractor(Extractor):
     root = "https://www.newgrounds.com"
     cookies_domain = ".newgrounds.com"
     cookies_names = ("NG_GG_username", "vmk1du5I8m")
-    request_interval = 1.0
+    request_interval = (0.5, 1.5)
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -98,7 +98,7 @@ class NewgroundsExtractor(Extractor):
         if username:
             self.cookies_update(self._login_impl(username, password))
 
-    @cache(maxage=360*24*3600, keyarg=1)
+    @cache(maxage=365*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 

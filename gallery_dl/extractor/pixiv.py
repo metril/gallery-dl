@@ -594,7 +594,7 @@ class PixivSeriesExtractor(PixivExtractor):
 class PixivNovelExtractor(PixivExtractor):
     """Extractor for pixiv novels"""
     subcategory = "novel"
-    request_interval = 1.0
+    request_interval = (0.5, 1.5)
     pattern = BASE_PATTERN + r"/n(?:ovel/show\.php\?id=|/)(\d+)"
     example = "https://www.pixiv.net/novel/show.php?id=12345"
 
@@ -996,6 +996,6 @@ class PixivAppAPI():
             params = text.parse_query(query)
 
 
-@cache(maxage=10*365*24*3600, keyarg=0)
+@cache(maxage=36500*86400, keyarg=0)
 def _refresh_token_cache(username):
     return None
