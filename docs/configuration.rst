@@ -1373,6 +1373,17 @@ Description
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.deviantart.intermediary
+---------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    For older non-downloadable images,
+    download a higher-quality ``/intermediary/`` version.
+
+
 extractor.deviantart.journals
 -----------------------------
 Type
@@ -3262,8 +3273,6 @@ Description
     for each Tweet in said timeline.
 
     Note: This requires at least 1 additional API call per initial Tweet.
-    Age-restricted replies cannot be expanded when using the
-    `syndication <extractor.twitter.syndication_>`__ API.
 
 
 extractor.twitter.include
@@ -3329,30 +3338,6 @@ Description
 
     Known available sizes are
     ``4096x4096``, ``orig``, ``large``, ``medium``, and ``small``.
-
-
-extractor.twitter.syndication
------------------------------
-Type
-    * ``bool``
-    * ``string``
-Default
-    ``false``
-Description
-    Controls how to retrieve age-restricted content when not logged in.
-
-    * ``false``: Skip age-restricted Tweets.
-    * ``true``: Download using Twitter's syndication API.
-    * ``"extended"``: Try to fetch Tweet metadata using the normal API
-      in addition to the syndication API. This requires additional HTTP
-      requests in some cases (e.g. when `retweets <extractor.twitter.retweets_>`_
-      are enabled).
-
-    Note: This does not apply to search results (including
-    `timeline strategies <extractor.twitter.timeline.strategy_>`__).
-    To retrieve such content from search results, you must log in and
-    disable "Hide sensitive content" in your `search settings
-    <https://twitter.com/settings/search>`__.
 
 
 extractor.twitter.logout
@@ -3447,7 +3432,7 @@ Description
     * ``"tweets"``: `/tweets <https://twitter.com/USER/tweets>`__ timeline + search
     * ``"media"``: `/media <https://twitter.com/USER/media>`__ timeline + search
     * ``"with_replies"``: `/with_replies <https://twitter.com/USER/with_replies>`__ timeline + search
-    * ``"auto"``: ``"tweets"`` or ``"media"``, depending on `retweets <extractor.twitter.retweets_>`__ and `text-tweets <extractor.twitter.text-tweets_>`__ settings
+    * ``"auto"``: ``"tweets"`` or ``"media"``, depending on `retweets <extractor.twitter.retweets_>`__, `replies <extractor.twitter.replies_>`__, and `text-tweets <extractor.twitter.text-tweets_>`__ settings
 
 
 extractor.twitter.text-tweets
