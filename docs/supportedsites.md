@@ -98,6 +98,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>BATO.TO</td>
+    <td>https://bato.to/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>BBC</td>
     <td>https://bbc.co.uk/</td>
     <td>Galleries, Programmes</td>
@@ -148,7 +154,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>DeviantArt</td>
     <td>https://www.deviantart.com/</td>
-    <td>Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Popular Images, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
+    <td>Avatars, Backgrounds, Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Popular Images, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
@@ -447,7 +453,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Komikcast</td>
-    <td>https://komikcast.site/</td>
+    <td>https://komikcast.lol/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -587,12 +593,6 @@ Consider all listed sites to potentially be NSFW.
     <td>NSFWalbum.com</td>
     <td>https://nsfwalbum.com/</td>
     <td>Albums</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Nudecollect</td>
-    <td>https://nudecollect.com/</td>
-    <td>Albums, individual Images</td>
     <td></td>
 </tr>
 <tr>
@@ -1004,6 +1004,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>Zzup</td>
+    <td>https://zzup.com/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
     <td>かべうち</td>
     <td>https://kabe-uchiroom.com/</td>
     <td>User Profiles</td>
@@ -1037,7 +1043,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>JPG Fish</td>
-    <td>https://jpg2.su/</td>
+    <td>https://jpg4.su/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
@@ -1406,6 +1412,12 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Bcbnsfw</td>
     <td>https://booru.bcbnsfw.space/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Snootbooru</td>
+    <td>https://snootbooru.com/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>

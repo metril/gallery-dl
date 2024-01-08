@@ -627,6 +627,20 @@ Description
     `ssl.SSLContext.set_ciphers() <https://docs.python.org/3/library/ssl.html#ssl.SSLContext.set_ciphers>`__
 
 
+extractor.*.tls12
+-----------------
+Type
+    ``bool``
+Default
+    * ``true``
+    * ``false`` for ``patreon``, ``pixiv:series``
+Description
+    Allow selecting TLS 1.2 cipher suites.
+
+    Can be disabled to alter TLS fingerprints
+    and potentially bypass Cloudflare blocks.
+
+
 extractor.*.keywords
 --------------------
 Type
@@ -1066,6 +1080,25 @@ Description
     after a colon ``:``, for example ``{date:%Y%m%d}``.
 
 
+extractor.*.write-pages
+-----------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``false``
+Description
+    During data extraction,
+    write received HTTP request data
+    to enumerated files in the current working directory.
+
+    Special values:
+
+    * ``"all"``: Include HTTP request and response headers. Hide ``Authorization``, ``Cookie``, and ``Set-Cookie`` values.
+    * ``"ALL"``: Include all HTTP request and response headers.
+
+
+
 Extractor-specific Options
 ==========================
 
@@ -1368,7 +1401,13 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"gallery"``, ``"scraps"``, ``"journal"``, ``"favorite"``, ``"status"``.
+    ``"avatar"``,
+    ``"background"``,
+    ``"gallery"``,
+    ``"scraps"``,
+    ``"journal"``,
+    ``"favorite"``,
+    ``"status"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
@@ -1530,7 +1569,7 @@ Default
     ``false``
 Example
     * ``notes,pools``
-    * ``["notes", "pools"``
+    * ``["notes", "pools"]``
 Description
     Extract additional metadata (notes, pool metadata) if available.
 
@@ -1670,6 +1709,21 @@ Description
     * ``"ytdl"``: Like ``true``, but let `youtube-dl`_ handle video
       extraction and download for YouTube, Vimeo and SoundCloud embeds.
     * ``false``: Ignore embeds.
+
+
+extractor.fanbox.metadata
+-------------------------
+Type
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``false``
+Example
+    * ``user,plan``
+    * ``["user", "plan"]``
+Description
+    Extract ``plan`` and extended ``user`` metadata.
 
 
 extractor.flickr.access-token & .access-token-secret
