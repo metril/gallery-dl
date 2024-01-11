@@ -10,8 +10,11 @@ from .common import Extractor, ChapterExtractor, MangaExtractor
 from .. import text, exception
 import re
 
-BASE_PATTERN = (r"(?:https?://)?"
-                r"(?:(?:ba|d|w)to\.to|(?:batotoo|mangatoto)\.com)")
+BASE_PATTERN = (r"(?:https?://)?(?:"
+                r"(?:ba|d|h|m|w)to\.to|"
+                r"(?:(?:manga|read)toto|batocomic|[xz]bato)\.(?:com|net|org)|"
+                r"comiko\.(?:net|org)|"
+                r"bat(?:otoo|o?two)\.com)")
 
 
 class BatotoBase():
@@ -38,7 +41,8 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
     def metadata(self, page):
         extr = text.extract_from(page)
         manga, info, _ = extr("<title>", "<").rsplit(" - ", 3)
-        manga_id = extr("/title/", "/")
+        manga_id = text.extr(
+            extr('rel="canonical" href="', '"'), "/title/", "/")
 
         match = re.match(
             r"(?:Volume\s+(\d+) )?"
