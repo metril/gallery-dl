@@ -260,6 +260,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>HatenaBlog</td>
+    <td>https://hatenablog.com</td>
+    <td>Archive, Individual Posts, Home Feed, Search Results</td>
+    <td></td>
+</tr>
+<tr>
     <td>HBrowse</td>
     <td>https://www.hbrowse.com/</td>
     <td>Chapters, Manga</td>
@@ -809,6 +815,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Speaker Deck</td>
     <td>https://speakerdeck.com/</td>
     <td>Presentations</td>
+    <td></td>
+</tr>
+<tr>
+    <td>SteamGridDB</td>
+    <td>https://www.steamgriddb.com</td>
+    <td>Individual Assets, Grids, Heroes, Icons, Logos</td>
     <td></td>
 </tr>
 <tr>
