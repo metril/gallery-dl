@@ -38,7 +38,7 @@ class DeviantartExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = (match.group(1) or match.group(2)).lower()
+        self.user = (match.group(1) or match.group(2) or "").lower()
         self.offset = 0
 
     def _init(self):
@@ -452,9 +452,11 @@ class DeviantartExtractor(Extractor):
             return None
 
         dev = self.api.deviation(deviation["deviationid"], False)
-        folder = dev["premium_folder_data"]
+        folder = deviation["premium_folder_data"]
         username = dev["author"]["username"]
-        has_access = folder["has_access"]
+
+        # premium_folder_data is no longer present when user has access (#5063)
+        has_access = ("premium_folder_data" not in dev) or folder["has_access"]
 
         if not has_access and folder["type"] == "watchers" and \
                 self.config("auto-watch"):
