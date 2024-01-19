@@ -88,7 +88,9 @@ CATEGORY_MAP = {
     "mangapark"      : "MangaPark",
     "mangaread"      : "MangaRead",
     "mangasee"       : "MangaSee",
+    "mariowiki"      : "Super Mario Wiki",
     "mastodon.social": "mastodon.social",
+    "mediawiki"      : "MediaWiki",
     "micmicidol"     : "MIC MIC IDOL",
     "myhentaigallery": "My Hentai Gallery",
     "myportfolio"    : "Adobe Portfolio",
@@ -457,7 +459,7 @@ def build_extractor_list():
                 domains[category] = domain(extr)
         else:
             base = categories[extr.basecategory]
-            for category, root in extr.instances:
+            for category, root, info in extr.instances:
                 base[category].append(extr.subcategory)
                 if category not in domains:
                     if not root:
