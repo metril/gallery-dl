@@ -25,7 +25,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         self.api_root = self.config_instance("api_root") or self.root
 
         if self.category == "realbooru":
-            self.items = self._items_realbooru
+            self._file_url = self._file_url_realbooru
             self._tags = self._tags_realbooru
 
     def _api_request(self, params):
@@ -124,28 +124,6 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 self.root, md5[0:2], md5[2:4], md5, url.rpartition(".")[2])
         return url
 
-    def _items_realbooru(self):
-        from .common import Message
-        data = self.metadata()
-
-        for post in self.posts():
-            try:
-                html = self._html(post)
-                url = post["file_url"] = text.rextract(
-                    html, 'href="', '"', html.index(">Original<"))[0]
-            except Exception:
-                self.log.debug("Unable to fetch download URL for post %s "
-                               "(md5: %s)", post.get("id"), post.get("md5"))
-                continue
-
-            text.nameext_from_url(url, post)
-            post.update(data)
-            self._prepare(post)
-            self._tags(post, html)
-
-            yield Message.Directory, post
-            yield Message.Url, url, post
-
     def _tags_realbooru(self, post, page):
         tag_container = text.extr(page, 'id="tagLink"', '</div>')
         tags = collections.defaultdict(list)
@@ -190,7 +168,7 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]+)"
+    pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]*)"
     example = "https://safebooru.org/index.php?page=post&s=list&tags=TAG"
 
     def __init__(self, match):
@@ -202,6 +180,8 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
         return {"search_tags": self.tags}
 
     def posts(self):
+        if self.tags == "all":
+            self.tags = ""
         return self._pagination({"tags": self.tags})
 
 

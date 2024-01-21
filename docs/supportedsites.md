@@ -272,12 +272,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>HBrowse</td>
-    <td>https://www.hbrowse.com/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
     <td>Hentai Cosplay</td>
     <td>https://hentai-cosplays.com/</td>
     <td>Galleries</td>
@@ -1066,12 +1060,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Pixl</td>
-    <td>https://pixl.li/</td>
-    <td>Albums, individual Images, User Profiles</td>
-    <td></td>
-</tr>
-<tr>
     <td>IMG.Kiwi</td>
     <td>https://img.kiwi/</td>
     <td>Albums, individual Images, User Profiles</td>
@@ -1294,12 +1282,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Nitter.lacontrevoie.fr</td>
-    <td>https://nitter.lacontrevoie.fr/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
-    <td></td>
-</tr>
-<tr>
     <td>Nitter.1d4.us</td>
     <td>https://nitter.1d4.us/</td>
     <td>Media Files, Replies, Search Results, Tweets</td>
@@ -1395,7 +1377,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Giantessbooru</td>
-    <td>https://giantessbooru.com/</td>
+    <td>https://sizechangebooru.com/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
@@ -1538,6 +1520,12 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>MediaWiki</td>
     <td>https://www.mediawiki.org/</td>
+    <td>Articles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Fandom</td>
+    <td>https://www.fandom.com/</td>
     <td>Articles</td>
     <td></td>
 </tr>
