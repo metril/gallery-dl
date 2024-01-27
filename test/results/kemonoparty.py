@@ -175,9 +175,41 @@ __tests__ = (
     "#class"   : kemonoparty.KemonopartyPostExtractor,
     "#urls"    : "https://kemono.su/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
 
-    "revision_id": 142470,
+    "file"          : {
+        "hash": "88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86",
+        "name": "wip update.jpg",
+        "path": "/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
+        "type": "file",
+    },
+    "attachments": [
+        {
+            "hash": "88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86",
+            "name": "wip update.jpg",
+            "path": "/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
+            "type": "attachment",
+        },
+    ],
+    "filename"      : "wip update",
+    "extension"     : "jpg",
+    "hash"          : "88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86",
+    "revision_id"   : 142470,
     "revision_index": 2,
-    "revision_hash": "e0e93281495e151b11636c156e52bfe9234c2a40",
+    "revision_hash" : "e0e93281495e151b11636c156e52bfe9234c2a40",
+},
+
+{
+    "#url"     : "https://kemono.su/patreon/user/3161935/post/68231671",
+    "#comment" : "unique revisions (#5013)",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#options" : {"revisions": "unique"},
+    "#urls"    : "https://kemono.su/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
+
+    "filename"      : "wip update",
+    "hash"          : "88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86",
+    "revision_id"   : 0,
+    "revision_index": 1,
+    "revision_hash" : "e0e93281495e151b11636c156e52bfe9234c2a40",
 },
 
 {
@@ -191,7 +223,7 @@ __tests__ = (
 
     "revision_id": range(134996, 3052965),
     "revision_index": range(1, 9),
-    "revision_hash": r"re:^[0-9a-f]{40}$",
+    "revision_hash": "e0e93281495e151b11636c156e52bfe9234c2a40",
 },
 
 

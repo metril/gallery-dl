@@ -2212,11 +2212,14 @@ Description
 extractor.kemonoparty.revisions
 -------------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``false``
 Description
     Extract post revisions.
+
+    Set this to ``"unique"`` to filter out duplicate revisions.
 
     Note: This requires 1 additional HTTP request per post.
 
@@ -3004,6 +3007,19 @@ Description
     If the format is given as ``string``, it will be extended with
     ``["hd", "sd", "gif"]``. Use a list with one element to
     restrict it to only one possible format.
+
+
+extractor.sankaku.id-format
+---------------------------
+Type
+    ``string``
+Default
+    ``"numeric"``
+Description
+    Format of ``id`` metadata fields.
+
+    * ``"alphanumeric"`` or ``"alnum"``: 11-character alphanumeric IDs (``y0abGlDOr2o``)
+    * ``"numeric"`` or ``"legacy"``: numeric IDs (``360451``)
 
 
 extractor.sankaku.refresh
