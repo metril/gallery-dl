@@ -10,12 +10,13 @@ start-github-runner-ubuntu:
         export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_JWT)"
         export TAILSCALE_OAUTH_CLIENT_ID="$(vault kv get -field=client_id tailscale/oauth)"
         export TAILSCALE_OAUTH_CLIENT_SECRET="$(vault kv get -field=client_secret tailscale/oauth)"
+        export TAILSCALE_TAGS='tag:ci'
         export GITHUB_TOKEN="$(vault kv get -field=token github/developer)"
         export GITLAB_REGISTRATION_TOKEN="$(vault kv get -field=token gitlab/runner-registration)"
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
         "https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/gitlab-runner-ubuntu.yaml/dispatches" \
-        -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'https://gitlab.azureolympos.com'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "docker_image": "'docker:19.03.12'"}}'
+        -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'https://gitlab.azureolympos.com'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "tailscale_tags": "'${TAILSCALE_TAGS}'", "docker_image": "'docker:19.03.12'"}}'
 
 start-github-runner-windows:
     stage: build
@@ -34,7 +35,7 @@ start-github-runner-windows:
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
         "https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/gitlab-runner-windows.yaml/dispatches" \
-        -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'https://gitlab.azureolympos.com'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "docker_image": "'23-windowsservercore-1809'"}}'
+        -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'https://gitlab.azureolympos.com'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "tailscale_tags": "'${TAILSCALE_TAGS}'", "docker_image": "'23-windowsservercore-1809'"}}'
 
 start-github-runner-macos:
     stage: build
@@ -53,7 +54,7 @@ start-github-runner-macos:
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
         "https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/gitlab-runner-macos.yaml/dispatches" \
-        -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'https://gitlab.azureolympos.com'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "docker_image": "'docker:19.03.12'"}}'
+        -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'https://gitlab.azureolympos.com'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "tailscale_tags": "'${TAILSCALE_TAGS}'", "docker_image": "'docker:19.03.12'"}}'
 
 build:linux:
     stage: build
