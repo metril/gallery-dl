@@ -30,6 +30,7 @@ start-github-runner-windows:
         export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_JWT)"
         export TAILSCALE_OAUTH_CLIENT_ID="$(vault kv get -field=client_id tailscale/oauth)"
         export TAILSCALE_OAUTH_CLIENT_SECRET="$(vault kv get -field=client_secret tailscale/oauth)"
+        export TAILSCALE_TAGS='tag:ci'
         export GITHUB_TOKEN="$(vault kv get -field=token github/developer)"
         export GITLAB_REGISTRATION_TOKEN="$(vault kv get -field=token gitlab/runner-registration)"
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
@@ -49,6 +50,7 @@ start-github-runner-macos:
         export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_JWT)"
         export TAILSCALE_OAUTH_CLIENT_ID="$(vault kv get -field=client_id tailscale/oauth)"
         export TAILSCALE_OAUTH_CLIENT_SECRET="$(vault kv get -field=client_secret tailscale/oauth)"
+        export TAILSCALE_TAGS='tag:ci'
         export GITHUB_TOKEN="$(vault kv get -field=token github/developer)"
         export GITLAB_REGISTRATION_TOKEN="$(vault kv get -field=token gitlab/runner-registration)"
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
