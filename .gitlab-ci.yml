@@ -82,7 +82,7 @@ build:linux:
         - gh release delete latest --yes
         - gh release create --latest --target master -t $TITLE latest ./dist/*
     tags:
-        - githubrunner-ubuntu-${CI_PIPELINE_ID}
+        - githubrunner-ubuntu-"${CI_PIPELINE_ID}"
 
 build:windows:
     stage: build
