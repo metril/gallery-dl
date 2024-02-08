@@ -82,7 +82,7 @@ build:linux:
         - gh release delete latest --yes
         - gh release create --latest --target master -t $TITLE latest ./dist/*
     tags:
-        - githubrunner-ubuntu-"${CI_PIPELINE_ID}"
+        - githubrunner-ubuntu-$CI_PIPELINE_ID
 
 build:windows:
     stage: build
@@ -91,7 +91,7 @@ build:windows:
         - pip install requests requests[socks] yt-dlp pyinstaller
         - python scripts/pyinstaller.py
     tags:
-        - githubrunner-windows-"${CI_PIPELINE_ID}""
+        - githubrunner-windows-$CI_PIPELINE_ID
 
 build:macos:
     stage: build
@@ -100,4 +100,4 @@ build:macos:
         - pip install requests requests[socks] yt-dlp pyinstaller
         - python scripts/pyinstaller.py
     tags:
-        - githubrunner-macos-"${CI_PIPELINE_ID}""
+        - githubrunner-macos-$CI_PIPELINE_ID
