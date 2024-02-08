@@ -15,7 +15,7 @@ start-github-runner-ubuntu:
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
         "https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/gitlab-runner-ubuntu.yaml/dispatches" \
-        -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'${GITLAB_ADDR}'", "gitlab_runner_tag": "'githubrunner-ubuntu-${CI_PROJECT_ID}'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "tailscale_tags": "'${TAILSCALE_TAGS}'", "docker_image": "'docker:19.03.12'"}}'
+        -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'${GITLAB_ADDR}'", "gitlab_runner_tag": "'githubrunner-ubuntu-${CI_PIPELINE_ID}'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "tailscale_tags": "'${TAILSCALE_TAGS}'", "docker_image": "'docker:19.03.12'"}}'
 
 start-github-runner-windows:
     stage: build
@@ -34,7 +34,7 @@ start-github-runner-windows:
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
         "https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/gitlab-runner-windows.yaml/dispatches" \
-        -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'${GITLAB_ADDR}'", "gitlab_runner_tag": "'githubrunner-windows-${CI_PROJECT_ID}'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "tailscale_tags": "'${TAILSCALE_TAGS}'", "docker_image": "'23-windowsservercore-1809'"}}'
+        -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'${GITLAB_ADDR}'", "gitlab_runner_tag": "'githubrunner-windows-${CI_PIPELINE_ID}'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "tailscale_tags": "'${TAILSCALE_TAGS}'", "docker_image": "'23-windowsservercore-1809'"}}'
 
 start-github-runner-macos:
     stage: build
@@ -53,7 +53,7 @@ start-github-runner-macos:
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
         "https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/gitlab-runner-macos.yaml/dispatches" \
-        -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'${GITLAB_ADDR}'", "gitlab_runner_tag": "'githubrunner-macos-${CI_PROJECT_ID}'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "tailscale_tags": "'${TAILSCALE_TAGS}'", "docker_image": "'docker:19.03.12'"}}'
+        -d '{"ref": "main", "inputs": {"registration_token": "'${GITLAB_REGISTRATION_TOKEN}'", "gitlab_url": "'${GITLAB_ADDR}'", "gitlab_runner_tag": "'githubrunner-macos-${CI_PIPELINE_ID}'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "tailscale_tags": "'${TAILSCALE_TAGS}'", "docker_image": "'docker:19.03.12'"}}'
 
 build:linux:
     stage: build
@@ -82,7 +82,7 @@ build:linux:
         - gh release delete latest --yes
         - gh release create --latest --target master -t $TITLE latest ./dist/*
     tags:
-        - githubrunner-ubuntu-${CI_PROJECT_ID}
+        - githubrunner-ubuntu-${CI_PIPELINE_ID}
 
 build:windows:
     stage: build
@@ -91,7 +91,7 @@ build:windows:
         - pip install requests requests[socks] yt-dlp pyinstaller
         - python scripts/pyinstaller.py
     tags:
-        - githubrunner-windows-${CI_PROJECT_ID}
+        - githubrunner-windows-${CI_PIPELINE_ID}
 
 build:macos:
     stage: build
@@ -100,4 +100,4 @@ build:macos:
         - pip install requests requests[socks] yt-dlp pyinstaller
         - python scripts/pyinstaller.py
     tags:
-        - githubrunner-macos-${CI_PROJECT_ID}
+        - githubrunner-macos-${CI_PIPELINE_ID}
