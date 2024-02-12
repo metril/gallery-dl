@@ -352,7 +352,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>ImageChest</td>
     <td>https://imgchest.com/</td>
-    <td>Galleries</td>
+    <td>Galleries, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -364,7 +364,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Imagetwist</td>
     <td>https://imagetwist.com/</td>
-    <td>individual Images</td>
+    <td>Galleries, individual Images</td>
     <td></td>
 </tr>
 <tr>
