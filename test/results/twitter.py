@@ -230,6 +230,22 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://twitter.com/i/communities",
+    "#category": ("", "twitter", "communities"),
+    "#class"   : twitter.TwitterCommunitiesExtractor,
+    "#range"   : "1-20",
+    "#count"   : 20,
+},
+
+{
+    "#url"     : "https://twitter.com/i/communities/1651515740753735697",
+    "#category": ("", "twitter", "community"),
+    "#class"   : twitter.TwitterCommunityExtractor,
+    "#range"   : "1-20",
+    "#count"   : 20,
+},
+
+{
     "#url"     : "https://twitter.com/supernaturepics/status/604341487988576256",
     "#comment" : "all Tweets from a 'conversation' (#1319)",
     "#category": ("", "twitter", "tweet"),
@@ -487,11 +503,8 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#comment" : "age-restricted (#2354)",
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
+    "#auth"     : False,
     "#exception": exception.AuthorizationError,
-    "#options"  : {"syndication": True},
-    "#count"    : 1,
-
-    "date": "dt:2022-02-13 20:10:09",
 },
 
 {
