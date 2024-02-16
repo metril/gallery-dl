@@ -1185,6 +1185,38 @@ Description
     Download embedded videos hosted on https://www.blogger.com/
 
 
+extractor.bluesky.metadata
+--------------------------
+Type
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``false``
+Example
+    * ``"facets,user"``
+    * ``["facets", "user"]``
+Description
+    Extract additional metadata.
+
+    * ``facets``: ``hashtags``, ``mentions``, and ``uris``
+    * ``user``: detailed ``user`` metadata for the user referenced in the input URL
+      (See `app.bsky.actor.getProfile <https://www.docs.bsky.app/docs/api/app-bsky-actor-get-profile>`__).
+
+
+
+extractor.bluesky.post.depth
+----------------------------
+Type
+    ``integer``
+Default
+    ``0``
+Description
+    Sets the maximum depth of returned reply posts.
+
+    (See `depth` parameter of `app.bsky.feed.getPostThread <https://www.docs.bsky.app/docs/api/app-bsky-feed-get-post-thread>`__)
+
+
 extractor.cyberdrop.domain
 --------------------------
 Type
@@ -1506,17 +1538,6 @@ Description
     * ``"manual"``: Disregard ``has_more`` and only stop when a batch of results is empty.
 
 
-extractor.deviantart.png
-------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Download the PNG version of images
-    for which an original file download is not available.
-
-
 extractor.deviantart.public
 ---------------------------
 Type
@@ -1533,14 +1554,15 @@ Description
 extractor.deviantart.quality
 ----------------------------
 Type
-    ``integer``
+    * ``integer``
+    * ``string``
 Default
     ``100``
 Description
-    JPEG quality level of newer images for which
+    JPEG quality level of images for which
     an original file download is not available.
 
-    Note: Only has an effect when `deviantart.jwt <extractor.deviantart.jwt_>`__ is disabled.
+    Set this to ``"png"`` to download a PNG version of these images instead.
 
 
 extractor.deviantart.refresh-token
@@ -1593,7 +1615,7 @@ Type
 Default
     ``false``
 Example
-    * ``notes,pools``
+    * ``"notes,pools"``
     * ``["notes", "pools"]``
 Description
     Extract additional metadata (notes, pool metadata) if available.
