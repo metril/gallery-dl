@@ -444,13 +444,20 @@ class BlueskyAPI():
             if response.status_code < 400:
                 return response.json()
             if response.status_code == 429:
-                self.extractor.wait(seconds=60)
+                until = response.headers.get("RateLimit-Reset")
+                self.extractor.wait(until=until)
                 continue
 
+            try:
+                data = response.json()
+                msg = "API request failed ('{}: {}')".format(
+                    data["error"], data["message"])
+            except Exception:
+                msg = "API request failed ({} {})".format(
+                    response.status_code, response.reason)
+
             self.extractor.log.debug("Server response: %s", response.text)
-            raise exception.StopExtraction(
-                "API request failed (%s %s)",
-                response.status_code, response.reason)
+            raise exception.StopExtraction(msg)
 
     def _pagination(self, endpoint, params, key="feed"):
         while True:
