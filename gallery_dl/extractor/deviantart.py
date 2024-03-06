@@ -18,12 +18,12 @@ import binascii
 import time
 import re
 
-
 BASE_PATTERN = (
     r"(?:https?://)?(?:"
     r"(?:www\.)?(?:fx)?deviantart\.com/(?!watch/)([\w-]+)|"
     r"(?!www\.)([\w-]+)\.(?:fx)?deviantart\.com)"
 )
+DEFAULT_AVATAR = "https://a.deviantart.net/avatars/default.gif"
 
 
 class DeviantartExtractor(Extractor):
@@ -177,6 +177,10 @@ class DeviantartExtractor(Extractor):
                 for comment in deviation["comments"]:
                     user = comment["user"]
                     name = user["username"].lower()
+                    if user["usericon"] == DEFAULT_AVATAR:
+                        self.log.debug(
+                            "Skipping avatar of '%s' (default)", name)
+                        continue
                     _user_details.update(name, user)
 
                     url = "{}/{}/avatar/".format(self.root, name)
@@ -585,7 +589,13 @@ class DeviantartAvatarExtractor(DeviantartExtractor):
             return ()
 
         icon = user["usericon"]
-        index = icon.rpartition("?")[2]
+        if icon == DEFAULT_AVATAR:
+            self.log.debug("Skipping avatar of '%s' (default)", name)
+            return ()
+
+        _, sep, index = icon.rpartition("?")
+        if not sep:
+            index = "0"
 
         formats = self.config("formats")
         if not formats:
