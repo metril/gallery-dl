@@ -40,6 +40,8 @@ class KemonopartyExtractor(Extractor):
     def _init(self):
         self.revisions = self.config("revisions")
         if self.revisions:
+            order = self.config("order-revisions")
+            self.revisions_reverse = order[0] in ("r", "a") if order else False
             self.revisions_unique = (self.revisions == "unique")
         self._prepare_ddosguard_cookies()
         self._find_inline = re.compile(
@@ -232,6 +234,7 @@ class KemonopartyExtractor(Extractor):
         except exception.HttpError:
             post["revision_hash"] = self._revision_hash(post)
             post["revision_index"] = 1
+            post["revision_count"] = 1
             return (post,)
         revs.insert(0, post)
 
@@ -247,21 +250,29 @@ class KemonopartyExtractor(Extractor):
                     uniq.append(rev)
             revs = uniq
 
-        idx = len(revs)
+        cnt = idx = len(revs)
         for rev in revs:
             rev["revision_index"] = idx
+            rev["revision_count"] = cnt
             idx -= 1
+
+        if self.revisions_reverse:
+            revs.reverse()
 
         return revs
 
     def _revisions_all(self, url):
         revs = self.request(url + "/revisions").json()
 
-        idx = len(revs)
+        cnt = idx = len(revs)
         for rev in revs:
             rev["revision_hash"] = self._revision_hash(rev)
             rev["revision_index"] = idx
+            rev["revision_count"] = cnt
             idx -= 1
+
+        if self.revisions_reverse:
+            revs.reverse()
 
         return revs
 
