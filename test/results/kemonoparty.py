@@ -136,6 +136,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.su/patreon/user/3161935/post/68231671",
+    "#comment" : "announcements",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#options" : {"announcements": True},
+
+    "announcements": [{
+        "body": "<div><strong>Thank you so much for the support!</strong><strong><br></strong>This Patreon is more of a tip jar for supporting what I make. I have to clarify that there are <strong>no exclusive Patreon animations</strong> because all are released for the public. You will get earlier access to WIPs. Direct downloads to my works are also available for $5 and $10 Tiers.</div>",
+        "date": "2023-02",
+    }],
+},
+
+{
     "#url"     : "https://kemono.su/patreon/user/19623797/post/29035449",
     "#comment" : "invalid file (#3510)",
     "#category": ("", "kemonoparty", "patreon"),
@@ -249,6 +262,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.su/gumroad/user/3267960360326/post/jwwag",
+    "#comment" : "empty 'file' with no 'path' (#5368)",
+    "#category": ("", "kemonoparty", "gumroad"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#count"   : 8,
+
+    "type"     : "attachment",
+},
+
+{
     "#url"     : "https://kemono.su/discord/server/488668827274444803#608504710906904576",
     "#category": ("", "kemonoparty", "discord"),
     "#class"   : kemonoparty.KemonopartyDiscordExtractor,
@@ -342,8 +365,24 @@ __tests__ = (
     "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
     "#pattern" : kemonoparty.KemonopartyUserExtractor.pattern,
     "#auth"    : True,
-    "#count"   : 3,
-    "#sha1_url": "902c656c8002a3257ef9e255cb69bca1937373d4",
+    "#urls"    : (
+        "https://kemono.su/patreon/user/881792",
+        "https://kemono.su/fanbox/user/6993449",
+        "https://kemono.su/subscribestar/user/alcorart",
+    ),
+},
+
+{
+    "#url"     : "https://kemono.su/favorites?type=artist&sort=faved_seq&order=asc",
+    "#category": ("", "kemonoparty", "favorite"),
+    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
+    "#pattern" : kemonoparty.KemonopartyUserExtractor.pattern,
+    "#auth"    : True,
+    "#urls"    : (
+        "https://kemono.su/fanbox/user/6993449",
+        "https://kemono.su/patreon/user/881792",
+        "https://kemono.su/subscribestar/user/alcorart",
+    ),
 },
 
 {
@@ -352,8 +391,24 @@ __tests__ = (
     "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
     "#pattern" : kemonoparty.KemonopartyPostExtractor.pattern,
     "#auth"    : True,
-    "#count"   : 3,
-    "#sha1_url": "4be8e84cb384a907a8e7997baaf6287b451783b5",
+    "#urls"    : (
+        "https://kemono.su/subscribestar/user/alcorart/post/184329",
+        "https://kemono.su/fanbox/user/6993449/post/23913",
+        "https://kemono.su/patreon/user/881792/post/4769638",
+    ),
+},
+
+{
+    "#url"     : "https://kemono.su/favorites?type=post&sort=published&order=asc",
+    "#category": ("", "kemonoparty", "favorite"),
+    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
+    "#pattern" : kemonoparty.KemonopartyPostExtractor.pattern,
+    "#auth"    : True,
+    "#urls"    : (
+        "https://kemono.su/patreon/user/881792/post/4769638",
+        "https://kemono.su/fanbox/user/6993449/post/23913",
+        "https://kemono.su/subscribestar/user/alcorart/post/184329",
+    ),
 },
 
 )
