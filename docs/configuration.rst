@@ -2964,14 +2964,24 @@ Description
     `gppt <https://github.com/eggplants/get-pixivpy-token>`__.
 
 
-extractor.pixiv.embeds
-----------------------
+extractor.pixiv.novel.covers
+----------------------------
 Type
     ``bool``
 Default
     ``false``
 Description
-    Download images embedded in novels.
+    Download cover images.
+
+
+extractor.pixiv.novel.embeds
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download embedded images.
 
 
 extractor.pixiv.novel.full-series
@@ -3904,6 +3914,19 @@ Description
 
     * ``"abort"``: Raise an error and stop extraction
     * ``"wait"``: Wait until rate limit reset
+
+
+extractor.twitter.relogin
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    | When receiving a "Could not authenticate you" error while logged in with
+      `username & passeword <extractor.*.username & .password_>`__,
+    | refresh the current login session and
+      try to continue from where it left off.
 
 
 extractor.twitter.locked
