@@ -14,6 +14,7 @@ import ssl
 import time
 import netrc
 import queue
+import getpass
 import logging
 import datetime
 import requests
@@ -176,9 +177,10 @@ class Extractor():
                 code = response.status_code
                 if self._write_pages:
                     self._dump_response(response)
-                if 200 <= code < 400 or fatal is None and \
-                        (400 <= code < 500) or not fatal and \
-                        (400 <= code < 429 or 431 <= code < 500):
+                if (
+                    code < 400 or
+                    code < 500 and (not fatal and code != 429 or fatal is None)
+                ):
                     if encoding:
                         response.encoding = encoding
                     return response
@@ -196,7 +198,10 @@ class Extractor():
                     if b'name="captcha-bypass"' in content:
                         self.log.warning("Cloudflare CAPTCHA")
                         break
-                if code not in retry_codes and code < 500:
+
+                if code == 429 and self._interval_429:
+                    pass
+                elif code not in retry_codes and code < 500:
                     break
 
             finally:
@@ -206,20 +211,24 @@ class Extractor():
             if tries > retries:
                 break
 
+            seconds = tries
             if self._interval:
-                seconds = self._interval()
-                if seconds < tries:
-                    seconds = tries
+                s = self._interval()
+                if seconds < s:
+                    seconds = s
+            if code == 429 and self._interval_429:
+                s = self._interval_429()
+                if seconds < s:
+                    seconds = s
+                self.wait(seconds=seconds, reason="429 Too Many Requests")
             else:
-                seconds = tries
-
-            self.sleep(seconds, "retry")
+                self.sleep(seconds, "retry")
             tries += 1
 
         raise exception.HttpError(msg, response)
 
     def wait(self, seconds=None, until=None, adjust=1.0,
-             reason="rate limit reset"):
+             reason="rate limit"):
         now = time.time()
 
         if seconds:
@@ -242,13 +251,22 @@ class Extractor():
         if reason:
             t = datetime.datetime.fromtimestamp(until).time()
             isotime = "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second)
-            self.log.info("Waiting until %s for %s.", isotime, reason)
+            self.log.info("Waiting until %s (%s)", isotime, reason)
         time.sleep(seconds)
 
     def sleep(self, seconds, reason):
         self.log.debug("Sleeping %.2f seconds (%s)",
                        seconds, reason)
         time.sleep(seconds)
+
+    def input(self, prompt, echo=True):
+        if echo:
+            try:
+                return input(prompt)
+            except (EOFError, OSError):
+                return None
+        else:
+            return getpass.getpass(prompt)
 
     def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""
@@ -281,6 +299,9 @@ class Extractor():
         self._interval = util.build_duration_func(
             self.config("sleep-request", self.request_interval),
             self.request_interval_min,
+        )
+        self._interval_429 = util.build_duration_func(
+            self.config("sleep-429", 60),
         )
 
         if self._retries < 0:
