@@ -171,6 +171,7 @@ class Extractor():
                     requests.exceptions.ChunkedEncodingError,
                     requests.exceptions.ContentDecodingError) as exc:
                 msg = exc
+                code = 0
             except (requests.exceptions.RequestException) as exc:
                 raise exception.HttpError(exc)
             else:
@@ -187,7 +188,8 @@ class Extractor():
                 if notfound and code == 404:
                     raise exception.NotFoundError(notfound)
 
-                msg = "'{} {}' for '{}'".format(code, response.reason, url)
+                msg = "'{} {}' for '{}'".format(
+                    code, response.reason, response.url)
                 server = response.headers.get("Server")
                 if server and server.startswith("cloudflare") and \
                         code in (403, 503):

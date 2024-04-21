@@ -4921,10 +4921,33 @@ output.colors
 Type
     ``object`` (`key` -> `ANSI color`)
 Default
-    ``{"success": "1;32", "skip": "2"}``
+    .. code:: json
+
+        {
+            "success": "1;32",
+            "skip"   : "2",
+            "debug"  : "0;37",
+            "info"   : "1;37",
+            "warning": "1;33",
+            "error"  : "1;31"
+        }
+
 Description
-    Controls the `ANSI colors <https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#colors--graphics-mode>`__
-    used with |mode: color|__ for successfully downloaded or skipped files.
+    Controls the
+    `ANSI colors <https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#colors--graphics-mode>`__
+    used for various outputs.
+
+    Output for |mode: color|__
+
+    * ``success``: successfully downloaded files
+    * ``skip``: skipped files
+
+    Logging Messages:
+
+    * ``debug``: debug logging messages
+    * ``info``: info logging messages
+    * ``warning``: warning logging messages
+    * ``error``: error logging messages
 
 .. __: `output.mode`_
 
@@ -4934,7 +4957,7 @@ output.ansi
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
     | On Windows, enable ANSI escape sequences and colored output
     | by setting the ``ENABLE_VIRTUAL_TERMINAL_PROCESSING`` flag for stdout and stderr.
