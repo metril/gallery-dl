@@ -69,7 +69,10 @@ build:linux:
         - apt update
         - apt install gh vault python3-pip pipx -y
     script:
-        - pipx install requests requests[socks] yt-dlp pyinstaller
+        - pipx install requests 
+        - pipx install requests[socks] 
+        - pipx install yt-dlp
+        - pipx install pyinstaller
         - python3 scripts/pyinstaller.py
         - export VAULT_ADDR=https://vault.azureolympos.com
         - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_JWT)"
