@@ -57,7 +57,7 @@ start-github-runner-macos:
 
 build:linux:
     stage: build
-    image: ubuntu:latest
+    image: debian:latest
     before_script:
         - apt update
         - apt install curl wget gnupg lsb-release -y
