@@ -50,7 +50,7 @@ class ExhentaiExtractor(Extractor):
 
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
-        if response.history and response.headers.get("Content-Length") == "0":
+        if "Cache-Control" not in response.headers and not response.content:
             self.log.info("blank page")
             raise exception.AuthorizationError()
         return response
@@ -441,7 +441,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             raise exception.AuthorizationError()
         if page.startswith(("Key missing", "Gallery not found")):
             raise exception.NotFoundError("gallery")
-        if "hentai.org/mpv/" in page:
+        if page.count("hentai.org/mpv/") > 1:
             self.log.warning("Enabled Multi-Page Viewer is not supported")
         return page
 
