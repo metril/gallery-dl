@@ -1,12 +1,15 @@
 start-github-runner-ubuntu:
     stage: build
+    id_tokens:
+        CI_JOB_ID_TOKEN:
+            aud: https://vault.azureolympos.com
     image:
         name: hashicorp/vault:latest
         pull_policy: if-not-present
     before_script:
         - apk add --update curl && rm -rf /var/cache/apk/*
     script: |
-        export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_JWT)"
+        export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_ID_TOKEN)"
         export TAILSCALE_OAUTH_CLIENT_ID="$(vault kv get -field=client_id tailscale/oauth)"
         export TAILSCALE_OAUTH_CLIENT_SECRET="$(vault kv get -field=client_secret tailscale/oauth)"
         export TAILSCALE_TAGS='tag:ci'
@@ -19,13 +22,16 @@ start-github-runner-ubuntu:
 
 start-github-runner-windows:
     stage: build
+    id_tokens:
+        CI_JOB_ID_TOKEN:
+            aud: https://vault.azureolympos.com
     image:
         name: hashicorp/vault:latest
         pull_policy: if-not-present
     before_script:
         - apk add --update curl && rm -rf /var/cache/apk/*
     script: |
-        export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_JWT)"
+        export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_ID_TOKEN)"
         export TAILSCALE_OAUTH_CLIENT_ID="$(vault kv get -field=client_id tailscale/oauth)"
         export TAILSCALE_OAUTH_CLIENT_SECRET="$(vault kv get -field=client_secret tailscale/oauth)"
         export TAILSCALE_TAGS='tag:ci'
@@ -38,13 +44,16 @@ start-github-runner-windows:
 
 start-github-runner-macos:
     stage: build
+    id_tokens:
+        CI_JOB_ID_TOKEN:
+            aud: https://vault.azureolympos.com
     image:
         name: hashicorp/vault:latest
         pull_policy: if-not-present
     before_script:
         - apk add --update curl && rm -rf /var/cache/apk/*
     script: |
-        export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_JWT)"
+        export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_ID_TOKEN)"
         export TAILSCALE_OAUTH_CLIENT_ID="$(vault kv get -field=client_id tailscale/oauth)"
         export TAILSCALE_OAUTH_CLIENT_SECRET="$(vault kv get -field=client_secret tailscale/oauth)"
         export TAILSCALE_TAGS='tag:ci'
@@ -57,6 +66,9 @@ start-github-runner-macos:
 
 build:linux:
     stage: build
+    id_tokens:
+        CI_JOB_ID_TOKEN:
+            aud: https://vault.azureolympos.com
     image: debian:latest
     before_script:
         - apt update
@@ -72,7 +84,7 @@ build:linux:
         - pip install --break-system-packages requests requests[socks] yt-dlp pyinstaller
         - python3 scripts/pyinstaller.py
         - export VAULT_ADDR=https://vault.azureolympos.com
-        - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_JWT)"
+        - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_ID_TOKEN)"
         - export GH_TOKEN="$(vault kv get -field=token github/developer)"
         - DATE=`TZ=":America/New_York" date +%Y-%m-%d_%H-%M`
         - TITLE=gallery-dl_${DATE}
