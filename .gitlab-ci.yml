@@ -7,7 +7,7 @@ start-github-runner-ubuntu:
         name: hashicorp/vault:latest
         pull_policy: if-not-present
     before_script:
-        - apk add --update curl && rm -rf /var/cache/apk/*
+        - apk add --update curl && apk add jq && rm -rf /var/cache/apk/*
     script: |
         export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_ID_TOKEN)"
         export RUNNER_CREATION_TOKEN="$(vault kv get -field=token gitlab/runner-creation)"
