@@ -2,7 +2,7 @@ start-github-runner-ubuntu:
     stage: build
     id_tokens:
         CI_JOB_ID_TOKEN:
-            aud: gitlab.azureolympos.com
+            aud: https://vault.azureolympos.com
     image:
         name: hashicorp/vault:latest
         pull_policy: if-not-present
