@@ -2,7 +2,7 @@ start-github-runner-ubuntu:
     stage: build
     id_tokens:
         CI_JOB_ID_TOKEN:
-            aud: https://vault.azureolympos.com
+            aud: https://gitlab.azureolympos.com
     image:
         name: hashicorp/vault:latest
         pull_policy: if-not-present
@@ -24,7 +24,7 @@ start-github-runner-windows:
     stage: build
     id_tokens:
         CI_JOB_ID_TOKEN:
-            aud: https://vault.azureolympos.com
+            aud: https://gitlab.azureolympos.com
     image:
         name: hashicorp/vault:latest
         pull_policy: if-not-present
@@ -46,7 +46,7 @@ start-github-runner-macos:
     stage: build
     id_tokens:
         CI_JOB_ID_TOKEN:
-            aud: https://vault.azureolympos.com
+            aud: https://gitlab.azureolympos.com
     image:
         name: hashicorp/vault:latest
         pull_policy: if-not-present
@@ -68,7 +68,7 @@ build:linux:
     stage: build
     id_tokens:
         CI_JOB_ID_TOKEN:
-            aud: https://vault.azureolympos.com
+            aud: https://gitlab.azureolympos.com
     image: debian:latest
     before_script:
         - apt update
