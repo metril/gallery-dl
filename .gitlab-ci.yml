@@ -16,7 +16,7 @@ start-github-runner-ubuntu:
         export TAILSCALE_TAGS='tag:ci'
         export GITHUB_TOKEN="$(vault kv get -field=token github/developer)"
         export GITLAB_REGISTRATION_TOKEN="$(vault kv get -field=token gitlab/runner-registration)"
-        curl --silent --request POST --url "${GITLAB_ADDR}/api/v4/user/runners" --data "tag_list=githubrunner-ubuntu-${CI_PROJECT_ID}-${CI_PIPELINE_IID}" --header "PRIVATE-TOKEN: ${RUNNER_CREATION_TOKEN}"
+        curl --silent --request POST --url "${GITLAB_ADDR}/api/v4/user/runners" --data "runner_type=docker" --data "tag_list=githubrunner-ubuntu-${CI_PROJECT_ID}-${CI_PIPELINE_IID}" --header "PRIVATE-TOKEN: ${RUNNER_CREATION_TOKEN}"
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
         "https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/gitlab-runner-ubuntu.yaml/dispatches" \
