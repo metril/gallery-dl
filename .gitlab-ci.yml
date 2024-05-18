@@ -20,7 +20,7 @@ start-github-runner-ubuntu:
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
         "https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/gitlab-runner-ubuntu.yaml/dispatches" \
-        -d '{"ref": "main", "inputs": {"registration_token": "'${RUNNER_REGISTRATION_TOKEN}'", "private_token": "'${RUNNER_MANAGEMENT_TOKEN}'", "gitlab_url": "'${GITLAB_ADDR}'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "tailscale_tags": "'${TAILSCALE_TAGS}'", "docker_image": "'docker:19.03.12'", "delete_runner": "true"}}'
+        -d '{"ref": "main", "inputs": {"registration_token": "'${RUNNER_REGISTRATION_TOKEN}'", "private_token": "'${RUNNER_MANAGEMENT_TOKEN}'", "gitlab_url": "'${GITLAB_ADDR}'", "project_id": ${CI_PROJECT_ID}, "tag_list": githubrunner-ubuntu-${CI_PROJECT_ID}-${CI_PIPELINE_IID}, "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "tailscale_tags": "'${TAILSCALE_TAGS}'", "docker_image": "'docker:19.03.12'", "delete_runner": "true"}}'
 
 # start-github-runner-windows:
 #     stage: build
