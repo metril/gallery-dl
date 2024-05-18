@@ -95,8 +95,8 @@ build:linux:
         - cd metril_gallery-dl
         - gh release delete latest --yes
         - gh release create --latest --target master -t $TITLE latest ./dist/*
-    tags:
-        - githubrunner-ubuntu-${CI_PROJECT_ID}-${CI_PIPELINE_IID}
+    # tags:
+    #     - githubrunner-ubuntu-${CI_PROJECT_ID}-${CI_PIPELINE_IID}
 
 # build:windows:
 #     stage: build
