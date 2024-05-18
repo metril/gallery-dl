@@ -11,6 +11,7 @@ start-github-runner-ubuntu:
     script: |
         export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_ID_TOKEN)"
         export RUNNER_CREATION_TOKEN="$(vault kv get -field=token gitlab/runner-creation)"
+        echo "CREATION TOKENL: ${RUNNER_CREATION_TOKEN}"
         export TAILSCALE_OAUTH_CLIENT_ID="$(vault kv get -field=client_id tailscale/oauth)"
         export TAILSCALE_OAUTH_CLIENT_SECRET="$(vault kv get -field=client_secret tailscale/oauth)"
         export TAILSCALE_TAGS='tag:ci'
