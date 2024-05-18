@@ -10,17 +10,17 @@ start-github-runner-ubuntu:
         - apk add --update curl && apk add jq && rm -rf /var/cache/apk/*
     script: |
         export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_ID_TOKEN)"
-        export RUNNER_CREATION_TOKEN="$(vault kv get -field=token gitlab/runner-creation)"
+        export RUNNER_MANAGEMENT_TOKEN="$(vault kv get -field=token gitlab/runner-management)"
         export TAILSCALE_OAUTH_CLIENT_ID="$(vault kv get -field=client_id tailscale/oauth)"
         export TAILSCALE_OAUTH_CLIENT_SECRET="$(vault kv get -field=client_secret tailscale/oauth)"
         export TAILSCALE_TAGS='tag:ci'
         export GITHUB_TOKEN="$(vault kv get -field=token github/developer)"
-        response=$(curl --request POST --url "${GITLAB_ADDR}/api/v4/user/runners" --data "runner_type=project_type" --data "project_id=${CI_PROJECT_ID}" --data "tag_list=githubrunner-ubuntu-${CI_PROJECT_ID}-${CI_PIPELINE_IID}" --header "PRIVATE-TOKEN: ${RUNNER_CREATION_TOKEN}")
+        response=$(curl --request POST --url "${GITLAB_ADDR}/api/v4/user/runners" --data "runner_type=project_type" --data "project_id=${CI_PROJECT_ID}" --data "tag_list=githubrunner-ubuntu-${CI_PROJECT_ID}-${CI_PIPELINE_IID}" --header "PRIVATE-TOKEN: ${RUNNER_MANAGEMENT_TOKEN}")
         export RUNNER_REGISTRATION_TOKEN=$(echo $response | jq -r '.token')
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
         "https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/gitlab-runner-ubuntu.yaml/dispatches" \
-        -d '{"ref": "main", "inputs": {"registration_token": "'${RUNNER_REGISTRATION_TOKEN}'", "private_token": "'${RUNNER_CREATION_TOKEN}'", "gitlab_url": "'${GITLAB_ADDR}'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "tailscale_tags": "'${TAILSCALE_TAGS}'", "docker_image": "'docker:19.03.12'", "delete_runner": "true"}}'
+        -d '{"ref": "main", "inputs": {"registration_token": "'${RUNNER_REGISTRATION_TOKEN}'", "private_token": "'${RUNNER_MANAGEMENT_TOKEN}'", "gitlab_url": "'${GITLAB_ADDR}'", "tailscale_oauth_client_id": "'${TAILSCALE_OAUTH_CLIENT_ID}'", "tailscale_oauth_client_secret": "'${TAILSCALE_OAUTH_CLIENT_SECRET}'", "tailscale_tags": "'${TAILSCALE_TAGS}'", "docker_image": "'docker:19.03.12'", "delete_runner": "true"}}'
 
 # start-github-runner-windows:
 #     stage: build
