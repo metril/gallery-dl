@@ -16,7 +16,6 @@ start-github-runner-ubuntu:
         export TAILSCALE_TAGS='tag:ci'
         export GITHUB_TOKEN="$(vault kv get -field=token github/developer)"
         response=$(curl --request POST --url "${GITLAB_ADDR}/api/v4/user/runners" --data "runner_type=project_type" --data "project_id=${CI_PROJECT_ID}" --data "tag_list=githubrunner-ubuntu-${CI_PROJECT_ID}-${CI_PIPELINE_IID}" --header "PRIVATE-TOKEN: ${RUNNER_CREATION_TOKEN}")
-        echo "RESPONSE: ${response}"
         export RUNNER_REGISTRATION_TOKEN=$(echo $response | jq -r '.token')
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
