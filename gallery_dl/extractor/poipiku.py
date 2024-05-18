@@ -25,6 +25,8 @@ class PoipikuExtractor(Extractor):
 
     def _init(self):
         self.cookies.set(
+            "LANG", "en", domain="poipiku.com")
+        self.cookies.set(
             "POIPIKU_CONTENTS_VIEW_MODE", "1", domain="poipiku.com")
 
     def items(self):
@@ -63,7 +65,7 @@ class PoipikuExtractor(Extractor):
                     "//img.", "//img-org.", 1)
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
-            if not extr(' show all(+', '<'):
+            if not extr('ShowAppendFile', '<'):
                 continue
 
             url = self.root + "/f/ShowAppendFileF.jsp"
