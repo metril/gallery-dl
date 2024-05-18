@@ -39,7 +39,7 @@ start-github-runner-windows:
         export TAILSCALE_OAUTH_CLIENT_SECRET="$(vault kv get -field=client_secret tailscale/oauth)"
         export TAILSCALE_TAGS='tag:ci'
         export GITHUB_TOKEN="$(vault kv get -field=token github/developer)"
-        response=$(curl --request POST --url "${GITLAB_ADDR}/api/v4/user/runners" --data "runner_type=project_type" --data "project_id=${CI_PROJECT_ID}" --data "tag_list=githubrunner-ubuntu-${CI_PROJECT_ID}-${CI_PIPELINE_IID}" --header "PRIVATE-TOKEN: ${RUNNER_CREATION_TOKEN}")
+        response=$(curl --request POST --url "${GITLAB_ADDR}/api/v4/user/runners" --data "runner_type=project_type" --data "project_id=${CI_PROJECT_ID}" --data "tag_list=githubrunner-windows-${CI_PROJECT_ID}-${CI_PIPELINE_IID}" --header "PRIVATE-TOKEN: ${RUNNER_CREATION_TOKEN}")
         export RUNNER_AUTHENTICATION_TOKEN=$(echo $response | jq -r '.token')
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
@@ -63,7 +63,7 @@ start-github-runner-macos:
         export TAILSCALE_OAUTH_CLIENT_SECRET="$(vault kv get -field=client_secret tailscale/oauth)"
         export TAILSCALE_TAGS='tag:ci'
         export GITHUB_TOKEN="$(vault kv get -field=token github/developer)"
-        response=$(curl --request POST --url "${GITLAB_ADDR}/api/v4/user/runners" --data "runner_type=project_type" --data "project_id=${CI_PROJECT_ID}" --data "tag_list=githubrunner-ubuntu-${CI_PROJECT_ID}-${CI_PIPELINE_IID}" --header "PRIVATE-TOKEN: ${RUNNER_CREATION_TOKEN}")
+        response=$(curl --request POST --url "${GITLAB_ADDR}/api/v4/user/runners" --data "runner_type=project_type" --data "project_id=${CI_PROJECT_ID}" --data "tag_list=githubrunner-macos-${CI_PROJECT_ID}-${CI_PIPELINE_IID}" --header "PRIVATE-TOKEN: ${RUNNER_CREATION_TOKEN}")
         export RUNNER_AUTHENTICATION_TOKEN=$(echo $response | jq -r '.token')
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
