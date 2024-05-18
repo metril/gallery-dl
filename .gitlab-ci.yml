@@ -11,12 +11,12 @@ start-github-runner-ubuntu:
     script: |
         export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=gitlab-runner jwt=$CI_JOB_ID_TOKEN)"
         export RUNNER_CREATION_TOKEN="$(vault kv get -field=token gitlab/runner-creation)"
-        echo "CREATION TOKENL: ${RUNNER_CREATION_TOKEN}"
         export TAILSCALE_OAUTH_CLIENT_ID="$(vault kv get -field=client_id tailscale/oauth)"
         export TAILSCALE_OAUTH_CLIENT_SECRET="$(vault kv get -field=client_secret tailscale/oauth)"
         export TAILSCALE_TAGS='tag:ci'
         export GITHUB_TOKEN="$(vault kv get -field=token github/developer)"
         response = $(curl --silent --request POST --url "${GITLAB_ADDR}/api/v4/user/runners" --data "runner_type=project_type" --data "project_id=36" --data "tag_list=githubrunner-ubuntu-${CI_PROJECT_ID}-${CI_PIPELINE_IID}" --header "PRIVATE-TOKEN: ${RUNNER_CREATION_TOKEN}")
+        echo $response
         export RUNNER_REGISTRATION_TOKEN=$(echo $response | jq -r '.token')
         curl -H "Authorization: token ${GITHUB_TOKEN}" \
         -H 'Accept: application/vnd.github.everest-preview+json' \
