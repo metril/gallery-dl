@@ -127,7 +127,7 @@ def main():
 
             extra = ""
             if util.EXECUTABLE:
-                extra = " - Executable"
+                extra = " - Executable ({})".format(version.__variant__)
             else:
                 git_head = util.git_head()
                 if git_head:
@@ -183,7 +183,13 @@ def main():
             else:
                 extractor._module_iter = iter(modules[0])
 
-        if args.list_modules:
+        if args.update:
+            from . import update
+            extr = update.UpdateExtractor.from_url("update:" + args.update)
+            ujob = update.UpdateJob(extr)
+            return ujob.run()
+
+        elif args.list_modules:
             extractor.modules.append("")
             sys.stdout.write("\n".join(extractor.modules))
 
