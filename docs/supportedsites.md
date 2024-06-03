@@ -614,12 +614,6 @@ Consider all listed sites to potentially be NSFW.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
-    <td>Photobucket</td>
-    <td>https://photobucket.com/</td>
-    <td>Albums, individual Images</td>
-    <td></td>
-</tr>
-<tr>
     <td>PhotoVogue</td>
     <td>https://www.vogue.com/photovogue/</td>
     <td>User Profiles</td>
@@ -1282,32 +1276,8 @@ Consider all listed sites to potentially be NSFW.
     <td colspan="4"><strong>Nitter Instances</strong></td>
 </tr>
 <tr>
-    <td>Nitter.net</td>
-    <td>https://nitter.net/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
     <td></td>
-</tr>
-<tr>
-    <td>Nitter.1d4.us</td>
-    <td>https://nitter.1d4.us/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
     <td></td>
-</tr>
-<tr>
-    <td>Nitter.kavin.rocks</td>
-    <td>https://nitter.kavin.rocks/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Nitter.unixfox.eu</td>
-    <td>https://nitter.unixfox.eu/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Nitter.it</td>
-    <td>https://nitter.it/</td>
     <td>Media Files, Replies, Search Results, Tweets</td>
     <td></td>
 </tr>
@@ -1450,12 +1420,6 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>8kun</td>
     <td>https://8kun.top/</td>
-    <td>Boards, Threads</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Wikieat</td>
-    <td>https://wikieat.club/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
@@ -1613,6 +1577,16 @@ Consider all listed sites to potentially be NSFW.
     <td>The /b/ Archive</td>
     <td>https://thebarchive.com/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>FoOlSlide Instances</strong></td>
+</tr>
+<tr>
+    <td></td>
+    <td></td>
+    <td>Chapters, Manga</td>
     <td></td>
 </tr>
 
