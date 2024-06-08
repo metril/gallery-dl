@@ -1730,15 +1730,16 @@ class DeviantartEclipseAPI():
         url = "{}/{}/about".format(self.extractor.root, user)
         page = self.request(url).text
 
-        gruserid, pos = text.extract(page, ' data-userid="', '"')
+        gruser_id = text.extr(page, ' data-userid="', '"')
 
-        pos = page.find('\\"type\\":\\"watching\\"', pos)
+        pos = page.find('\\"name\\":\\"watching\\"')
         if pos < 0:
-            raise exception.NotFoundError("module")
-        moduleid = text.rextract(page, '\\"id\\":', ',', pos)[0].strip('" ')
+            raise exception.NotFoundError("'watching' module ID")
+        module_id = text.rextract(
+            page, '\\"id\\":', ',', pos)[0].strip('" ')
 
         self._fetch_csrf_token(page)
-        return gruserid, moduleid
+        return gruser_id, module_id
 
     def _fetch_csrf_token(self, page=None):
         if page is None:
