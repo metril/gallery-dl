@@ -173,28 +173,6 @@ def build_parser():
         action="version", version=version.__version__,
         help="Print program version and exit",
     )
-    if util.EXECUTABLE:
-        general.add_argument(
-            "-U", "--update",
-            dest="update", action="store_const", const="latest",
-            help="Update to the latest version",
-        )
-        general.add_argument(
-            "--update-to",
-            dest="update", metavar="[CHANNEL@]TAG",
-            help="Upgrade/downgrade to a specific version",
-        )
-        general.add_argument(
-            "--update-check",
-            dest="update", action="store_const", const="check",
-            help="Check if a newer version is available",
-        )
-    else:
-        general.add_argument(
-            "-U", "--update-check",
-            dest="update", action="store_const", const="check",
-            help="Check if a newer version is available",
-        )
     general.add_argument(
         "-f", "--filename",
         dest="filename", metavar="FORMAT",
@@ -217,16 +195,6 @@ def build_parser():
         help="Load external extractors from PATH",
     )
     general.add_argument(
-        "--proxy",
-        dest="proxy", metavar="URL", action=ConfigAction,
-        help="Use the specified proxy",
-    )
-    general.add_argument(
-        "--source-address",
-        dest="source-address", metavar="IP", action=ConfigAction,
-        help="Client-side IP address to bind to",
-    )
-    general.add_argument(
         "--user-agent",
         dest="user-agent", metavar="UA", action=ConfigAction,
         help="User-Agent request header",
@@ -237,6 +205,31 @@ def build_parser():
         help="Delete cached login sessions, cookies, etc. for MODULE "
              "(ALL to delete everything)",
     )
+
+    update = parser.add_argument_group("Update Options")
+    if util.EXECUTABLE or 1:
+        update.add_argument(
+            "-U", "--update",
+            dest="update", action="store_const", const="latest",
+            help="Update to the latest version",
+        )
+        update.add_argument(
+            "--update-to",
+            dest="update", metavar="CHANNEL[@TAG]",
+            help=("Switch to a dfferent release channel (stable or dev) "
+                  "or upgrade/downgrade to a specific version"),
+        )
+        update.add_argument(
+            "--update-check",
+            dest="update", action="store_const", const="check",
+            help="Check if a newer version is available",
+        )
+    else:
+        update.add_argument(
+            "-U", "--update-check",
+            dest="update", action="store_const", const="check",
+            help="Check if a newer version is available",
+        )
 
     input = parser.add_argument_group("Input Options")
     input.add_argument(
@@ -262,6 +255,11 @@ def build_parser():
         dest="input_files", metavar="FILE", action=InputfileAction, const="d",
         help=("Download URLs found in FILE. "
               "Delete them after they were downloaded successfully."),
+    )
+    input.add_argument(
+        "--no-input",
+        dest="input", nargs=0, action=ConfigConstAction, const=False,
+        help=("Do not prompt for passwords/tokens"),
     )
 
     output = parser.add_argument_group("Output Options")
@@ -353,6 +351,34 @@ def build_parser():
         help=("Do not emit ANSI color codes in output"),
     )
 
+    networking = parser.add_argument_group("Networking Options")
+    networking.add_argument(
+        "-R", "--retries",
+        dest="retries", metavar="N", type=int, action=ConfigAction,
+        help=("Maximum number of retries for failed HTTP requests "
+              "or -1 for infinite retries (default: 4)"),
+    )
+    networking.add_argument(
+        "--http-timeout",
+        dest="timeout", metavar="SECONDS", type=float, action=ConfigAction,
+        help="Timeout for HTTP connections (default: 30.0)",
+    )
+    networking.add_argument(
+        "--proxy",
+        dest="proxy", metavar="URL", action=ConfigAction,
+        help="Use the specified proxy",
+    )
+    networking.add_argument(
+        "--source-address",
+        dest="source-address", metavar="IP", action=ConfigAction,
+        help="Client-side IP address to bind to",
+    )
+    networking.add_argument(
+        "--no-check-certificate",
+        dest="verify", nargs=0, action=ConfigConstAction, const=False,
+        help="Disable HTTPS certificate validation",
+    )
+
     downloader = parser.add_argument_group("Downloader Options")
     downloader.add_argument(
         "-r", "--limit-rate",
@@ -360,15 +386,9 @@ def build_parser():
         help="Maximum download rate (e.g. 500k or 2.5M)",
     )
     downloader.add_argument(
-        "-R", "--retries",
-        dest="retries", metavar="N", type=int, action=ConfigAction,
-        help=("Maximum number of retries for failed HTTP requests "
-              "or -1 for infinite retries (default: 4)"),
-    )
-    downloader.add_argument(
-        "--http-timeout",
-        dest="timeout", metavar="SECONDS", type=float, action=ConfigAction,
-        help="Timeout for HTTP connections (default: 30.0)",
+        "--chunk-size",
+        dest="chunk-size", metavar="SIZE", action=ConfigAction,
+        help="Size of in-memory data chunks (default: 32k)",
     )
     downloader.add_argument(
         "--sleep",
@@ -390,21 +410,6 @@ def build_parser():
               "for an input URL"),
     )
     downloader.add_argument(
-        "--filesize-min",
-        dest="filesize-min", metavar="SIZE", action=ConfigAction,
-        help="Do not download files smaller than SIZE (e.g. 500k or 2.5M)",
-    )
-    downloader.add_argument(
-        "--filesize-max",
-        dest="filesize-max", metavar="SIZE", action=ConfigAction,
-        help="Do not download files larger than SIZE (e.g. 500k or 2.5M)",
-    )
-    downloader.add_argument(
-        "--chunk-size",
-        dest="chunk-size", metavar="SIZE", action=ConfigAction,
-        help="Size of in-memory data chunks (default: 32k)",
-    )
-    downloader.add_argument(
         "--no-part",
         dest="part", nargs=0, action=ConfigConstAction, const=False,
         help="Do not use .part files",
@@ -424,16 +429,6 @@ def build_parser():
         "--no-download",
         dest="download", nargs=0, action=ConfigConstAction, const=False,
         help=("Do not download any files")
-    )
-    downloader.add_argument(
-        "--no-postprocessors",
-        dest="postprocess", nargs=0, action=ConfigConstAction, const=False,
-        help=("Do not run any post processors")
-    )
-    downloader.add_argument(
-        "--no-check-certificate",
-        dest="verify", nargs=0, action=ConfigConstAction, const=False,
-        help="Disable HTTPS certificate validation",
     )
 
     configuration = parser.add_argument_group("Configuration Options")
@@ -461,8 +456,18 @@ def build_parser():
     )
     configuration.add_argument(
         "--config-create",
-        dest="config_init", action="store_true",
+        dest="config", action="store_const", const="init",
         help="Create a basic configuration file",
+    )
+    configuration.add_argument(
+        "--config-status",
+        dest="config", action="store_const", const="status",
+        help="Show configuration file status",
+    )
+    configuration.add_argument(
+        "--config-open",
+        dest="config", action="store_const", const="open",
+        help="Open configuration file in external application",
     )
     configuration.add_argument(
         "--config-ignore",
@@ -516,12 +521,6 @@ def build_parser():
 
     selection = parser.add_argument_group("Selection Options")
     selection.add_argument(
-        "--download-archive",
-        dest="archive", metavar="FILE", action=ConfigAction,
-        help=("Record all downloaded or skipped files in FILE and "
-              "skip downloading any file already in it"),
-    )
-    selection.add_argument(
         "-A", "--abort",
         dest="abort", metavar="N", type=int,
         help=("Stop current extractor run "
@@ -532,6 +531,22 @@ def build_parser():
         dest="terminate", metavar="N", type=int,
         help=("Stop current and parent extractor runs "
               "after N consecutive file downloads were skipped"),
+    )
+    selection.add_argument(
+        "--filesize-min",
+        dest="filesize-min", metavar="SIZE", action=ConfigAction,
+        help="Do not download files smaller than SIZE (e.g. 500k or 2.5M)",
+    )
+    selection.add_argument(
+        "--filesize-max",
+        dest="filesize-max", metavar="SIZE", action=ConfigAction,
+        help="Do not download files larger than SIZE (e.g. 500k or 2.5M)",
+    )
+    selection.add_argument(
+        "--download-archive",
+        dest="archive", metavar="FILE", action=ConfigAction,
+        help=("Record all downloaded or skipped files in FILE and "
+              "skip downloading any file already in it"),
     )
     selection.add_argument(
         "--range",
@@ -572,6 +587,11 @@ def build_parser():
         "-P", "--postprocessor",
         dest="postprocessors", metavar="NAME", action="append", default=[],
         help="Activate the specified post processor",
+    )
+    postprocessor.add_argument(
+        "--no-postprocessors",
+        dest="postprocess", nargs=0, action=ConfigConstAction, const=False,
+        help=("Do not run any post processors")
     )
     postprocessor.add_argument(
         "-O", "--postprocessor-option",
