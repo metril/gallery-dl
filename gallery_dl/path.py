@@ -344,7 +344,11 @@ class PathFormat():
                     continue
                 except OSError:
                     # move across different filesystems
-                    shutil.copyfile(self.temppath, self.realpath)
+                    try:
+                        shutil.copyfile(self.temppath, self.realpath)
+                    except FileNotFoundError:
+                        os.makedirs(self.realdirectory)
+                        shutil.copyfile(self.temppath, self.realpath)
                     os.unlink(self.temppath)
                 break
 

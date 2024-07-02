@@ -33,6 +33,7 @@ stdout_write = output.stdout_write
 class Job():
     """Base class for Job types"""
     ulog = None
+    _logger_adapter = output.LoggerAdapter
 
     def __init__(self, extr, parent=None):
         if isinstance(extr, str):
@@ -77,9 +78,9 @@ class Job():
 
         actions = extr.config("actions")
         if actions:
-            from .actions import parse
+            from .actions import LoggerAdapter, parse
+            self._logger_adapter = LoggerAdapter
             self._logger_actions = parse(actions)
-            self._wrap_logger = self._wrap_logger_actions
 
         path_proxy = output.PathfmtProxy(self)
         self._logger_extra = {
@@ -267,10 +268,7 @@ class Job():
         return self._wrap_logger(logging.getLogger(name))
 
     def _wrap_logger(self, logger):
-        return output.LoggerAdapter(logger, self)
-
-    def _wrap_logger_actions(self, logger):
-        return output.LoggerAdapterActions(logger, self)
+        return self._logger_adapter(logger, self)
 
     def _write_unsupported(self, url):
         if self.ulog:
@@ -315,7 +313,7 @@ class DownloadJob(Job):
             pathfmt.build_path()
 
             if pathfmt.exists():
-                if archive:
+                if archive and self._archive_write_skip:
                     archive.add(kwdict)
                 self.handle_skip()
                 return
@@ -345,7 +343,7 @@ class DownloadJob(Job):
                 return
 
         if not pathfmt.temppath:
-            if archive:
+            if archive and self._archive_write_skip:
                 archive.add(kwdict)
             self.handle_skip()
             return
@@ -359,7 +357,7 @@ class DownloadJob(Job):
         pathfmt.finalize()
         self.out.success(pathfmt.path)
         self._skipcnt = 0
-        if archive:
+        if archive and self._archive_write_file:
             archive.add(kwdict)
         if "after" in hooks:
             for callback in hooks["after"]:
@@ -561,6 +559,16 @@ class DownloadJob(Job):
             else:
                 extr.log.debug("Using download archive '%s'", archive_path)
 
+                events = cfg("archive-event")
+                if events is None:
+                    self._archive_write_file = True
+                    self._archive_write_skip = False
+                else:
+                    if isinstance(events, str):
+                        events = events.split(",")
+                    self._archive_write_file = ("file" in events)
+                    self._archive_write_skip = ("skip" in events)
+
         skip = cfg("skip", True)
         if skip:
             self._skipexc = None
@@ -676,7 +684,7 @@ class SimulationJob(DownloadJob):
             kwdict["extension"] = "jpg"
         if self.sleep:
             self.extractor.sleep(self.sleep(), "download")
-        if self.archive:
+        if self.archive and self._archive_write_skip:
             self.archive.add(kwdict)
         self.out.skip(self.pathfmt.build_filename(kwdict))
 

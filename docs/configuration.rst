@@ -865,6 +865,25 @@ Description
     may pose a security risk.
 
 
+extractor.*.archive-event
+-------------------------
+Type
+     + ``string``
+     + ``list`` of ``strings``
+Default
+    ``"file"``
+Example
+    * ``"file,skip"``
+    * ``["file", "skip"]``
+Description
+    `Event(s) <metadata.event_>`__
+    for which IDs get written to an
+    `archive <extractor.*.archive_>`__.
+
+    Available events are:
+    ``file``, ``skip``
+
+
 extractor.*.archive-format
 --------------------------
 Type
@@ -917,23 +936,31 @@ Description
 extractor.*.actions
 -------------------
 Type
-    * ``object`` (`pattern` -> `action`)
-    * ``list`` of ``lists`` with 2 ``strings`` as elements
+    * ``object`` (`pattern` -> `action(s)`)
+    * ``list`` of ``lists`` with `pattern` -> `action(s)` pairs as elements
 Example
     .. code:: json
 
         {
-            "error"                   : "status |= 1",
+            "info:Logging in as .+"   : "level = debug",
             "warning:(?i)unable to .+": "exit 127",
-            "info:Logging in as .+"   : "level = debug"
+            "error"                   : [
+                "status |= 1",
+                "exec notify.sh 'gdl error'",
+                "abort"
+            ]
         }
 
     .. code:: json
 
         [
-            ["error"                   , "status |= 1"  ],
+            ["info:Logging in as .+"   , "level = debug"],
             ["warning:(?i)unable to .+", "exit 127"     ],
-            ["info:Logging in as .+"   , "level = debug"]
+            ["error"                   , [
+                "status |= 1",
+                "exec notify.sh 'gdl error'",
+                "abort"
+            ]]
         ]
 
 Description
@@ -949,6 +976,9 @@ Description
     ``action`` is parsed as action type
     followed by (optional) arguments.
 
+    It is possible to specify more than one ``action`` per ``pattern``
+    by providing them as a ``list``: ``["<action1>", "<action2>", …]``
+
     Supported Action Types:
 
     ``status``:
@@ -963,12 +993,19 @@ Description
     ``level``:
         | Modify severity level of the current logging message.
         | Can be one of ``debug``, ``info``, ``warning``, ``error`` or an integer value.
-    ``print``
+    ``print``:
         Write argument to stdout.
+    ``exec``:
+        Run a shell command.
+    ``abort``:
+        Stop the current extractor run.
+    ``terminate``:
+        Stop the current extractor run, including parent extractors.
     ``restart``:
         Restart the current extractor run.
     ``wait``:
-        Stop execution until Enter is pressed.
+        | Sleep for a given Duration_ or
+        | wait until Enter is pressed when no argument was given.
     ``exit``:
         Exit the program with the given argument as exit status.
 
@@ -3894,6 +3931,17 @@ Description
     for each Tweet in said timeline.
 
     Note: This requires at least 1 additional API call per initial Tweet.
+
+
+extractor.twitter.unavailable
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Try to download media marked as ``Unavailable``,
+    e.g. ``Geoblocked`` videos.
 
 
 extractor.twitter.include
