@@ -609,16 +609,14 @@ class TwitterTimelineExtractor(TwitterExtractor):
                 yield tweet
             if tweet is None and not cursor:
                 return
-
-            user = self._user["name"]
             tweet_id = tweet["rest_id"]
 
             state = reset = 2
         else:
-            user = self.user
+            self.api._user_id_by_screen_name(self.user)
 
         # build search query
-        query = "from:{} max_id:{}".format(user, tweet_id)
+        query = "from:{} max_id:{}".format(self._user["name"], tweet_id)
         if self.retweets:
             query += " include:retweets include:nativeretweets"
 
@@ -1479,7 +1477,9 @@ class TwitterAPI():
 
     def _pagination_legacy(self, endpoint, params):
         extr = self.extractor
-        params["cursor"] = extr._init_cursor()
+        cursor = extr._init_cursor()
+        if cursor:
+            params["cursor"] = cursor
         original_retweets = (extr.retweets == "original")
         bottom = ("cursor-bottom-", "sq-cursor-bottom")
 
@@ -1579,7 +1579,9 @@ class TwitterAPI():
         pinned_tweet = extr.pinned
 
         params = {"variables": None}
-        variables["cursor"] = extr._init_cursor()
+        cursor = extr._init_cursor()
+        if cursor:
+            variables["cursor"] = cursor
         if features is None:
             features = self.features_pagination
         if features:
@@ -1772,7 +1774,9 @@ class TwitterAPI():
 
     def _pagination_users(self, endpoint, variables, path=None):
         extr = self.extractor
-        variables["cursor"] = extr._init_cursor()
+        cursor = extr._init_cursor()
+        if cursor:
+            variables["cursor"] = cursor
         params = {
             "variables": None,
             "features" : self._json_dumps(self.features_pagination),
