@@ -11,6 +11,7 @@
 from .booru import BooruExtractor
 from ..cache import cache
 from .. import text, util, exception
+import collections
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?zerochan\.net"
 
@@ -76,16 +77,16 @@ class ZerochanExtractor(BooruExtractor):
                 'class="breadcrumbs', '</nav>'))[2:],
             "uploader": extr('href="/user/', '"'),
             "tags"    : extr('<ul id="tags"', '</ul>'),
-            "source"  : extr('<h2>Source</h2>', '</p><h2>').rpartition(
-                ">")[2] or None,
+            "source"  : text.unescape(text.extr(
+                extr('id="source-url"', '</a>'), 'href="', '"')),
         }
 
         html = data["tags"]
         tags = data["tags"] = []
         for tag in html.split("<li class=")[1:]:
-            category = text.extr(tag, 'data-type="', '"')
+            category = text.extr(tag, '"', '"')
             name = text.extr(tag, 'data-tag="', '"')
-            tags.append(category.capitalize() + ":" + name)
+            tags.append(category.partition(" ")[0].capitalize() + ":" + name)
 
         return data
 
@@ -108,6 +109,14 @@ class ZerochanExtractor(BooruExtractor):
             data["tags"] = item["tags"]
 
         return data
+
+    def _tags(self, post, page):
+        tags = collections.defaultdict(list)
+        for tag in post["tags"]:
+            category, _, name = tag.partition(":")
+            tags[category].append(name)
+        for key, value in tags.items():
+            post["tags_" + key.lower()] = value
 
 
 class ZerochanTagExtractor(ZerochanExtractor):
