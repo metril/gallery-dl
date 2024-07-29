@@ -92,6 +92,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>AGNPH</td>
+    <td>https://agn.ph/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Architizer</td>
     <td>https://architizer.com/</td>
     <td>Firms, Projects</td>
@@ -137,6 +143,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Catbox</td>
     <td>https://catbox.moe/</td>
     <td>Albums, Files</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Ci-en</td>
+    <td>https://ci-en.net/</td>
+    <td>Articles, Creators, Followed Users, Recent Images</td>
     <td></td>
 </tr>
 <tr>
@@ -467,6 +479,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Khinsider</td>
     <td>https://downloads.khinsider.com/</td>
     <td>Soundtracks</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Koharu</td>
+    <td>https://koharu.to/</td>
+    <td>Galleries, Search Results</td>
     <td></td>
 </tr>
 <tr>
