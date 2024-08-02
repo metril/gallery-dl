@@ -212,12 +212,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Supported</td>
 </tr>
 <tr>
-    <td>Fallen Angels Scans</td>
-    <td>https://www.fascans.com/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
     <td>Fanleaks</td>
     <td>https://fanleaks.club/</td>
     <td>Models, Posts</td>
@@ -484,7 +478,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Koharu</td>
     <td>https://koharu.to/</td>
-    <td>Galleries, Search Results</td>
+    <td>Favorites, Galleries, Search Results</td>
     <td></td>
 </tr>
 <tr>
@@ -958,7 +952,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>VSCO</td>
     <td>https://vsco.co/</td>
-    <td>Avatars, Collections, individual Images, Spaces, User Profiles</td>
+    <td>Avatars, Collections, Galleries, individual Images, Spaces, User Profiles</td>
     <td></td>
 </tr>
 <tr>
