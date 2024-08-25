@@ -1457,6 +1457,19 @@ Description
     Process reposts.
 
 
+extractor.bunkr.tlds
+--------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Controls which ``bunkr`` TLDs to accept.
+
+    * ``true``: Match URLs with *all* possible TLDs (e.g. ``bunkr.xyz`` or ``bunkrrr.duck``)
+    * ``false``: Match only URLs with known TLDs
+
+
 extractor.cien.files
 --------------------
 Type
@@ -2433,6 +2446,16 @@ Description
     ``"avatar"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
+
+
+extractor.instagram.max-posts
+-----------------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Limit the number of posts to download.
 
 
 extractor.instagram.metadata
@@ -4536,6 +4559,18 @@ Description
     Download video files.
 
 
+extractor.wikimedia.limit
+-------------------------
+Type
+    ``integer``
+Default
+    ``50``
+Description
+    Number of results to return in a single API query.
+
+    The value must be between 10 and 500.
+
+
 extractor.ytdl.cmdline-args
 ---------------------------
 Type
@@ -5680,6 +5715,30 @@ Description
         e.g. a Tweet on Twitter or a post on Patreon.
     ``post-after``
         After downloading all files of a `post`
+
+
+metadata.include
+----------------
+Type
+    ``list`` of ``strings``
+Example
+    ``["id", "width", "height", "description"]``
+Description
+    Include only the given top-level keys when writing JSON data.
+
+    Note: Missing or undefined fields will be silently ignored.
+
+
+metadata.exclude
+----------------
+Type
+    ``list`` of ``strings``
+Example
+    ``["blocked", "watching", "status"]``
+Description
+    Exclude all given keys from written JSON data.
+
+    Note: Cannot be used with `metadata.include`_.
 
 
 metadata.fields
