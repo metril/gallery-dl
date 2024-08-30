@@ -2689,14 +2689,17 @@ Description
 extractor.koharu.format
 -----------------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``strings``
 Default
-    ``"original"``
+    ``["0", "1600", "1280", "980", "780"]``
 Description
-    Name of the image format to download.
+    Name(s) of the image format to download.
 
-    | Available formats are
-    | ``"780"``, ``"980"``, ``"1280"``, ``"1600"``, ``"0"``/``"original"``
+    When more than one format is given, the first available one is selected.
+
+    | Possible formats are
+    | ``"780"``, ``"980"``, ``"1280"``, ``"1600"``, ``"0"`` (original)
 
 
 extractor.lolisafe.domain
@@ -6328,6 +6331,16 @@ Description
 
     For example, setting this option to ``"#"`` would allow a replacement
     operation to be ``Rold#new#`` instead of the default ``Rold/new/``
+
+
+input-files
+-----------
+Type
+    ``list`` of |Path|_
+Example
+    ``["~/urls.txt", "$HOME/input"]``
+Description
+    Additional# input files.
 
 
 signals-ignore
