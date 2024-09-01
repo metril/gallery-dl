@@ -4093,6 +4093,7 @@ Description
     when processing a user profile.
 
     Possible values are
+    ``"info"``,
     ``"avatar"``,
     ``"background"``,
     ``"timeline"``,
@@ -5585,6 +5586,63 @@ Description
     See `metadata.event`_ for a list of available events.
 
 
+hash.chunk-size
+---------------
+Type
+    ``integer``
+Default
+    ``32768``
+Description
+    Number of bytes read per chunk during file hash computation.
+
+
+hash.event
+----------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"file"``
+Description
+    The event(s) for which `file hashes <hash.hashes_>`__ are computed.
+
+    See `metadata.event`_ for a list of available events.
+
+
+hash.filename
+-------------
+Type
+    * ``bool``
+Default
+    ``false``
+Description
+    Rebuild `filenames <extractor.*.filename_>`__ after computing
+    `hash digests <hash.hashes_>`__ and adding them to the metadata dict.
+
+
+hash.hashes
+-----------
+Type
+    * ``string``
+    * ``object`` (`field name` -> `hash algorithm`)
+Default
+    ``"md5,sha1"``
+Example
+    .. code:: json
+
+        "sha256:hash_sha,sha3_512:hash_sha3"
+
+    .. code:: json
+
+        {
+            "hash_sha" : "sha256",
+            "hash_sha3": "sha3_512"
+        }
+
+Description
+    Hash digests to compute.
+
+
 metadata.mode
 -------------
 Type
@@ -6016,6 +6074,42 @@ Description
     or the |Path|_ to a `.py` file,
 
 
+rename.from
+-----------
+Type
+    ``string``
+Description
+    The `format string`_ for filenames to rename.
+
+    When no value is given, `extractor.*.filename`_ is used.
+
+
+rename.to
+---------
+Type
+    ``string``
+Description
+    The `format string`_ for target filenames.
+
+    When no value is given, `extractor.*.filename`_ is used.
+
+    Note:
+    With default settings, the potential download to `extractor.*.filename`_
+    still happens, even when using this post processor.
+    Disabling `file downloads <extractor.*.download_>`__
+    when using this option is recommended.
+
+
+rename.skip
+-----------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Do not rename a file when another file with the target name already exists.
+
+
 ugoira.extension
 ----------------
 Type
@@ -6340,7 +6434,7 @@ Type
 Example
     ``["~/urls.txt", "$HOME/input"]``
 Description
-    Additional# input files.
+    Additional input files.
 
 
 signals-ignore
@@ -6657,17 +6751,20 @@ Description
         | (requires `downloader.*.part`_ = ``true`` and `extractor.*.skip`_ = ``false``)
     ``exec``
         Execute external commands
+    ``hash``
+        Compute file hash digests
     ``metadata``
         Write metadata to separate files
     ``mtime``
         Set file modification time according to its metadata
     ``python``
         Call Python functions
+    ``rename``
+        Rename previously downloaded files
     ``ugoira``
         Convert Pixiv Ugoira to WebM using |ffmpeg|
     ``zip``
         Store files in a ZIP archive
-        |ytdl|
 
 
 
