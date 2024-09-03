@@ -2443,6 +2443,7 @@ Description
     ``"tagged"``,
     ``"stories"``,
     ``"highlights"``,
+    ``"info"``,
     ``"avatar"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
@@ -6092,12 +6093,6 @@ Description
     The `format string`_ for target filenames.
 
     When no value is given, `extractor.*.filename`_ is used.
-
-    Note:
-    With default settings, the potential download to `extractor.*.filename`_
-    still happens, even when using this post processor.
-    Disabling `file downloads <extractor.*.download_>`__
-    when using this option is recommended.
 
 
 rename.skip
