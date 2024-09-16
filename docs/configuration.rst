@@ -1279,6 +1279,20 @@ Extractor-specific Options
 ==========================
 
 
+extractor.ao3.formats
+---------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"pdf"``
+Example
+    * ``"azw3,epub,mobi,pdf,html"``
+    * ``["azw3", "epub", "mobi", "pdf", "html"]``
+Description
+    Format(s) to download.
+
+
 extractor.artstation.external
 -----------------------------
 Type
@@ -1455,6 +1469,16 @@ Default
     ``false``
 Description
     Process reposts.
+
+
+extractor.bluesky.videos
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download videos.
 
 
 extractor.bunkr.tlds
