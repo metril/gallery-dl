@@ -11,7 +11,8 @@
 from .common import Extractor, Message
 from .. import text, util
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?archiveofourown.org"
+BASE_PATTERN = (r"(?:https?://)?(?:www\.)?"
+                r"a(?:rchiveofourown|o3)\.(?:org|com|net)")
 
 
 class Ao3Extractor(Extractor):
@@ -68,7 +69,14 @@ class Ao3WorkExtractor(Ao3Extractor):
         url = "{}/works/{}".format(self.root, work_id)
         extr = text.extract_from(self.request(url).text)
 
+        chapters = {}
+        cindex = extr(' id="chapter_index"', "</ul>")
+        for ch in text.extract_iter(cindex, ' value="', "</option>"):
+            cid, _, cname = ch.partition('">')
+            chapters[cid] = text.unescape(cname)
+
         fmts = {}
+        path = ""
         download = extr(' class="download"', "</ul>")
         for dl in text.extract_iter(download, ' href="', "</"):
             path, _, type = dl.rpartition('">')
@@ -94,10 +102,13 @@ class Ao3WorkExtractor(Ao3Extractor):
             "series"       : extr('<dd class="series">', "</dd>"),
             "date"         : text.parse_datetime(
                 extr('<dd class="published">', "<"), "%Y-%m-%d"),
+            "date_completed": text.parse_datetime(
+                extr('>Completed:</dt><dd class="status">', "<"), "%Y-%m-%d"),
+            "date_updated" : text.parse_timestamp(
+                path.rpartition("updated_at=")[2]),
             "words"        : text.parse_int(
                 extr('<dd class="words">', "<").replace(",", "")),
-            "chapters"     : text.parse_int(
-                extr('<dd class="chapters">', "/")),
+            "chapters"     : chapters,
             "comments"     : text.parse_int(
                 extr('<dd class="comments">', "<").replace(",", "")),
             "likes"        : text.parse_int(
@@ -114,6 +125,19 @@ class Ao3WorkExtractor(Ao3Extractor):
                 extr(' class="heading">Summary:</h3>', "</div>")),
         }
         data["language"] = util.code_to_language(data["lang"])
+
+        series = data["series"]
+        if series:
+            extr = text.extract_from(series)
+            data["series"] = {
+                "prev" : extr(' class="previous" href="/works/', '"'),
+                "index": extr(' class="position">Part ', " "),
+                "id"   : extr(' href="/series/', '"'),
+                "name" : text.unescape(extr(">", "<")),
+                "next" : extr(' class="next" href="/works/', '"'),
+            }
+        else:
+            data["series"] = None
 
         yield Message.Directory, data
         for fmt in self.formats:
@@ -188,7 +212,6 @@ class Ao3UserSeriesExtractor(Ao3Extractor):
             yield Message.Queue, base + series_id, data
 
     def series(self):
-        path, user, pseud, query = self.groups
         return self._pagination(self.groups[0], '<li id="series_')
 
 
