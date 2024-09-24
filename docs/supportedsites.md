@@ -107,7 +107,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Archive of Our Own</td>
     <td>https://archiveofourown.org/</td>
     <td>Search Results, Series, Tag Searches, User Profiles, Bookmarks, Works</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 <tr>
     <td>ArtStation</td>
@@ -160,7 +160,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Civitai</td>
     <td>https://www.civitai.com/</td>
-    <td>Models, Search Results, Tag Searches, User Profiles</td>
+    <td>individual Images, Models, Search Results, Tag Searches (Images), Tag Searches (Models), User Profiles, User Images, User Models</td>
     <td></td>
 </tr>
 <tr>
@@ -629,7 +629,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Niconico Seiga</td>
     <td>https://seiga.nicovideo.jp/</td>
     <td>individual Images, User Profiles</td>
-    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
+    <td>Supported</td>
 </tr>
 <tr>
     <td>Nozomi.la</td>

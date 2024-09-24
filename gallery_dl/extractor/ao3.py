@@ -9,7 +9,8 @@
 """Extractors for https://archiveofourown.org/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, util, exception
+from ..cache import cache
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.)?"
                 r"a(?:rchiveofourown|o3)\.(?:org|com|net)")
@@ -20,9 +21,13 @@ class Ao3Extractor(Extractor):
     category = "ao3"
     root = "https://archiveofourown.org"
     categorytransfer = True
+    cookies_domain = ".archiveofourown.org"
+    cookies_names = ("remember_user_token",)
     request_interval = (0.5, 1.5)
 
     def items(self):
+        self.login()
+
         base = self.root + "/works/"
         data = {"_extractor": Ao3WorkExtractor}
 
@@ -31,6 +36,48 @@ class Ao3Extractor(Extractor):
 
     def works(self):
         return self._pagination(self.groups[0])
+
+    def login(self):
+        if self.cookies_check(self.cookies_names):
+            return
+
+        username, password = self._get_auth_info()
+        if username:
+            return self.cookies_update(self._login_impl(username, password))
+
+    @cache(maxage=90*86400, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = self.root + "/users/login"
+        page = self.request(url).text
+
+        pos = page.find('id="loginform"')
+        token = text.extract(
+            page, ' name="authenticity_token" value="', '"', pos)[0]
+        if not token:
+            self.log.error("Unable to extract 'authenticity_token'")
+
+        data = {
+            "authenticity_token": text.unescape(token),
+            "user[login]"       : username,
+            "user[password]"    : password,
+            "user[remember_me]" : "1",
+            "commit"            : "Log In",
+        }
+
+        response = self.request(url, method="POST", data=data)
+        if not response.history:
+            raise exception.AuthenticationError()
+
+        remember = response.history[0].cookies.get("remember_user_token")
+        if not remember:
+            raise exception.AuthenticationError()
+
+        return {
+            "remember_user_token": remember,
+            "user_credentials"   : "1",
+        }
 
     def _pagination(self, path, needle='<li id="work_'):
         while True:
@@ -65,9 +112,21 @@ class Ao3WorkExtractor(Ao3Extractor):
         self.cookies.set("view_adult", "true", domain="archiveofourown.org")
 
     def items(self):
+        self.login()
+
         work_id = self.groups[0]
         url = "{}/works/{}".format(self.root, work_id)
-        extr = text.extract_from(self.request(url).text)
+        response = self.request(url, notfound="work")
+
+        if response.url.endswith("/users/login?restricted=true"):
+            raise exception.AuthorizationError(
+                "Login required to access member-only works")
+        page = response.text
+        if len(page) < 20000 and \
+                '<h2 class="landmark heading">Adult Content Warning</' in page:
+            raise exception.StopExtraction("Adult Content")
+
+        extr = text.extract_from(page)
 
         chapters = {}
         cindex = extr(' id="chapter_index"', "</ul>")
@@ -117,8 +176,8 @@ class Ao3WorkExtractor(Ao3Extractor):
                 extr('<dd class="bookmarks">', "</dd>")).replace(",", "")),
             "views"        : text.parse_int(
                 extr('<dd class="hits">', "<").replace(",", "")),
-            "title"        : text.unescape(
-                extr(' class="title heading">', "<").strip()),
+            "title"        : text.unescape(text.remove_html(
+                extr(' class="title heading">', "</h2>")).strip()),
             "author"       : text.unescape(text.remove_html(
                 extr(' class="byline heading">', "</h3>"))),
             "summary"      : text.split_html(
@@ -205,6 +264,8 @@ class Ao3UserSeriesExtractor(Ao3Extractor):
     example = "https://archiveofourown.org/users/USER/series"
 
     def items(self):
+        self.login()
+
         base = self.root + "/series/"
         data = {"_extractor": Ao3SeriesExtractor}
 
@@ -221,3 +282,21 @@ class Ao3UserBookmarkExtractor(Ao3Extractor):
     pattern = (BASE_PATTERN + r"(/users/([^/?#]+)/(?:pseuds/([^/?#]+)/)?"
                r"bookmarks(?:/?\?.+)?)")
     example = "https://archiveofourown.org/users/USER/bookmarks"
+
+    def items(self):
+        self.login()
+
+        base = self.root + "/"
+        data_work = {"_extractor": Ao3WorkExtractor}
+        data_series = {"_extractor": Ao3SeriesExtractor}
+
+        for item in self._pagination(
+                self.groups[0], '<span class="count"><a href="/'):
+            path = item.rpartition("/")[0]
+            url = base + path
+            if item.startswith("works/"):
+                yield Message.Queue, url, data_work
+            elif item.startswith("series/"):
+                yield Message.Queue, url, data_series
+            else:
+                self.log.warning("Unsupported bookmark type '%s'", path)
