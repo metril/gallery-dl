@@ -527,6 +527,29 @@ Description
         ["chromium", "Private", "kwallet", null, ".twitter.com"]
 
 
+extractor.*.cookies-select
+--------------------------
+Type
+    ``string``
+Default
+    ``"random"``
+Description
+    Interpret `extractor.cookies <extractor.*.cookies_>`__
+    as a list of cookie sources and select one of them for each extractor run.
+
+    * ``"random"``: Select cookies `randomly <https://docs.python.org/3.10/library/random.html#random.choice>`__
+    * ``"rotate"``: Select cookies in sequence. Start over from the beginning after reaching the end of the list.
+
+    .. code:: json
+
+      [
+          "~/.local/share/cookies-instagram-com-1.txt",
+          "~/.local/share/cookies-instagram-com-2.txt",
+          "~/.local/share/cookies-instagram-com-3.txt",
+          ["firefox", null, null, "c1", ".instagram-com"],
+      ]
+
+
 extractor.*.cookies-update
 --------------------------
 Type
@@ -1966,7 +1989,7 @@ Description
 
     Setting this option to ``"images"`` only downloads original
     files if they are images and falls back to preview versions for
-    everything else (archives, etc.).
+    everything else (archives, videos, etc.).
 
 
 extractor.deviantart.pagination
@@ -1980,6 +2003,19 @@ Description
 
     * ``"api"``: Trust the API and stop when ``has_more`` is ``false``.
     * ``"manual"``: Disregard ``has_more`` and only stop when a batch of results is empty.
+
+
+extractor.deviantart.previews
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    For non-image files (archives, videos, etc.),
+    also download the file's preview image.
+
+    Set this option to ``"all"`` to download previews for all files.
 
 
 extractor.deviantart.public
