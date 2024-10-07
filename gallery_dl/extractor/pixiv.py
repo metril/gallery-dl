@@ -52,6 +52,7 @@ class PixivExtractor(Extractor):
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
         meta_user = self.config("metadata")
         meta_bookmark = self.config("metadata-bookmark")
+        meta_comments = self.config("comments")
         metadata = self.metadata()
 
         works = self.works()
@@ -65,10 +66,17 @@ class PixivExtractor(Extractor):
 
             if meta_user:
                 work.update(self.api.user_detail(work["user"]["id"]))
+            if meta_comments:
+                if work["total_comments"]:
+                    work["comments"] = list(
+                        self.api.illust_comments(work["id"]))
+                else:
+                    work["comments"] = ()
             if meta_bookmark and work["is_bookmarked"]:
                 detail = self.api.illust_bookmark_detail(work["id"])
                 work["tags_bookmark"] = [tag["name"] for tag in detail["tags"]
                                          if tag["is_registered"]]
+
             if transform_tags:
                 transform_tags(work)
             work["num"] = 0
@@ -91,11 +99,10 @@ class PixivExtractor(Extractor):
         del work["image_urls"]
         del work["meta_pages"]
 
-        files = []
         if work["type"] == "ugoira":
             if self.load_ugoira:
                 try:
-                    self._extract_ugoira(work, files)
+                    return self._extract_ugoira(work)
                 except exception.StopExtraction as exc:
                     self.log.warning(
                         "Unable to retrieve Ugoira metatdata (%s - %s)",
@@ -106,24 +113,27 @@ class PixivExtractor(Extractor):
             if url == self.sanity_url:
                 if self.sanity_workaround:
                     self.log.warning("%s: 'sanity_level' warning", work["id"])
-                    self._extract_ajax(work, files)
+                    body = self._request_ajax("/illust/" + str(work["id"]))
+                    return self._extract_ajax(work, body)
                 else:
                     self.log.warning(
                         "%s: Unable to download work ('sanity_level' warning)",
                         work["id"])
             else:
-                files.append({"url": url})
+                return ({"url": url},)
 
         else:
-            for num, img in enumerate(meta_pages):
-                files.append({
+            return [
+                {
                     "url"   : img["image_urls"]["original"],
                     "suffix": "_p{:02}".format(num),
-                })
+                }
+                for num, img in enumerate(meta_pages)
+            ]
 
-        return files
+        return ()
 
-    def _extract_ugoira(self, work, files):
+    def _extract_ugoira(self, work):
         ugoira = self.api.ugoira_metadata(work["id"])
         url = ugoira["zip_urls"]["medium"]
         work["frames"] = frames = ugoira["frames"]
@@ -142,26 +152,30 @@ class PixivExtractor(Extractor):
                 except exception.HttpError:
                     pass
             else:
-                return self.log.warning(
+                self.log.warning(
                     "Unable to find Ugoira frame URLs (%s)", work["id"])
 
-            for num in range(len(frames)):
-                url = "{}{}.{}".format(base, num, ext)
-                files.append(text.nameext_from_url(url, {
-                    "url": url,
-                    "num": num,
+            return [
+                {
+                    "url": "{}{}.{}".format(base, num, ext),
                     "suffix": "_p{:02}".format(num),
                     "_ugoira_frame_index": num,
-                }))
+                }
+                for num in range(len(frames))
+            ]
         else:
-            files.append({
-                "url": url.replace("_ugoira600x600", "_ugoira1920x1080", 1),
-            })
+            url = url.replace("_ugoira600x600", "_ugoira1920x1080", 1)
+            return ({"url": url},)
 
-    def _extract_ajax(self, work, files):
-        url = "{}/ajax/illust/{}".format(self.root, work["id"])
+    def _request_ajax(self, endpoint):
+        url = "{}/ajax{}".format(self.root, endpoint)
         data = self.request(url, headers=self.headers_web).json()
-        body = data["body"]
+        return data["body"]
+
+    def _extract_ajax(self, work, body):
+        url = self._extract_ajax_url(body)
+        if not url:
+            return ()
 
         for key_app, key_ajax in (
             ("title"            , "illustTitle"),
@@ -198,21 +212,18 @@ class PixivExtractor(Extractor):
                 translated_name = None
             tags.append({"name": name, "translated_name": translated_name})
 
-        url = self._extract_ajax_url(body)
-        if not url:
-            return
-
         work["page_count"] = count = body["pageCount"]
         if count == 1:
-            files.append({"url": url})
-        else:
-            base, _, ext = url.rpartition("_p0.")
-            for num in range(count):
-                url = "{}_p{}.{}".format(base, num, ext)
-                files.append({
-                    "url"   : url,
-                    "suffix": "_p{:02}".format(num),
-                })
+            return ({"url": url},)
+
+        base, _, ext = url.rpartition("_p0.")
+        return [
+            {
+                "url"   : "{}_p{}.{}".format(base, num, ext),
+                "suffix": "_p{:02}".format(num),
+            }
+            for num in range(count)
+        ]
 
     def _extract_ajax_url(self, body):
         try:
@@ -430,6 +441,22 @@ class PixivWorkExtractor(PixivExtractor):
             related = self.api.illust_related(self.illust_id)
             works = itertools.chain(works, related)
         return works
+
+
+class PixivUnlistedExtractor(PixivExtractor):
+    """Extractor for a unlisted pixiv illustrations"""
+    subcategory = "unlisted"
+    pattern = BASE_PATTERN + r"/(?:en/)?artworks/unlisted/(\w+)"
+    example = "https://www.pixiv.net/en/artworks/unlisted/a1b2c3d4e5f6g7h8i9j0"
+
+    def _extract_files(self, work):
+        body = self._request_ajax("/illust/unlisted/" + work["id"])
+        work["id_unlisted"] = work["id"]
+        work["id"] = text.parse_int(body["illustId"])
+        return self._extract_ajax(work, body)
+
+    def works(self):
+        return ({"id": self.groups[0], "user": {"id": 1}},)
 
 
 class PixivFavoriteExtractor(PixivExtractor):
@@ -725,6 +752,7 @@ class PixivNovelExtractor(PixivExtractor):
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
         meta_user = self.config("metadata")
         meta_bookmark = self.config("metadata-bookmark")
+        meta_comments = self.config("comments")
         embeds = self.config("embeds")
         covers = self.config("covers")
 
@@ -744,6 +772,12 @@ class PixivNovelExtractor(PixivExtractor):
         for novel in novels:
             if meta_user:
                 novel.update(self.api.user_detail(novel["user"]["id"]))
+            if meta_comments:
+                if novel["total_comments"]:
+                    novel["comments"] = list(
+                        self.api.novel_comments(novel["id"]))
+                else:
+                    novel["comments"] = ()
             if meta_bookmark and novel["is_bookmarked"]:
                 detail = self.api.novel_bookmark_detail(novel["id"])
                 novel["tags_bookmark"] = [tag["name"] for tag in detail["tags"]
@@ -1011,6 +1045,10 @@ class PixivAppAPI():
         return self._call(
             "/v2/illust/bookmark/detail", params)["bookmark_detail"]
 
+    def illust_comments(self, illust_id):
+        params = {"illust_id": illust_id}
+        return self._pagination("/v3/illust/comments", params, "comments")
+
     def illust_follow(self, restrict="all"):
         params = {"restrict": restrict}
         return self._pagination("/v2/illust/follow", params)
@@ -1032,6 +1070,10 @@ class PixivAppAPI():
         params = {"novel_id": novel_id}
         return self._call(
             "/v2/novel/bookmark/detail", params)["bookmark_detail"]
+
+    def novel_comments(self, novel_id):
+        params = {"novel_id": novel_id}
+        return self._pagination("/v1/novel/comments", params, "comments")
 
     def novel_detail(self, novel_id):
         params = {"novel_id": novel_id}

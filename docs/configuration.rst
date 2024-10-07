@@ -1590,12 +1590,12 @@ extractor.civitai.api
 Type
     ``string``
 Default
-    ``"rest"``
+    ``"trpc"``
 Description
     Selects which API endpoints to use.
 
     * ``"rest"``: `Public REST API <https://developer.civitai.com/docs/api/public-rest>`__
-    * ``"trpc"``: Internal TRPC API
+    * ``"trpc"``: Internal tRPC API
 
 
 extractor.civitai.api-key
@@ -1624,6 +1624,25 @@ Description
     ``model``,
     ``image``,
     ``gallery``.
+
+
+extractor.civitai.include
+-------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["user-models", "user-posts"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"user-models"``,
+    ``"user-posts"``,
+    ``"user-images"``.
+
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
 extractor.civitai.nsfw
@@ -2293,6 +2312,19 @@ Description
     * ``"hitomi"``:  Download the corresponding gallery from ``hitomi.la``
 
 
+extractor.fanbox.comments
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract ``comments`` metadata.
+
+    Note: This requires 1 or more additional API requests per post,
+    depending on the number of comments.
+
+
 extractor.fanbox.embeds
 -----------------------
 Type
@@ -2319,10 +2351,19 @@ Type
 Default
     ``false``
 Example
-    * ``user,plan``
-    * ``["user", "plan"]``
+    * ``user,plan,comments``
+    * ``["user", "plan", "comments"]``
 Description
     Extract ``plan`` and extended ``user`` metadata.
+
+    Supported fields when selecting which data to extract are
+
+    * ``comments``
+    * ``plan``
+    * ``user``
+
+    Note: ``comments`` can also be enabled via
+    `fanbox.comments <extractor.fanbox.comments_>`__
 
 
 extractor.flickr.access-token & .access-token-secret
@@ -3465,7 +3506,20 @@ Description
     `your own account <extractor.pixiv.refresh-token_>`__,
     fetch bookmark tags as ``tags_bookmark`` metadata.
 
-    Note: This requires 1 additional API call per bookmarked post.
+    Note: This requires 1 additional API request per bookmarked post.
+
+
+extractor.pixiv.comments
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch ``comments`` metadata.
+
+    Note: This requires 1 or more additional API requests per post,
+    depending on the number of comments.
 
 
 extractor.pixiv.work.related

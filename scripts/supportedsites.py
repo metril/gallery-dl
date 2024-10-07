@@ -194,11 +194,15 @@ SUBCATEGORY_MAP = {
     "bluesky": {
         "posts": "",
     },
+    "boosty": {
+        "feed": "Subscriptions Feed",
+    },
     "civitai": {
         "tag-models": "Tag Searches (Models)",
         "tag-images": "Tag Searches (Images)",
         "user-models": "User Models",
         "user-images": "User Images",
+        "user-posts": "User Posts",
     },
     "coomerparty": {
         "discord"       : "",
@@ -270,6 +274,7 @@ SUBCATEGORY_MAP = {
         "novel-user": "",
         "pixivision": "pixivision",
         "sketch": "Sketch",
+        "unlisted": "Unlisted Works",
         "work": "individual Images",
     },
     "poringa": {

@@ -166,7 +166,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Civitai</td>
     <td>https://www.civitai.com/</td>
-    <td>individual Images, Models, Search Results, Tag Searches (Images), Tag Searches (Models), User Profiles, User Images, User Models</td>
+    <td>individual Images, Models, Posts, Search Results, Tag Searches (Images), Tag Searches (Models), User Profiles, User Images, User Models, User Posts</td>
     <td></td>
 </tr>
 <tr>
@@ -700,7 +700,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Pixiv</td>
     <td>https://www.pixiv.net/</td>
-    <td>Artworks, Avatars, Backgrounds, Favorites, Follows, pixiv.me Links, Novels, Novel Bookmarks, Novel Series, pixivision, Rankings, Search Results, Series, Sketch, User Profiles, individual Images</td>
+    <td>Artworks, Avatars, Backgrounds, Favorites, Follows, pixiv.me Links, Novels, Novel Bookmarks, Novel Series, pixivision, Rankings, Search Results, Series, Sketch, Unlisted Works, User Profiles, individual Images</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
