@@ -105,11 +105,11 @@ class UgoiraPP(PostProcessor):
         }, options)
 
     def prepare(self, pathfmt):
-        if "frames" not in pathfmt.kwdict:
+        if "_ugoira_frame_data" not in pathfmt.kwdict:
             self._frames = None
             return
 
-        self._frames = pathfmt.kwdict["frames"]
+        self._frames = pathfmt.kwdict["_ugoira_frame_data"]
         if pathfmt.extension == "zip":
             self._convert_zip = True
             if self.delete:
@@ -147,6 +147,13 @@ class UgoiraPP(PostProcessor):
                 except FileNotFoundError:
                     pathfmt.realpath = pathfmt.temppath
                     return
+                except Exception as exc:
+                    pathfmt.realpath = pathfmt.temppath
+                    self.log.error(
+                        "%s: Unable to extract frames from %s (%s: %s)",
+                        pathfmt.kwdict.get("id"), pathfmt.filename,
+                        exc.__class__.__name__, exc)
+                    return self.log.debug("", exc_info=exc)
 
             if self.convert(pathfmt, tempdir):
                 if self.delete:
