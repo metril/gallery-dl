@@ -507,7 +507,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Komikcast</td>
-    <td>https://komikcast.lol/</td>
+    <td>https://komikcast.cz/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -755,12 +755,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Postimg</td>
     <td>https://postimages.org/</td>
     <td>Galleries, individual Images</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Pururin</td>
-    <td>https://pururin.to/</td>
-    <td>Galleries</td>
     <td></td>
 </tr>
 <tr>
@@ -1085,12 +1079,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Blogs, Labels, Posts, Search Results</td>
     <td></td>
 </tr>
-<tr>
-    <td>MIC MIC IDOL</td>
-    <td>https://www.micmicidol.club/</td>
-    <td>Blogs, Labels, Posts, Search Results</td>
-    <td></td>
-</tr>
 
 <tr>
     <td colspan="4"><strong>Chevereto Instances</strong></td>
@@ -1104,12 +1092,6 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>IMG.Kiwi</td>
     <td>https://img.kiwi/</td>
-    <td>Albums, individual Images, User Profiles</td>
-    <td></td>
-</tr>
-<tr>
-    <td>DeltaPorno</td>
-    <td>https://gallery.deltaporno.com/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
@@ -1386,12 +1368,6 @@ Consider all listed sites to potentially be NSFW.
 
 <tr>
     <td colspan="4"><strong>Shimmie2 Instances</strong></td>
-</tr>
-<tr>
-    <td>Loudbooru</td>
-    <td>https://loudbooru.com/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
 </tr>
 <tr>
     <td>Giantessbooru</td>
@@ -1734,8 +1710,8 @@ Consider all listed sites to potentially be NSFW.
     <td colspan="4"><strong>lolisafe and chibisafe</strong></td>
 </tr>
 <tr>
-    <td>xBunkr</td>
-    <td>https://xbunkr.com/</td>
+    <td></td>
+    <td></td>
     <td>Albums</td>
     <td></td>
 </tr>
