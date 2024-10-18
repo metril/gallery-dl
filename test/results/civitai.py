@@ -26,13 +26,15 @@ __tests__ = (
         "minor"      : False,
         "name"       : "メイド　クラシック/maid classic",
         "nsfwLevel"  : 1,
-        "type"       : "LORA"
+        "type"       : "LORA",
     },
     "user"   : {
         "image"   : None,
         "username": "bolero537"
     },
-    "file"   : dict,
+    "file"   : {
+        "uuid": str,
+    },
     "version": dict,
     "num"    : range(1, 3),
 },
@@ -60,7 +62,10 @@ __tests__ = (
         "username": "bolero537"
     },
     "file"   : {
-        "id": {26887862, 26887856, 26887852},
+        "id"  : {26887862, 26887856, 26887852},
+        "uuid": {"52b6efa7-801c-4901-90b4-fa3964d23480",
+                 "c4d3bcd5-0e23-4f4e-9f34-d13b2f2bf14c",
+                 "68568d22-c4f3-45cb-ac32-82f1cedf968f"},
     },
     "model"  : {
         "id": 703211,
@@ -89,6 +94,7 @@ __tests__ = (
     "user"     : {
         "username": "bolero537",
     },
+    "uuid"     : "69bf3279-df2c-4ec8-b795-479e9cd3db1b",
     "width"    : 1152,
 },
 
@@ -105,16 +111,32 @@ __tests__ = (
         "id"  : 6877551,
         "date": "dt:2024-09-22 12:54:15",
     },
+    "file": {
+        "id"  : {30748752, 30748747, 30748733},
+        "uuid": {"6220fa0f-9037-4b1d-bfbd-a740a06eeb7c",
+                 "cd1edb7f-7b50-4da5-bf23-d38f24d8aef0",
+                 "cfd5b231-accd-49bd-8bde-370880f63aa6"},
+    },
 },
 
 {
     "#url"  : "https://civitai.com/tag/mecha",
-    "#class": civitai.CivitaiTagModelsExtractor,
+    "#class": civitai.CivitaiTagExtractor,
 },
 
 {
     "#url"  : "https://civitai.com/images?tags=482",
-    "#class": civitai.CivitaiTagImagesExtractor,
+    "#class": civitai.CivitaiImagesExtractor,
+},
+
+{
+    "#url"  : "https://civitai.com/images?modelVersionId=786644",
+    "#class": civitai.CivitaiImagesExtractor,
+},
+
+{
+    "#url"  : "https://civitai.com/models",
+    "#class": civitai.CivitaiModelsExtractor,
 },
 
 {
@@ -152,6 +174,17 @@ __tests__ = (
     "#pattern": r"https://image\.civitai\.com/xG1nkqKTMzGDvpLrqFT7WA/[0-9a-f-]+/original=true/\S+\.png",
     "#range"  : "1-50",
     "#count"  : 50,
+},
+
+{
+    "#url"  : "https://civitai.com/user/USER/images?section=reactions",
+    "#class": civitai.CivitaiUserImagesExtractor,
+    "#auth" : True,
+    "#urls" : (
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/dd29c97a-1e95-4186-8df5-632736cbae79/original=true/00012-2489035818.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/5c4efa68-bb58-47c5-a716-98cd0f51f047/original=true/00013-4238863814.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/69bf3279-df2c-4ec8-b795-479e9cd3db1b/original=true/00014-3150861441.png",
+    ),
 },
 
 )

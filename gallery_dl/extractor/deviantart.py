@@ -401,7 +401,7 @@ class DeviantartExtractor(Extractor):
         html = content["html"]
         markup = html["markup"]
 
-        if not markup.startswith("{"):
+        if not markup or markup[0] != "{":
             return markup
 
         if html["type"] == "tiptap":
@@ -1301,7 +1301,7 @@ class DeviantartOAuthAPI():
 
         metadata = extractor.config("metadata", False)
         if not metadata:
-            metadata = bool(extractor.extra)
+            metadata = True if extractor.extra else False
         if metadata:
             self.metadata = True
 

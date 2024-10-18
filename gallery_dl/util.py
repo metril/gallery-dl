@@ -432,7 +432,7 @@ def cookiestxt_load(fp):
             None, False,
             domain,
             domain_specified == "TRUE",
-            domain.startswith("."),
+            domain[0] == "." if domain else False,
             path, False,
             secure == "TRUE",
             None if expires == "0" or not expires else expires,
@@ -458,9 +458,10 @@ def cookiestxt_store(fp, cookies):
             name = cookie.name
             value = cookie.value
 
+        domain = cookie.domain
         write("\t".join((
-            cookie.domain,
-            "TRUE" if cookie.domain.startswith(".") else "FALSE",
+            domain,
+            "TRUE" if domain and domain[0] == "." else "FALSE",
             cookie.path,
             "TRUE" if cookie.secure else "FALSE",
             "0" if cookie.expires is None else str(cookie.expires),
@@ -531,6 +532,24 @@ class HTTPBasicAuth():
         return request
 
 
+class ModuleProxy():
+    __slots__ = ()
+
+    def __getitem__(self, key, modules=sys.modules):
+        try:
+            return modules[key]
+        except KeyError:
+            pass
+        try:
+            __import__(key)
+        except ImportError:
+            modules[key] = NONE
+            return NONE
+        return modules[key]
+
+    __getattr__ = __getitem__
+
+
 class LazyPrompt():
     __slots__ = ()
 
@@ -539,6 +558,7 @@ class LazyPrompt():
 
 
 class NullContext():
+    __slots__ = ()
 
     def __enter__(self):
         return None
@@ -645,6 +665,7 @@ GLOBALS = {
     "restart"  : raises(exception.RestartExtraction),
     "hash_sha1": sha1,
     "hash_md5" : md5,
+    "std"      : ModuleProxy(),
     "re"       : re,
 }
 
