@@ -443,6 +443,7 @@ Description
     * ``nijie`` (R)
     * ``pillowfort``
     * ``sankaku``
+    * ``scrolller``
     * ``seiga``
     * ``subscribestar``
     * ``tapas``
@@ -3400,6 +3401,16 @@ Description
     Include pins from board sections.
 
 
+extractor.pinterest.stories
+---------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Extract files from story pins.
+
+
 extractor.pinterest.videos
 --------------------------
 Type
@@ -4447,7 +4458,14 @@ Description
     `fallback <extractor.*.fallback_>`_ URLs.
 
     Known available sizes are
-    ``4096x4096``, ``orig``, ``large``, ``medium``, and ``small``.
+
+    * ``orig``
+    * ``large``
+    * ``medium``
+    * ``small``
+    * ``4096x4096``
+    * ``900x900``
+    * ``360x360``
 
 
 extractor.twitter.logout
@@ -6109,6 +6127,8 @@ Description
         After a file got moved to its target location
     ``skip``
         When skipping a file download
+    ``error``
+        After a file download failed
     ``post``
         When starting to download all files of a `post`,
         e.g. a Tweet on Twitter or a post on Patreon.
