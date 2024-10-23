@@ -3520,6 +3520,17 @@ Description
     Note: This requires 1 additional API request per bookmarked post.
 
 
+extractor.pixiv.captions
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    For works with seemingly empty ``caption`` metadata,
+    try to grab the actual ``caption`` value using the AJAX API.
+
+
 extractor.pixiv.comments
 ------------------------
 Type
@@ -3689,6 +3700,16 @@ Description
     stubs in the base comment tree.
 
     Note: This requires 1 additional API call for every 100 extra comments.
+
+
+extractor.reddit.embeds
+-----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download embedded comments media.
 
 
 extractor.reddit.date-min & .date-max
