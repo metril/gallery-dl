@@ -174,6 +174,20 @@ class MangadexListExtractor(MangadexExtractor):
                 yield Message.Queue, url, data
 
 
+class MangadexAuthorExtractor(MangadexExtractor):
+    """Extractor for mangadex authors"""
+    subcategory = "author"
+    pattern = BASE_PATTERN + r"/author/([0-9a-f-]+)"
+    example = ("https://mangadex.org/author"
+               "/01234567-89ab-cdef-0123-456789abcdef/NAME")
+
+    def items(self):
+        for manga in self.api.manga_author(self.uuid):
+            manga["_extractor"] = MangadexMangaExtractor
+            url = "{}/title/{}".format(self.root, manga["id"])
+            yield Message.Queue, url, manga
+
+
 class MangadexAPI():
     """Interface for the MangaDex API v5
 
@@ -195,6 +209,10 @@ class MangadexAPI():
     def athome_server(self, uuid):
         return self._call("/at-home/server/" + uuid)
 
+    def author(self, uuid, manga=False):
+        params = {"includes[]": ("manga",)} if manga else None
+        return self._call("/author/" + uuid, params)["data"]
+
     def chapter(self, uuid):
         params = {"includes[]": ("scanlation_group",)}
         return self._call("/chapter/" + uuid, params)["data"]
@@ -209,6 +227,10 @@ class MangadexAPI():
     def manga(self, uuid):
         params = {"includes[]": ("artist", "author")}
         return self._call("/manga/" + uuid, params)["data"]
+
+    def manga_author(self, uuid_author):
+        params = {"authorOrArtist": uuid_author}
+        return self._pagination("/manga", params)
 
     def manga_feed(self, uuid):
         order = "desc" if self.extractor.config("chapter-reverse") else "asc"
