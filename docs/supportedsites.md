@@ -136,7 +136,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Bluesky</td>
     <td>https://bsky.app/</td>
-    <td>Avatars, Backgrounds, Feeds, Followed Users, Likes, Lists, Media Files, Posts, Replies, Search Results, User Profiles</td>
+    <td>Avatars, Backgrounds, Feeds, Followed Users, Hashtags, Likes, Lists, Media Files, Posts, Replies, Search Results, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -364,7 +364,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Hitomi.la</td>
     <td>https://hitomi.la/</td>
-    <td>Galleries, Tag Searches</td>
+    <td>Galleries, Site Index, Search Results, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
@@ -758,6 +758,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>R34 Vault</td>
+    <td>https://rule34vault.com/</td>
+    <td>Playlists, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Read Comic Online</td>
     <td>https://readcomiconline.li/</td>
     <td>Comic Issues, Comics</td>
@@ -785,6 +791,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Rule 34</td>
     <td>https://rule34.us/</td>
     <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Saint</td>
+    <td>https://saint2.su/</td>
+    <td>Albums, Media Files</td>
     <td></td>
 </tr>
 <tr>

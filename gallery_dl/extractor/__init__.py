@@ -139,6 +139,8 @@ modules = [
     "reddit",
     "redgifs",
     "rule34us",
+    "rule34vault",
+    "saint",
     "sankaku",
     "sankakucomplex",
     "scrolller",
@@ -200,6 +202,7 @@ modules = [
     "directlink",
     "recursive",
     "oauth",
+    "noop",
     "ytdl",
     "generic",
 ]
