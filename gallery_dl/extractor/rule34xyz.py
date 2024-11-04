@@ -1,59 +1,62 @@
 # -*- coding: utf-8 -*-
 
+# Copyright 2024 Mike Fährmann
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://rule34vault.com/"""
+"""Extractors for https://rule34.xyz/"""
 
 from .booru import BooruExtractor
 from .. import text
 import collections
 
-BASE_PATTERN = r"(?:https?://)?rule34vault\.com"
+BASE_PATTERN = r"(?:https?://)?rule34\.xyz"
 
 
-class Rule34vaultExtractor(BooruExtractor):
-    category = "rule34vault"
-    root = "https://rule34vault.com"
-    root_cdn = "https://r34xyz.b-cdn.net"
+class Rule34xyzExtractor(BooruExtractor):
+    category = "rule34xyz"
+    root = "https://rule34.xyz"
+    root_cdn = "https://rule34xyz.b-cdn.net"
     filename_fmt = "{category}_{id}.{extension}"
-    per_page = 100
+    per_page = 60
 
     TAG_TYPES = {
-        1: "general",
-        2: "copyright",
-        4: "character",
-        8: "artist",
+        0: "general",
+        1: "copyright",
+        2: "character",
+        3: "artist",
     }
 
     def _file_url(self, post):
-        post_id = post["id"]
-        extension = "jpg" if post["type"] == 0 else "mp4"
-        post["file_url"] = url = "{}/posts/{}/{}/{}.{}".format(
-            self.root_cdn, post_id // 1000, post_id, post_id, extension)
+        post["files"] = files = {
+            link["type"]: link["url"]
+            for link in post.pop("imageLinks")
+        }
+        post["file_url"] = url = (
+            files.get(10) or files.get(40) or files.get(41) or files[2])
         return url
 
     def _prepare(self, post):
-        post.pop("files", None)
+        post.pop("filesPreview", None)
+        post.pop("tagsWithType", None)
         post["date"] = text.parse_datetime(
-            post["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
-        if "tags" in post:
-            post["tags"] = [t["value"] for t in post["tags"]]
+            post["created"], "%Y-%m-%dT%H:%M:%S.%f")
 
     def _tags(self, post, _):
-        if "tags" not in post:
+        if post.get("tagsWithType") is None:
             post.update(self._fetch_post(post["id"]))
 
         tags = collections.defaultdict(list)
-        for tag in post["tags"]:
+        for tag in post["tagsWithType"]:
             tags[tag["type"]].append(tag["value"])
         types = self.TAG_TYPES
         for type, values in tags.items():
             post["tags_" + types[type]] = values
 
     def _fetch_post(self, post_id):
-        url = "{}/api/v2/post/{}".format(self.root, post_id)
+        url = "{}/api/post/{}".format(self.root, post_id)
         return self.request(url).json()
 
     def _pagination(self, endpoint, params=None):
@@ -61,59 +64,62 @@ class Rule34vaultExtractor(BooruExtractor):
 
         if params is None:
             params = {}
-        params["CountTotal"] = False
+        params["IncludeLinks"] = "true"
+        params["IncludeTags"] = "true"
+        params["OrderBy"] = "0"
         params["Skip"] = self.page_start * self.per_page
-        params["take"] = self.per_page
+        params["Take"] = self.per_page
+        params["DisableTotal"] = "true"
         threshold = self.per_page
 
         while True:
-            data = self.request(url, method="POST", json=params).json()
+            data = self.request(url, params=params).json()
 
             yield from data["items"]
 
             if len(data["items"]) < threshold:
                 return
-            params["cursor"] = data.get("cursor")
-            params["Skip"] += params["take"]
+            params["Skip"] += params["Take"]
 
 
-class Rule34vaultPostExtractor(Rule34vaultExtractor):
+class Rule34xyzPostExtractor(Rule34xyzExtractor):
     subcategory = "post"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/post/(\d+)"
-    example = "https://rule34vault.com/post/12345"
+    example = "https://rule34.xyz/post/12345"
 
     def posts(self):
         return (self._fetch_post(self.groups[0]),)
 
 
-class Rule34vaultPlaylistExtractor(Rule34vaultExtractor):
+class Rule34xyzPlaylistExtractor(Rule34xyzExtractor):
     subcategory = "playlist"
     directory_fmt = ("{category}", "{playlist_id}")
     archive_fmt = "p_{playlist_id}_{id}"
     pattern = BASE_PATTERN + r"/playlists/view/(\d+)"
-    example = "https://rule34vault.com/playlists/view/12345"
+    example = "https://rule34.xyz/playlists/view/12345"
 
     def metadata(self):
         return {"playlist_id": self.groups[0]}
 
     def posts(self):
-        endpoint = "/v2/post/search/playlist/" + self.groups[0]
-        return self._pagination(endpoint)
+        endpoint = "/playlist-item"
+        params = {"PlaylistId": self.groups[0]}
+        return self._pagination(endpoint, params)
 
 
-class Rule34vaultTagExtractor(Rule34vaultExtractor):
+class Rule34xyzTagExtractor(Rule34xyzExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/(?!p(?:ost|laylists)/)([^/?#]+)"
-    example = "https://rule34vault.com/TAG"
+    pattern = BASE_PATTERN + r"/([^/?#]+)$"
+    example = "https://rule34.xyz/TAG"
 
     def metadata(self):
-        self.tags = text.unquote(self.groups[0]).split("%7C")
-        return {"search_tags": " ".join(self.tags)}
+        self.tags = text.unquote(self.groups[0]).replace("_", " ")
+        return {"search_tags": self.tags}
 
     def posts(self):
-        endpoint = "/v2/post/search/root"
-        params = {"includeTags": [t.replace("_", " ") for t in self.tags]}
+        endpoint = "/post/search"
+        params = {"Tag": self.tags}
         return self._pagination(endpoint, params)
