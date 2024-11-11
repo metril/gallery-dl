@@ -20,7 +20,6 @@ class FlickrExtractor(Extractor):
     filename_fmt = "{category}_{id}.{extension}"
     directory_fmt = ("{category}", "{user[username]}")
     archive_fmt = "{id}"
-    cookies_domain = None
     request_interval = (1.0, 2.0)
     request_interval_min = 0.5
 
@@ -45,7 +44,7 @@ class FlickrExtractor(Extractor):
                 self.log.debug("", exc_info=exc)
             else:
                 photo.update(data)
-                url = photo["url"]
+                url = self._file_url(photo)
                 yield Message.Directory, photo
                 yield Message.Url, url, text.nameext_from_url(url, photo)
 
@@ -56,6 +55,13 @@ class FlickrExtractor(Extractor):
 
     def photos(self):
         """Return an iterable with all relevant photo objects"""
+
+    def _file_url(self, photo):
+        if "video" in photo:
+            return photo["url"]
+
+        path, _, ext = photo["url"].rpartition(".")
+        return path + "_d." + ext
 
 
 class FlickrImageExtractor(FlickrExtractor):
@@ -98,7 +104,7 @@ class FlickrImageExtractor(FlickrExtractor):
                 if isinstance(value, dict):
                     location[key] = value["_content"]
 
-        url = photo["url"]
+        url = self._file_url(photo)
         yield Message.Directory, photo
         yield Message.Url, url, text.nameext_from_url(url, photo)
 
