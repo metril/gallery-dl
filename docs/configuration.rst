@@ -394,7 +394,11 @@ Default
     * ``"2.0-4.0"``
         ``behance``, ``imagefap``, ``[Nijie]``
     * ``"3.0-6.0"``
-        ``exhentai``, ``idolcomplex``, ``[reactor]``, ``readcomiconline``
+        ``bilibili``,
+        ``exhentai``,
+        ``idolcomplex``,
+        ``[reactor]``,
+        ``readcomiconline``
     * ``"6.0-6.1"``
         ``twibooru``
     * ``"6.0-12.0"``
@@ -596,8 +600,20 @@ Description
       ``scheme://host`` as key.
       See `Requests' proxy documentation`_ for more details.
 
-    Note: If a proxy URLs does not include a scheme,
+    Note: If a proxy URL does not include a scheme,
     ``http://`` is assumed.
+
+
+extractor.*.proxy-env
+---------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Collect proxy configuration information from environment variables
+    (``HTTP_PROXY``, ``HTTPS_PROXY``, ``NO_PROXY``)
+    and Windows Registry settings.
 
 
 extractor.*.source-address
@@ -6855,13 +6871,22 @@ Description
 filters-environment
 -------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
-    Evaluate filter expressions raising an exception as ``false``
-    instead of aborting the current extractor run
-    by wrapping them in a `try`/`except` block.
+    Evaluate filter expressions in a special environment
+    preventing them from raising fatal exceptions.
+
+    ``true`` or ``"tryexcept"``:
+        Wrap expressions in a `try`/`except` block;
+        Evaluate expressions raising an exception as ``false``
+    ``false`` or ``"raw"``:
+        Do not wrap expressions in a special environment
+    ``"defaultdict"``:
+        Prevent exceptions when accessing undefined variables
+        by using a `defaultdict <https://docs.python.org/3/library/collections.html#collections.defaultdict>`__
 
 
 format-separator
