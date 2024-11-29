@@ -90,12 +90,19 @@ class KemonopartyExtractor(Extractor):
                 post["username"] = username
                 post["user_profile"] = profile
             if comments:
-                post["comments"] = self.api.creator_post_comments(
-                    service, creator_id, post["id"])
+                try:
+                    post["comments"] = self.api.creator_post_comments(
+                        service, creator_id, post["id"])
+                except exception.HttpError:
+                    post["comments"] = ()
             if dms is not None:
                 if dms is True:
                     dms = self.api.creator_dms(
                         post["service"], post["user"])
+                    try:
+                        dms = dms["props"]["dms"]
+                    except Exception:
+                        dms = ()
                 post["dms"] = dms
             if announcements is not None:
                 if announcements is True:
@@ -151,20 +158,23 @@ class KemonopartyExtractor(Extractor):
             self.cookies_update(self._login_impl(
                 (username, self.cookies_domain), password))
 
-    @cache(maxage=28*86400, keyarg=1)
+    @cache(maxage=3650*86400, keyarg=1)
     def _login_impl(self, username, password):
         username = username[0]
         self.log.info("Logging in as %s", username)
 
-        url = self.root + "/account/login"
+        url = self.root + "/api/v1/authentication/login"
         data = {"username": username, "password": password}
 
-        response = self.request(url, method="POST", data=data)
-        if response.url.endswith("/account/login") and \
-                "Username or password is incorrect" in response.text:
-            raise exception.AuthenticationError()
+        response = self.request(url, method="POST", json=data, fatal=False)
+        if response.status_code >= 400:
+            try:
+                msg = '"' + response.json()["error"] + '"'
+            except Exception:
+                msg = '"0/1 Username or password is incorrect"'
+            raise exception.AuthenticationError(msg)
 
-        return {c.name: c.value for c in response.history[0].cookies}
+        return {c.name: c.value for c in response.cookies}
 
     def _file(self, post):
         file = post["file"]
@@ -338,18 +348,15 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                      "{channel_name|channel}")
     filename_fmt = "{id}_{num:>02}_{filename}.{extension}"
     archive_fmt = "discord_{server}_{id}_{num}"
-    pattern = BASE_PATTERN + r"/discord/server/(\d+)(?:/channel/(\d+))?#(.*)"
-    example = "https://kemono.su/discord/server/12345#CHANNEL"
+    pattern = (BASE_PATTERN + r"/discord/server/(\d+)"
+               r"(?:/(?:channel/)?(\d+)(?:#(.+))?|#(.+))")
+    example = "https://kemono.su/discord/server/12345/12345"
 
     def items(self):
         self._prepare_ddosguard_cookies()
+        _, _, server_id, channel_id, channel_name, channel = self.groups
 
-        _, _, server_id, channel_id, channel = self.groups
-        channel_name = ""
-
-        if channel_id:
-            channel_name = channel
-        else:
+        if channel_id is None:
             if channel.isdecimal() and len(channel) >= 16:
                 key = "id"
             else:
@@ -363,6 +370,8 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
 
             channel_id = ch["id"]
             channel_name = ch["name"]
+        elif channel_name is None:
+            channel_name = ""
 
         find_inline = re.compile(
             r"https?://(?:cdn\.discordapp.com|media\.discordapp\.net)"
@@ -415,7 +424,7 @@ class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
     def items(self):
         server_id = self.groups[2]
         for channel in self.api.discord_server(server_id):
-            url = "{}/discord/server/{}/channel/{}#{}".format(
+            url = "{}/discord/server/{}/{}#{}".format(
                 self.root, server_id, channel["id"], channel["name"])
             channel["_extractor"] = KemonopartyDiscordExtractor
             yield Message.Queue, url, channel
@@ -424,26 +433,21 @@ class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
 class KemonopartyFavoriteExtractor(KemonopartyExtractor):
     """Extractor for kemono.su favorites"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/favorites(?:/?\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/favorites()()(?:/?\?([^#]+))?"
     example = "https://kemono.su/favorites"
-
-    def __init__(self, match):
-        KemonopartyExtractor.__init__(self, match)
-        self.params = text.parse_query(match.group(3))
-        self.favorites = (self.params.get("type") or
-                          self.config("favorites") or
-                          "artist")
 
     def items(self):
         self._prepare_ddosguard_cookies()
         self.login()
 
-        sort = self.params.get("sort")
-        order = self.params.get("order") or "desc"
+        params = text.parse_query(self.groups[4])
+        type = params.get("type") or self.config("favorites") or "artist"
 
-        if self.favorites == "artist":
-            users = self.request(
-                self.root + "/api/v1/account/favorites?type=artist").json()
+        sort = params.get("sort")
+        order = params.get("order") or "desc"
+
+        if type == "artist":
+            users = self.api.account_favorites("artist")
 
             if not sort:
                 sort = "updated"
@@ -456,9 +460,8 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
                     self.root, user["service"], user["id"])
                 yield Message.Queue, url, user
 
-        elif self.favorites == "post":
-            posts = self.request(
-                self.root + "/api/v1/account/favorites?type=post").json()
+        elif type == "post":
+            posts = self.api.account_favorites("post")
 
             if not sort:
                 sort = "faved_seq"
@@ -541,11 +544,6 @@ class KemonoAPI():
     def account_favorites(self, type):
         endpoint = "/account/favorites"
         params = {"type": type}
-        return self._call(endpoint, params)
-
-    def authentication_login(self, username, password):
-        endpoint = "/authentication/login"
-        params = {"username": username, "password": password}
         return self._call(endpoint, params)
 
     def _call(self, endpoint, params=None):

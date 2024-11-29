@@ -123,12 +123,23 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://kemono.su/patreon/user/34134344/post/38129255",
-    "#comment" : "DMs (#2008)",
+    "#url"     : "https://kemono.su/patreon/user/3161935/post/23445732",
+    "#comment" : "comments (#2008)",
     "#category": ("", "kemonoparty", "patreon"),
     "#class"   : kemonoparty.KemonopartyPostExtractor,
-    "#options" : {"dms": True},
+    "#options" : {"comments": True},
 
+    "comments": "len:12",
+},
+
+{
+    "#url"     : "https://kemono.su/patreon/user/34134344/post/38129255",
+    "#comment" : "DMs (#2008); no comments",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#options" : {"dms": True, "comments": True},
+
+    "comments": (),
     "dms": [
         {
             "added"    : "2021-07-31T02:47:51.327865",
@@ -289,6 +300,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.su/discord/server/488668827274444803/608504710906904576",
+    "#category": ("", "kemonoparty", "discord"),
+    "#class"   : kemonoparty.KemonopartyDiscordExtractor,
+    "#count"   : 4,
+
+    "channel"     : "608504710906904576",
+    "channel_name": "",
+},
+
+{
     "#url"     : "https://kemono.su/discord/server/488668827274444803#608504710906904576",
     "#category": ("", "kemonoparty", "discord"),
     "#class"   : kemonoparty.KemonopartyDiscordExtractor,
@@ -378,6 +399,7 @@ __tests__ = (
         "https://kemono.su/patreon/user/881792",
         "https://kemono.su/fanbox/user/6993449",
         "https://kemono.su/subscribestar/user/alcorart",
+        "https://kemono.su/gumroad/user/shengtian",
     ),
 },
 
@@ -391,6 +413,7 @@ __tests__ = (
         "https://kemono.su/fanbox/user/6993449",
         "https://kemono.su/patreon/user/881792",
         "https://kemono.su/subscribestar/user/alcorart",
+        "https://kemono.su/gumroad/user/shengtian",
     ),
 },
 
