@@ -380,8 +380,9 @@ class PixivArtworksExtractor(PixivExtractor):
                 ajax_ids.extend(map(int, body["manga"]))
                 ajax_ids.sort()
             except Exception as exc:
-                self.log.warning("Unable to collect artwork IDs using AJAX "
-                                 "API (%s: %s)", exc.__class__.__name__, exc)
+                self.log.warning("u%s: Failed to collect artwork IDs "
+                                 "using AJAX API (%s: %s)",
+                                 self.user_id, exc.__class__.__name__, exc)
             else:
                 works = self._extend_sanity(works, ajax_ids)
 
@@ -607,8 +608,12 @@ class PixivRankingExtractor(PixivExtractor):
 
     def works(self):
         ranking = self.ranking
-        for ranking["rank"], work in enumerate(
-                self.api.illust_ranking(self.mode, self.date), 1):
+
+        works = self.api.illust_ranking(self.mode, self.date)
+        if self.type:
+            works = filter(lambda work, t=self.type: work["type"] == t, works)
+
+        for ranking["rank"], work in enumerate(works, 1):
             yield work
 
     def metadata(self):
@@ -648,10 +653,13 @@ class PixivRankingExtractor(PixivExtractor):
             date = (now - timedelta(days=1)).strftime("%Y-%m-%d")
         self.date = date
 
+        self.type = type = query.get("content")
+
         self.ranking = ranking = {
             "mode": mode,
             "date": self.date,
             "rank": 0,
+            "type": type or "all",
         }
         return {"ranking": ranking}
 
