@@ -3442,10 +3442,38 @@ Type
 Default
     ``["images", "image_large", "attachments", "postfile", "content"]``
 Description
-    Determines the type and order of files to be downloaded.
+    Determines types and order of files to download.
 
-    Available types are
-    ``postfile``, ``images``, ``image_large``, ``attachments``, and ``content``.
+    Available types:
+
+    * ``postfile``
+    * ``images``
+    * ``image_large``
+    * ``attachments``
+    * ``content``
+
+
+extractor.patreon.format-images
+-------------------------------
+Type
+    ``string``
+Default
+    ``"download_url"``
+Description
+    Selects the format of ``images`` `files <extractor.patreon.files_>`__.
+
+    Possible formats:
+
+    * ``original``
+    * ``default``
+    * ``default_small``
+    * ``default_blurred``
+    * ``default_blurred_small``
+    * ``thumbnail``
+    * ``thumbnail_large``
+    * ``thumbnail_small``
+    * ``url``
+    * ``download_url``
 
 
 extractor.pillowfort.external
@@ -5160,6 +5188,22 @@ Description
     `yt-dlp's docstrings <https://github.com/yt-dlp/yt-dlp/blob/2024.05.27/yt_dlp/YoutubeDL.py#L200>`__
     /
     `youtube-dl's docstrings <https://github.com/ytdl-org/youtube-dl/blob/0153b387e57e0bb8e580f1869f85596d2767fb0d/youtube_dl/YoutubeDL.py#L157>`__
+
+
+extractor.zerochan.extensions
+-----------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["jpg", "png", "webp", "gif"]``
+Example
+    * ``"gif"``
+    * ``["webp", "gif", "jpg"}``
+Description
+    List of filename extensions to try when dynamically building download URLs
+    (`"pagination": "api" <extractor.zerochan.pagination_>`__ +
+    `"metadata": false <extractor.zerochan.metadata_>`__)
 
 
 extractor.zerochan.metadata
