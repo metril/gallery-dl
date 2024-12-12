@@ -196,7 +196,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Cyberdrop</td>
     <td>https://cyberdrop.me/</td>
-    <td>Albums</td>
+    <td>Albums, Media Files</td>
     <td></td>
 </tr>
 <tr>
@@ -478,7 +478,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Itaku</td>
     <td>https://itaku.ee/</td>
-    <td>Galleries, individual Images</td>
+    <td>Galleries, individual Images, Search Results</td>
     <td></td>
 </tr>
 <tr>
@@ -533,6 +533,12 @@ Consider all listed sites to potentially be NSFW.
     <td>livedoor Blog</td>
     <td>http://blog.livedoor.jp/</td>
     <td>Blogs, Posts</td>
+    <td></td>
+</tr>
+<tr>
+    <td>LOFTER</td>
+    <td>https://www.lofter.com/</td>
+    <td>Blog Posts, Posts</td>
     <td></td>
 </tr>
 <tr>
@@ -1079,6 +1085,12 @@ Consider all listed sites to potentially be NSFW.
     <td>XVideos</td>
     <td>https://www.xvideos.com/</td>
     <td>Galleries, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Yiff verse</td>
+    <td>https://yiffverse.com/</td>
+    <td>Playlists, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
