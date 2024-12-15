@@ -1455,7 +1455,10 @@ Type
     * ``string``
     * ``list`` of ``strings``
 Default
-    ``"media"``
+    * ``"posts"`` if
+      `reposts <extractor.bluesky.reposts_>`__ or
+      `quoted <extractor.bluesky.quoted_>`__ is enabled
+    * ``"media"`` otherwise
 Example
     * ``"avatar,background,posts"``
     * ``["avatar", "background", "posts"]``
@@ -1464,6 +1467,7 @@ Description
     when processing a user profile.
 
     Possible values are
+    ``"info"``,
     ``"avatar"``,
     ``"background"``,
     ``"posts"``,
@@ -1749,6 +1753,26 @@ Default
     ``true``
 Description
     Extract ``ask`` posts.
+
+
+extractor.cohost.avatar
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download ``avatar`` images.
+
+
+extractor.cohost.background
+---------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download ``background``/``banner``/``header`` images.
 
 
 extractor.cohost.pinned
