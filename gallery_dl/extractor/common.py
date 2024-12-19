@@ -42,8 +42,7 @@ class Extractor():
     ciphers = None
     tls12 = True
     browser = None
-    useragent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                 "rv:128.0) Gecko/20100101 Firefox/128.0")
+    useragent = util.USERAGENT_FIREFOX
     request_interval = 0.0
     request_interval_min = 0.0
     request_interval_429 = 60.0
@@ -922,10 +921,11 @@ def _browser_useragent():
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(("127.0.0.1", 6414))
+    server.bind(("127.0.0.1", 0))
     server.listen(1)
 
-    webbrowser.open("http://127.0.0.1:6414/user-agent")
+    host, port = server.getsockname()
+    webbrowser.open("http://{}:{}/user-agent".format(host, port))
 
     client = server.accept()[0]
     server.close()
