@@ -149,6 +149,7 @@ CATEGORY_MAP = {
     "vanillarock"    : "もえぴりあ",
     "vidyart2"       : "/v/idyart2",
     "vidyapics"      : "Vidya Booru",
+    "visuabusters"   : "VISUABUSTERS",
     "vk"             : "VK",
     "vsco"           : "VSCO",
     "wallpapercave"  : "Wallpaper Cave",
@@ -213,6 +214,7 @@ SUBCATEGORY_MAP = {
         "user-models": "User Models",
         "user-images": "User Images",
         "user-posts" : "User Posts",
+        "user-videos": "User Videos",
     },
     "coomerparty": {
         "discord"       : "",
