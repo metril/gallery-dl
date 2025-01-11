@@ -194,6 +194,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://bunkr.cr/f/image-sZrQUeOx.jpg",
+    "#comment" : "/f/ URL",
+    "#category": ("lolisafe", "bunkr", "media"),
+    "#class"   : bunkr.BunkrMediaExtractor,
+    "#urls"    : "https://mlk-bk.cdn.gigachad-cdn.ru/image-sZrQUeOx.jpg?n=image.jpg",
+},
+
+{
     "#url"     : "https://bunkrrr.org/d/dJuETSzKLrUps",
     "#category": ("lolisafe", "bunkr", "media"),
     "#class"   : bunkr.BunkrMediaExtractor,
@@ -206,6 +214,14 @@ __tests__ = (
     "filename" : "file-r5fmwjdd",
     "id"       : "r5fmwjdd",
     "name"     : "file",
+},
+
+{
+    "#url"     : "https://bunkr.ph/v/rEeTUL8MXR17A",
+    "#comment" : "redirect to '/f/rEeTUL8MXR17A' (#6790)",
+    "#category": ("lolisafe", "bunkr", "media"),
+    "#class"   : bunkr.BunkrMediaExtractor,
+    "#urls"    : "https://meatballs.bunkr.ru/27-03-2024-Rp-0FfrropA.mp4",
 },
 
 )

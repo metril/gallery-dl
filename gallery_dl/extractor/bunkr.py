@@ -80,6 +80,9 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
                 # redirect
                 url = response.headers["Location"]
+                if url[0] == "/":
+                    url = self.root + url
+                    continue
                 root, path = self._split(url)
                 if root not in CF_DOMAINS:
                     continue
@@ -105,7 +108,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                             "All Bunkr domains require solving a CF challenge")
 
             # select alternative domain
-            root = "https://" + random.choice(DOMAINS)
+            self.root = root = "https://" + random.choice(DOMAINS)
             self.log.debug("Trying '%s' as fallback", root)
             url = root + path
 
@@ -119,7 +122,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 "&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
 
         # files
-        items = list(text.extract_iter(page, "<!-- item -->", "<!--  -->"))
+        items = list(text.extract_iter(
+            page, '<div class="grid-images_box', "</a>"))
         return self._extract_files(items), {
             "album_id"   : album_id,
             "album_name" : title,
@@ -130,9 +134,11 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     def _extract_files(self, items):
         for item in items:
             try:
-                url = text.extr(item, ' href="', '"')
-                file = self._extract_file(text.unescape(url))
+                url = text.unescape(text.extr(item, ' href="', '"'))
+                if url[0] == "/":
+                    url = self.root + url
 
+                file = self._extract_file(url)
                 info = text.split_html(item)
                 file["name"] = info[0]
                 file["size"] = info[2]
@@ -179,8 +185,8 @@ class BunkrMediaExtractor(BunkrAlbumExtractor):
     """Extractor for bunkr.si media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
-    pattern = BASE_PATTERN + r"(/[vid]/[^/?#]+)"
-    example = "https://bunkr.si/v/FILENAME"
+    pattern = BASE_PATTERN + r"(/[fvid]/[^/?#]+)"
+    example = "https://bunkr.si/f/FILENAME"
 
     def fetch_album(self, album_id):
         try:
