@@ -176,12 +176,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>cohost!</td>
-    <td>https://cohost.org/</td>
-    <td>Likes, Posts, Tag Searches, User Profiles</td>
-    <td></td>
-</tr>
-<tr>
     <td>Comic Vine</td>
     <td>https://comicvine.gamespot.com/</td>
     <td>Tag Searches</td>
@@ -1190,7 +1184,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>e621</td>
     <td>https://e621.net/</td>
-    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Favorites, Pools, Popular Images, Posts, Tag Searches, Frontends</td>
     <td>Supported</td>
 </tr>
 <tr>
