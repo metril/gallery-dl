@@ -401,6 +401,7 @@ Default
         ``urlgalleries``,
         ``vk``,
         ``weebcentral``,
+        ``xfolio``,
         ``zerochan``
     * ``"1.0-2.0"``
         ``flickr``,
@@ -2969,6 +2970,16 @@ Description
     * ``"asc"``: Ascending order (oldest first)
     * ``"desc"``: Descending order (newest first)
     * ``"reverse"``: Same as ``"asc"``
+
+
+extractor.khinsider.covers
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download album cover images.
 
 
 extractor.khinsider.format
