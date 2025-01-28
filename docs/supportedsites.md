@@ -248,12 +248,6 @@ Consider all listed sites to potentially be NSFW.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
-    <td>Fanleaks</td>
-    <td>https://fanleaks.club/</td>
-    <td>Models, Posts</td>
-    <td></td>
-</tr>
-<tr>
     <td>Fantia</td>
     <td>https://fantia.jp/</td>
     <td>Creators, Posts</td>
@@ -356,8 +350,8 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Hipertoon</td>
-    <td>https://hipertoon.com/</td>
+    <td>HiperDEX</td>
+    <td>https://hiperdex.com/</td>
     <td>Artists, Chapters, Manga</td>
     <td></td>
 </tr>
@@ -501,7 +495,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Komikcast</td>
-    <td>https://komikcast.cz/</td>
+    <td>https://komikcast.la/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -1458,12 +1452,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Tentaclerape</td>
-    <td>https://tentaclerape.net/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
     <td>Cavemanon</td>
     <td>https://booru.cavemanon.xyz/</td>
     <td>Posts, Tag Searches</td>
@@ -1484,12 +1472,6 @@ Consider all listed sites to potentially be NSFW.
 
 <tr>
     <td colspan="4"><strong>szurubooru Instances</strong></td>
-</tr>
-<tr>
-    <td>Foalcon</td>
-    <td>https://booru.foalcon.com/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
 </tr>
 <tr>
     <td>Bcbnsfw</td>
