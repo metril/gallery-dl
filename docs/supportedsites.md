@@ -440,6 +440,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>IMHentai</td>
+    <td>https://imhentai.xxx/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Imxto</td>
     <td>https://imx.to/</td>
     <td>Galleries, individual Images</td>
@@ -1012,7 +1018,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>VSCO</td>
     <td>https://vsco.co/</td>
-    <td>Avatars, Collections, Galleries, individual Images, Spaces, User Profiles</td>
+    <td>Avatars, Collections, Galleries, individual Images, Spaces, User Profiles, Videos</td>
     <td></td>
 </tr>
 <tr>
