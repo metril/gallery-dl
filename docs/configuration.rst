@@ -922,11 +922,13 @@ Description
 extractor.*.archive
 -------------------
 Type
-    |Path|_
+    * ``string``
+    * |Path|_
 Default
     ``null``
 Example
-    ``"$HOME/.archives/{category}.sqlite3"``
+    * ``"$HOME/.archives/{category}.sqlite3"``
+    * ``"postgresql://user:pass@host/database"``
 Description
     File to store IDs of downloaded files in. Downloads of files
     already recorded in this archive file will be
@@ -936,6 +938,11 @@ Description
     database, as either lookup operations are significantly faster or
     memory requirements are significantly lower when the
     amount of stored IDs gets reasonably large.
+
+    If this value is a
+    `PostgreSQL Connection URI <https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS>`__,
+    the archive will use this PostgreSQL database as backend (requires
+    `Psycopg <https://www.psycopg.org/>`__).
 
     Note: Archive files that do not already exist get generated automatically.
 
@@ -994,7 +1001,8 @@ extractor.*.archive-prefix
 Type
     ``string``
 Default
-    ``"{category}"``
+    * ``""`` when `archive-table <extractor.*.archive-table_>`__ is set
+    * ``"{category}"`` otherwise
 Description
     Prefix for archive IDs.
 
@@ -1010,6 +1018,18 @@ Description
 
     See `<https://www.sqlite.org/pragma.html#toc>`__
     for available ``PRAGMA`` statements and further details.
+
+
+extractor.*.archive-table
+-------------------------
+Type
+    ``string``
+Default
+    ``"archive"``
+Example
+    ``"{category}"``
+Description
+    `Format string`_ selecting the archive database table name.
 
 
 extractor.*.actions
@@ -5564,6 +5584,21 @@ Description
     regardless of this option.
 
 
+downloader.http.sleep-429
+-------------------------
+Type
+    |Duration|_
+Default
+    `extractor.*.sleep-429`_
+Description
+    Number of seconds to sleep when receiving a `429 Too Many Requests`
+    response before `retrying <downloader.*.retries_>`__ the request.
+
+    Note: Requires
+    `retry-codes <downloader.http.retry-codes_>`__
+    to include ``429``.
+
+
 downloader.http.validate
 ------------------------
 Type
@@ -6079,16 +6114,18 @@ Description
 exec.archive
 ------------
 Type
-    |Path|_
+    * ``string``
+    * |Path|_
 Description
-    File to store IDs of executed commands in,
+    Database to store IDs of executed commands in,
     similar to `extractor.*.archive`_.
 
-    ``archive-format``, ``archive-prefix``, and ``archive-pragma`` options,
-    akin to
-    `extractor.*.archive-format`_,
-    `extractor.*.archive-prefix`_, and
-    `extractor.*.archive-pragma`_, are supported as well.
+    The following archive options are also supported:
+
+    * `archive-format <extractor.*.archive-format_>`__
+    * `archive-prefix <extractor.*.archive-prefix_>`__
+    * `archive-pragma <extractor.*.archive-pragma_>`__
+    * `archive-table  <extractor.*.archive-table_>`__
 
 
 exec.async
@@ -6528,16 +6565,18 @@ Description
 metadata.archive
 ----------------
 Type
-    |Path|_
+    * ``string``
+    * |Path|_
 Description
-    File to store IDs of generated metadata files in,
+    Database to store IDs of generated metadata files in,
     similar to `extractor.*.archive`_.
 
-    ``archive-format``, ``archive-prefix``, and ``archive-pragma`` options,
-    akin to
-    `extractor.*.archive-format`_,
-    `extractor.*.archive-prefix`_, and
-    `extractor.*.archive-pragma`_, are supported as well.
+    The following archive options are also supported:
+
+    * `archive-format <extractor.*.archive-format_>`__
+    * `archive-prefix <extractor.*.archive-prefix_>`__
+    * `archive-pragma <extractor.*.archive-pragma_>`__
+    * `archive-table  <extractor.*.archive-table_>`__
 
 
 metadata.mtime
@@ -6608,16 +6647,18 @@ Description
 python.archive
 --------------
 Type
-    |Path|_
+    * ``string``
+    * |Path|_
 Description
-    File to store IDs of called Python functions in,
+    Database to store IDs of called Python functions in,
     similar to `extractor.*.archive`_.
 
-    ``archive-format``, ``archive-prefix``, and ``archive-pragma`` options,
-    akin to
-    `extractor.*.archive-format`_,
-    `extractor.*.archive-prefix`_, and
-    `extractor.*.archive-pragma`_, are supported as well.
+    The following archive options are also supported:
+
+    * `archive-format <extractor.*.archive-format_>`__
+    * `archive-prefix <extractor.*.archive-prefix_>`__
+    * `archive-pragma <extractor.*.archive-pragma_>`__
+    * `archive-table  <extractor.*.archive-table_>`__
 
 
 python.event
