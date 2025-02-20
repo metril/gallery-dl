@@ -20,7 +20,7 @@ class ImhentaiExtractor(Extractor):
 
     def _pagination(self, url):
         base = self.root + "/gallery/"
-        data = {"_extractor": ImhentaiGalleryExtractor}
+        data = {"_extractor": self._gallery_extractor}
 
         while True:
             page = self.request(url).text
@@ -36,7 +36,12 @@ class ImhentaiExtractor(Extractor):
             href = text.rextract(page, "class='page-link' href='", "'")[0]
             if not href or href == "#":
                 return
-            url = text.ensure_http_scheme(href)
+            if href[0] == "/":
+                if href[1] == "/":
+                    href = "https:" + href
+                else:
+                    href = self.root + href
+            url = href
 
 
 class ImhentaiGalleryExtractor(ImhentaiExtractor, GalleryExtractor):
@@ -56,13 +61,13 @@ class ImhentaiGalleryExtractor(ImhentaiExtractor, GalleryExtractor):
             "gallery_id": text.parse_int(self.gallery_id),
             "title"     : text.unescape(extr("<h1>", "<")),
             "title_alt" : text.unescape(extr('class="subtitle">', "<")),
-            "parody"    : self._split(extr(">Parodies:</span>", "</li>")),
-            "character" : self._split(extr(">Characters:</span>", "</li>")),
-            "tags"      : self._split(extr(">Tags:</span>", "</li>")),
-            "artist"    : self._split(extr(">Artists:</span>", "</li>")),
-            "group"     : self._split(extr(">Groups:</span>", "</li>")),
-            "language"  : self._split(extr(">Languages:</span>", "</li>")),
-            "type"      : text.remove_html(extr(">Category:</span>", "<span")),
+            "parody"    : self._split(extr(">Parodies", "</li>")),
+            "character" : self._split(extr(">Characters", "</li>")),
+            "tags"      : self._split(extr(">Tags", "</li>")),
+            "artist"    : self._split(extr(">Artists", "</li>")),
+            "group"     : self._split(extr(">Groups", "</li>")),
+            "language"  : self._split(extr(">Languages", "</li>")),
+            "type"      : extr("href='/category/", "/"),
         }
 
         if data["language"]:
@@ -117,3 +122,6 @@ class ImhentaiSearchExtractor(ImhentaiExtractor):
     def items(self):
         url = self.root + "/search/?" + self.groups[0]
         return self._pagination(url)
+
+
+ImhentaiExtractor._gallery_extractor = ImhentaiGalleryExtractor
