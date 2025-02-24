@@ -136,7 +136,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Bilibili</td>
     <td>https://www.bilibili.com/</td>
-    <td>Articles, User Articles</td>
+    <td>Articles, User Articles, User Article Favorites</td>
     <td></td>
 </tr>
 <tr>
@@ -148,7 +148,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Boosty</td>
     <td>https://www.boosty.to/</td>
-    <td>Subscriptions Feed, Followed Users, Media Files, Posts, User Profiles</td>
+    <td>DMs, Subscriptions Feed, Followed Users, Media Files, Posts, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
