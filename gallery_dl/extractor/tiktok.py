@@ -22,11 +22,13 @@ class TiktokExtractor(Extractor):
     root = "https://www.tiktok.com"
     cookies_domain = ".tiktok.com"
 
-    def avatar(self):
-        return ""
+    def _init(self):
+        self.audio = self.config("audio", True)
+        self.video = self.config("videos", True)
+        if not self.config("avatar", True):
+            self.avatar = util.false
 
     def items(self):
-        videos = self.config("videos", True)
         # We assume that all of the URLs served by urls() come from the same
         # author.
         downloaded_avatar = not self.avatar()
@@ -50,8 +52,6 @@ class TiktokExtractor(Extractor):
             post["user"] = user = author["uniqueId"]
             post["date"] = text.parse_timestamp(post["createTime"])
             original_title = title = post["desc"]
-            if not title:
-                title = "TikTok photo #{}".format(post["id"])
 
             if not downloaded_avatar:
                 avatar_url = author["avatarLarger"]
@@ -62,7 +62,11 @@ class TiktokExtractor(Extractor):
                 downloaded_avatar = True
 
             yield Message.Directory, post
+            ytdl_media = False
+
             if "imagePost" in post:
+                if not original_title:
+                    title = "TikTok photo #{}".format(post["id"])
                 img_list = post["imagePost"]["images"]
                 for i, img in enumerate(img_list, 1):
                     url = img["imageURL"]["urlList"][0]
@@ -78,19 +82,23 @@ class TiktokExtractor(Extractor):
                     })
                     yield Message.Url, url, post
 
-            elif videos:
-                if not original_title:
-                    title = "TikTok video #{}".format(post["id"])
+                if self.audio and "music" in post:
+                    ytdl_media = "audio"
+
+            elif self.video and "video" in post:
+                ytdl_media = "video"
 
             else:
                 self.log.info("%s: Skipping post", tiktok_url)
 
-            if videos:
+            if ytdl_media:
+                if not original_title:
+                    title = "TikTok {} #{}".format(ytdl_media, post["id"])
                 post.update({
-                    "type"      : "video",
+                    "type"      : ytdl_media,
                     "image"     : None,
                     "filename"  : "",
-                    "extension" : "mp4",
+                    "extension" : "mp3" if ytdl_media == "audio" else "mp4",
                     "title"     : title,
                     "num"       : 0,
                     "img_id"    : "",
@@ -113,6 +121,9 @@ class TiktokExtractor(Extractor):
                 avatar_url, data, user_name, data["id"])
             yield Message.Directory, avatar
             yield Message.Url, avatar_url, avatar
+
+    def avatar(self):
+        return False
 
     def _generate_avatar(self, avatar_url, data, user_name, user_id):
         avatar = text.nameext_from_url(avatar_url, data.copy())
