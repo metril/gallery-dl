@@ -1829,6 +1829,25 @@ Description
     follow the ``source`` and download from there if possible.
 
 
+extractor.[Danbooru].pool.order-posts
+-------------------------------------
+Type
+    ``string``
+Default
+    ``"pool"``
+Description
+    Controls the order in which pool posts are returned.
+
+    ``"pool"`` | ``"pool_asc"`` | ``"asc"`` | ``"asc_pool"``
+        Pool order
+    ``"pool_desc"`` | ``"desc_pool"`` | ``"desc"``
+        Reverse Pool order
+    ``"id"`` | ``"id_desc"`` | ``"desc_id"``
+        Descending Post ID order
+    ``"id_asc"`` | ``"asc_id"``
+        Ascending Post ID order
+
+
 extractor.[Danbooru].ugoira
 ---------------------------
 Type
@@ -4316,6 +4335,36 @@ Description
     and click ``Create Token``.
 
 
+extractor.tenor.format
+----------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["gif", "mp4", "webm", "webp"]``
+Description
+    List of names of the preferred animation format.
+
+    If a selected format is not available, the next one in the list will be
+    tried until a format is found.
+
+    Possible formats include
+
+    * ``"gif"``
+    * ``"gif_transparent"``
+    * ``"gifpreview"``
+    * ``"mediumgif"``
+    * ``"tinygif"``
+    * ``"tinygif_transparent"``
+    * ``"mp4"``
+    * ``"tinymp4"``
+    * ``"webm"``
+    * ``"webp"``
+    * ``"webp_transparent"``
+    * ``"tinywebp"``
+    * ``"tinywebp_transparent"``
+
+
 extractor.tiktok.audio
 ----------------------
 Type
@@ -4364,7 +4413,7 @@ extractor.tiktok.user.tiktok-range
 Type
     ``string``
 Default
-    ``null``
+    ``""``
 Example
     ``"1-20"``
 Description
