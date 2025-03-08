@@ -11,7 +11,7 @@
 from .common import Extractor, Message
 from .. import text, util
 
-BASE_PATTERN = r"(?:https?://)?tenor\.com"
+BASE_PATTERN = r"(?:https?://)?tenor\.com/(?:\w\w(?:-\w\w)?/)?"
 
 
 class TenorExtractor(Extractor):
@@ -57,42 +57,7 @@ class TenorExtractor(Extractor):
             if fmt in media_formats:
                 return media_formats[fmt]
 
-    def metadata(self):
-        return False
-
-    def gifs(self):
-        return ()
-
-
-class TenorImageExtractor(TenorExtractor):
-    subcategory = "image"
-    pattern = BASE_PATTERN + r"/view/(?:[\w-]*-)?(\d+)"
-    example = "https://tenor.com/view/SLUG-1234567890"
-
-    def gifs(self):
-        url = "{}/view/{}".format(self.root, self.groups[0])
-        page = self.request(url).text
-        pos = page.index('id="store-cache"')
-        data = util.json_loads(text.extract(page, ">", "</script>", pos)[0])
-        return (data["gifs"]["byId"].popitem()[1]["results"][0],)
-
-
-class TenorSearchExtractor(TenorExtractor):
-    subcategory = "search"
-    directory_fmt = ("{category}", "{search_tags}")
-    pattern = BASE_PATTERN + r"/search/([^/?#]+)"
-    example = "https://tenor.com/search/QUERY"
-
-    def metadata(self):
-        query = text.unquote(self.groups[0])
-        rest, _, last = query.rpartition("-")
-        if last == "gifs":
-            query = rest
-        self.search_tags = query.replace("-", " ")
-
-        return {"search_tags": self.search_tags}
-
-    def gifs(self):
+    def _search_results(self, query):
         url = "https://tenor.googleapis.com/v2/search"
         params = {
             "appversion": "browser-r20250225-1",
@@ -101,7 +66,7 @@ class TenorSearchExtractor(TenorExtractor):
             "client_key": "tenor_web",
             "locale": "en",
             "anon_id": "",
-            "q": self.search_tags,
+            "q": query,
             "limit": "50",
             "contentfilter": "low",
             "media_filter": "gif,gif_transparent,mediumgif,tinygif,"
@@ -116,7 +81,6 @@ class TenorSearchExtractor(TenorExtractor):
                       "results.tags,results.content_rating,results.bg_color,"
                       "results.legacy_info,results.geographic_restriction,"
                       "results.content_description",
-            "searchfilter": "none",
             "pos": None,
             "component": "web_desktop",
         }
@@ -133,3 +97,51 @@ class TenorSearchExtractor(TenorExtractor):
             params["pos"] = data.get("next")
             if not params["pos"]:
                 return
+
+    def metadata(self):
+        return False
+
+    def gifs(self):
+        return ()
+
+
+class TenorImageExtractor(TenorExtractor):
+    subcategory = "image"
+    pattern = BASE_PATTERN + r"view/(?:[\w-]*-)?(\d+)"
+    example = "https://tenor.com/view/SLUG-1234567890"
+
+    def gifs(self):
+        url = "{}/view/{}".format(self.root, self.groups[0])
+        page = self.request(url).text
+        pos = page.index('id="store-cache"')
+        data = util.json_loads(text.extract(page, ">", "</script>", pos)[0])
+        return (data["gifs"]["byId"].popitem()[1]["results"][0],)
+
+
+class TenorSearchExtractor(TenorExtractor):
+    subcategory = "search"
+    directory_fmt = ("{category}", "{search_tags}")
+    pattern = BASE_PATTERN + r"search/([^/?#]+)"
+    example = "https://tenor.com/search/QUERY"
+
+    def metadata(self):
+        query = text.unquote(self.groups[0])
+        rest, _, last = query.rpartition("-")
+        if last == "gifs":
+            query = rest
+        self.search_tags = query.replace("-", " ")
+
+        return {"search_tags": self.search_tags}
+
+    def gifs(self):
+        return self._search_results(self.search_tags)
+
+
+class TenorUserExtractor(TenorExtractor):
+    subcategory = "user"
+    directory_fmt = ("{category}", "@{user[username]}")
+    pattern = BASE_PATTERN + r"(?:users|official)/([^/?#]+)"
+    example = "https://tenor.com/users/USER"
+
+    def gifs(self):
+        return self._search_results("@" + self.groups[0])
