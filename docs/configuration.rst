@@ -1651,6 +1651,16 @@ Description
     * ``tiny`` (144p)
 
 
+extractor.bunkr.endpoint
+------------------------
+Type
+    ``string``
+Default
+    ``"/api/_001"``
+Description
+    API endpoint for retrieving file URLs.
+
+
 extractor.bunkr.tlds
 --------------------
 Type
@@ -3993,6 +4003,17 @@ Description
     authorized to do so,
     but requests to the reddit API are going to be rate limited
     at 600 requests every 10 minutes/600 seconds.
+
+
+extractor.reddit.selftext
+-------------------------
+Type
+    ``bool``
+Default
+    * ``true`` if `comments <extractor.reddit.comments_>`__ are enabled
+    * ``false`` otherwise
+Description
+    Follow links in the original post's ``selftext``.
 
 
 extractor.reddit.videos

@@ -14,7 +14,7 @@ __tests__ = (
     "#urls" : "https://media1.tenor.com/m/dlGgz3LRXEMAAAAC/moving.gif",
 
     "bg_color" : "",
-    "content_description": "an illustration of a tree with green leaves",
+    "description": "an illustration of a tree with green leaves",
     "created"  : 1687512768.687436,
     "date"     : "dt:2023-06-23 09:32:48",
     "embed"    : r"re:<div class=.+",
@@ -66,6 +66,15 @@ __tests__ = (
     "#class"  : tenor.TenorImageExtractor,
     "#options": {"format": ["mkv", "foobar", "webp"]},
     "#urls"   : "https://media.tenor.com/dlGgz3LRXEMAAAAx/moving.webp",
+},
+
+{
+    "#url"    : "https://tenor.com/view/vtuber-hololive-%E3%83%9B%E3%83%AD%E3%83%A9%E3%82%A4%E3%83%96-hologra-%E3%83%9B%E3%83%AD%E3%81%90%E3%82%89-gif-26058046",
+    "#comment": "non-ASCII characters in URL",
+    "#class"  : tenor.TenorImageExtractor,
+    "#urls"   : "https://media1.tenor.com/m/jHugoUKy-T0AAAAC/vtuber-hololive.gif",
+
+    "id": "10122861201914526013",
 },
 
 {
