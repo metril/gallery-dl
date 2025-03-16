@@ -86,7 +86,7 @@ __tests__ = (
 
 {
     "#url"    : "https://arca.live/b/bluearchive/117240135",
-    "#comment": "video",
+    "#comment": ".mp4 video",
     "#class"  : arcalive.ArcalivePostExtractor,
     "#urls"   : "https://ac.namu.la/20240926sac/16f07778a97f91b935c8a3394ead01a223d96b2a619fdb25c4628ddba88b5fad.mp4?type=orig",
 },
@@ -94,10 +94,8 @@ __tests__ = (
 {
     "#url"    : "https://arca.live/b/bluearchive/111191955",
     "#comment": "fake .mp4 GIF",
-    "#skip"   : "not implemented",
     "#class"  : arcalive.ArcalivePostExtractor,
-    #  "#urls"   : "https://ac.namu.la/20240714sac/c8fcadeb0b578e5121eb7a7e8fb05984cb87c68e7a6e0481a1c8869bf0ecfd2b.gif?type=orig",
-    "#urls"   : "https://ac.namu.la/20240714sac/c8fcadeb0b578e5121eb7a7e8fb05984cb87c68e7a6e0481a1c8869bf0ecfd2b.mp4?type=orig",
+    "#urls"   : "https://ac.namu.la/20240714sac/c8fcadeb0b578e5121eb7a7e8fb05984cb87c68e7a6e0481a1c8869bf0ecfd2b.gif?type=orig",
 },
 
 {
@@ -120,11 +118,56 @@ __tests__ = (
 },
 
 {
-    "#url"      : "https://arca.live/b/arknights",
-    "#class"    : arcalive.ArcaliveBoardExtractor,
+    "#url"    : "https://arca.live/b/arknights",
+    "#class"  : arcalive.ArcaliveBoardExtractor,
     "#pattern": arcalive.ArcalivePostExtractor.pattern,
-    "#range"    : "1-100",
-    "#count"    : 100,
+    "#range"  : "1-100",
+    "#count"  : 100,
+
+    "category"    : {str, None},
+    "categoryDisplayName": {str, None},
+    "commentCount": int,
+    "createdAt"   : str,
+    "id"          : int,
+    "isUser"      : bool,
+    "?mark"       : str,
+    "nickname"    : str,
+    "publicId"    : {int, None},
+    "ratingDown"  : int,
+    "ratingUp"    : int,
+    "thumbnailUrl": {str, None},
+    "title"       : str,
+    "viewCount"   : int,
+},
+
+{
+    "#url"  : "https://arca.live/u/@Si%EB%A6%AC%EB%A7%81",
+    "#class": arcalive.ArcaliveUserExtractor,
+    "#range": "1-5",
+    "#urls" : (
+        "https://arca.live/b/vrchat/107257886",
+        "https://arca.live/b/soulworkers/95371697",
+        "https://arca.live/b/arcalivebreverse/90843346",
+        "https://arca.live/b/arcalivebreverse/90841126",
+        "https://arca.live/b/arcalivebreverse/90769916",
+    ),
+
+    "boardName"   : str,
+    "boardSlug"   : {"vrchat", "soulworkers", "arcalivebreverse"},
+    "category"    : {str, None},
+    "categoryDisplayName": {str, None},
+    "commentCount": int,
+    "createdAt"   : str,
+    "id"          : int,
+    "isUser"      : True,
+    "?mark"       : "image",
+    "nickname"    : "Si리링",
+    "publicId"    : {int, None},
+    "ratingDown"  : int,
+    "ratingUp"    : int,
+    "thumbnailUrl": {str, None},
+    "title"       : str,
+    "viewCount"   : int,
 },
 
 )
