@@ -53,7 +53,6 @@ __tests__ = (
         "userid"  : "9AE51FC7-0278-806C-3FFF-F4961ABF9E2B",
         "username": "shimoda7",
     },
-    "category_path"   : str,
     "content"         : {
         "filesize"    : int,
         "height"      : int,
@@ -149,7 +148,7 @@ __tests__ = (
         "folders" : 1,
         "original": 0,
     },
-    "#count"   : 3,
+    "#count"   : 10,
 
     "description": str,
     "folders"    : list,
@@ -173,6 +172,12 @@ __tests__ = (
 
 {
     "#url"     : "https://www.deviantart.com/shimoda7/gallery/all",
+    "#category": ("", "deviantart", "gallery"),
+    "#class"   : deviantart.DeviantartGalleryExtractor,
+},
+
+{
+    "#url"     : "https://www.deviantart.com/shimoda7/gallery/recommended-for-you",
     "#category": ("", "deviantart", "gallery"),
     "#class"   : deviantart.DeviantartGalleryExtractor,
 },
@@ -273,7 +278,6 @@ __tests__ = (
         "userid"  : "1A12BA26-33C2-AA0A-7678-0B6DFBA7AC8E",
         "username": "gdldev"
     },
-    "category_path"    : "",
     "content"          : {
         "filename"    : "banner_by_gdldev_dgntyqc.png",
         "filesize"    : 84510,
@@ -389,6 +393,19 @@ __tests__ = (
     "#url"     : "https://sta.sh/022c83odnaxc",
     "#category": ("", "deviantart", "stash"),
     "#class"   : deviantart.DeviantartStashExtractor,
+    "#pattern" : r"https://wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/dcvdmbc-e506cdcf-3208-4c20-85ab-0bfa8a7bcb16.png\?token=ey.+",
+    "#count"   : 1,
+
+    "date"          : "dt:2018-12-26 14:49:27",
+    "deviationid"   : "A4A6AD52-8857-46EE-ABFE-86D49D4FF9D0",
+    "download_filesize": 380,
+    "extension"     : "png",
+    "filename"      : "01_by_justatest235723-dcvdmbc",
+    "index"         : 778297656,
+    "index_base36"  : "cvdmbc",
+    "published_time": 1545835767,
+    "title"         : "01",
+    "url"           : "https://www.deviantart.com/stash/022c83odnaxc",
 },
 
 {
