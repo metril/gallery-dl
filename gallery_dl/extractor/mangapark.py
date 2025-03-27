@@ -13,7 +13,10 @@ from .. import text, util, exception
 from ..cache import memcache
 import re
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangapark\.(?:net|com|org|io|me)"
+BASE_PATTERN = (r"(?:https?://)?(?:www\.)?(?:"
+                r"(?:manga|comic|read)park\.(?:com|net|org|me|io|to)|"
+                r"parkmanga\.(?:com|net|org)|"
+                r"mpark\.to)")
 
 
 class MangaparkBase():
@@ -71,7 +74,8 @@ class MangaparkBase():
 
 class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
     """Extractor for manga-chapters from mangapark.net"""
-    pattern = BASE_PATTERN + r"/title/[^/?#]+/(\d+)"
+    pattern = (BASE_PATTERN +
+               r"/(?:title/[^/?#]+/|comic/\d+/[^/?#]+/[^/?#]+-i)(\d+)")
     example = "https://mangapark.net/title/MANGA/12345-en-ch.01"
 
     def __init__(self, match):
@@ -111,7 +115,7 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
 class MangaparkMangaExtractor(MangaparkBase, Extractor):
     """Extractor for manga from mangapark.net"""
     subcategory = "manga"
-    pattern = BASE_PATTERN + r"/title/(\d+)(?:-[^/?#]*)?/?$"
+    pattern = BASE_PATTERN + r"/(?:title|comic)/(\d+)(?:[/-][^/?#]*)?/?$"
     example = "https://mangapark.net/title/12345-MANGA"
 
     def __init__(self, match):
