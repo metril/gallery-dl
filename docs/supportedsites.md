@@ -478,7 +478,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Itaku</td>
     <td>https://itaku.ee/</td>
-    <td>Galleries, individual Images, Search Results</td>
+    <td>Galleries, individual Images, Search Results, Stars</td>
     <td></td>
 </tr>
 <tr>
@@ -689,6 +689,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Picarto</td>
     <td>https://picarto.tv/</td>
     <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Pictoa</td>
+    <td>https://pictoa.com/</td>
+    <td>Albums, individual Images</td>
     <td></td>
 </tr>
 <tr>

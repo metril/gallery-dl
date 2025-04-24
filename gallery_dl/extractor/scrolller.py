@@ -20,8 +20,8 @@ class ScrolllerExtractor(Extractor):
     category = "scrolller"
     root = "https://scrolller.com"
     directory_fmt = ("{category}", "{subredditTitle}")
-    filename_fmt = "{id}{title:? //}.{extension}"
-    archive_fmt = "{id}"
+    filename_fmt = "{id}{num:?_//>03}{title:? //}.{extension}"
+    archive_fmt = "{id}_{num}"
     request_interval = (0.5, 1.5)
 
     def _init(self):
@@ -31,22 +31,35 @@ class ScrolllerExtractor(Extractor):
         self.login()
 
         for post in self.posts():
-
-            media_sources = post.get("mediaSources")
-            if not media_sources:
-                self.log.warning("%s: No media files", post.get("id"))
-                continue
-
-            src = max(media_sources, key=self._sort_key)
-            post.update(src)
-            url = src["url"]
-            text.nameext_from_url(url, post)
+            files = self._extract_files(post)
+            post["count"] = len(files)
 
             yield Message.Directory, post
-            yield Message.Url, url, post
+            for file in files:
+                url = file["url"]
+                post.update(file)
+                yield Message.Url, url, text.nameext_from_url(url, post)
 
     def posts(self):
         return ()
+
+    def _extract_files(self, post):
+        album = post.pop("albumContent", None)
+        if not album:
+            sources = post.get("mediaSources")
+            if not sources:
+                self.log.warning("%s: No media files", post.get("id"))
+                return ()
+            src = max(sources, key=self._sort_key)
+            src["num"] = 0
+            return (src,)
+
+        files = []
+        for num, media in enumerate(album, 1):
+            src = max(media["mediaSources"], key=self._sort_key)
+            src["num"] = num
+            files.append(src)
+        return files
 
     def login(self):
         username, password = self._get_auth_info()
@@ -71,7 +84,7 @@ class ScrolllerExtractor(Extractor):
 
         return data["login"]["token"]
 
-    def _request_graphql(self, opname, variables):
+    def _request_graphql(self, opname, variables, admin=False):
         url = "https://api.scrolller.com/api/v2/graphql"
         headers = {
             "Content-Type"  : "text/plain;charset=UTF-8",
@@ -85,6 +98,11 @@ class ScrolllerExtractor(Extractor):
             "variables"    : variables,
             "authorization": self.auth_token,
         }
+
+        if admin:
+            url = "https://api.scrolller.com/admin"
+            headers["Content-Type"] = "application/json"
+
         return self.request(
             url, method="POST", headers=headers, data=util.json_dumps(data),
         ).json()["data"]
@@ -159,12 +177,9 @@ class ScrolllerPostExtractor(ScrolllerExtractor):
     example = "https://scrolller.com/title-slug-a1b2c3d4f5"
 
     def posts(self):
-        url = "{}/{}".format(self.root, self.groups[0])
-        page = self.request(url).text
-        data = util.json_loads(text.extr(
-            page, '<script>window.scrolllerConfig="', '"</script>')
-            .replace('\\"', '"'))
-        return (data["item"],)
+        variables = {"url": "/" + self.groups[0]}
+        data = self._request_graphql("SubredditPostQuery", variables, True)
+        return (data["getPost"],)
 
 
 QUERIES = {
@@ -225,6 +240,34 @@ query LoginQuery(
         password: $password
     ) {
         username token expiresAt isAdmin status isPremium
+    }
+}
+""",
+
+    "ItemTypeQuery": """\
+query ItemTypeQuery(
+    $url: String!
+) {
+    getItemType(
+        url: $url
+    )
+}
+""",
+
+    "SubredditPostQuery": """\
+query SubredditPostQuery(
+    $url: String!
+) {
+    getPost(
+        data: { url: $url }
+    ) {
+        __typename id url title subredditId subredditTitle subredditUrl
+        redditPath isNsfw hasAudio fullLengthSource gfycatSource redgifsSource
+        ownerAvatar username displayName favoriteCount isPaid tags
+        commentsCount commentsRepliesCount isFavorite
+        albumContent { mediaSources { url width height isOptimized } }
+        mediaSources { url width height isOptimized }
+        blurredMediaSources { url width height isOptimized }
     }
 }
 """,
