@@ -3107,12 +3107,32 @@ Description
     Extract a user's announcements as ``announcements`` metadata.
 
 
+extractor.kemonoparty.endpoint
+------------------------------
+Type
+    ``string``
+Default
+    ``"legacy"``
+Description
+    API endpoint to use for retrieving creator posts.
+
+    ``"legacy"``
+        | Use the results from
+          `/v1/{service}/user/{creator_id}/posts-legacy <https://kemono.su/documentation/api#operations-default-get_v1__service__user__creator_id__posts_legacy>`__
+        | Provides less metadata, but is more reliable at returning all posts.
+        | Supports filtering results by ``tag`` query parameter.
+    ``"posts"``
+        | Use the results from
+          `/v1/{service}/user/{creator_id} <https://kemono.su/documentation/api#operations-Posts-get_v1__service__user__creator_id_>`__
+        | Provides more metadata, but might not return a creator's first/last posts.
+
+
 extractor.kemonoparty.favorites
 -------------------------------
 Type
     ``string``
 Default
-    ``artist``
+    ``"artist"``
 Description
     Determines the type of favorites to be downloaded.
 
@@ -6440,6 +6460,19 @@ Description
     Only compare file sizes. Do not read and compare their content.
 
 
+directory.event
+---------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"prepare"``
+Description
+    The event(s) for which directory_ format strings are (re)evaluated.
+
+    See `metadata.event`_ for a list of available events.
+
+
 exec.archive
 ------------
 Type
@@ -7738,6 +7771,8 @@ Description
     ``compare``
         | Compare versions of the same file and replace/enumerate them on mismatch
         | (requires `downloader.*.part`_ = ``true`` and `extractor.*.skip`_ = ``false``)
+    ``directory``
+        Reevaluate directory_ format strings
     ``exec``
         Execute external commands
     ``hash``
