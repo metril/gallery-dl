@@ -1860,7 +1860,7 @@ Type
 Default
     ``true``
 Description
-    Download images rated NSFW.
+    Download NSFW-rated images.
 
     * For ``"api": "rest"``, this can be one of
       ``"None"``, ``"Soft"``, ``"Mature"``, ``"X"``
@@ -1869,8 +1869,8 @@ Description
     * For ``"api": "trpc"``, this can be an ``integer``
       whose bits select the returned mature content flags.
 
-      For example, ``12`` (``4|8``)  would return only
-      ``Mature`` and ``X`` rated images,
+      For example, ``28`` (``4|8|16``)  would return only
+      ``R``, ``X``, and ``XXX`` rated images,
       while ``3`` (``1|2``) would return only
       ``None`` and ``Soft`` rated images,
 
@@ -1893,6 +1893,26 @@ Description
 
     Note: Set this option to an arbitrary letter, e.g., ``"w"``,
     to download images in JPEG format at their original resolution.
+
+
+extractor.civitai.quality-videos
+--------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"quality=100"``
+Example
+    * ``"+transcode=true,quality=100"``
+    * ``["+", "transcode=true", "quality=100"]``
+Description
+    A (comma-separated) list of video quality options
+    to pass with every video URL.
+
+    Known available options include ``original``, ``quality``, ``transcode``
+
+    Use ``+`` as first character to `add` the given options to the
+    `quality <extractor.civitai.quality_>`__ ones.
 
 
 extractor.cyberdrop.domain
