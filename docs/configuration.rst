@@ -2653,6 +2653,19 @@ Description
     See `flickr.photos.getExif <https://www.flickr.com/services/api/flickr.photos.getExif.html>`__ for details.
 
 
+extractor.flickr.info
+---------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    For each photo, retrieve its "full" metadata as provided by
+    `flickr.photos.getInfo <https://www.flickr.com/services/api/flickr.photos.getInfo.html>`__
+
+    Note: This requires 1 additional API call per photo.
+
+
 extractor.flickr.metadata
 -------------------------
 Type
@@ -7564,6 +7577,23 @@ How To
       and click "SUBMIT"
     * copy ``Key`` and ``Secret`` and put them in your configuration file
       as ``"api-key"`` and ``"api-secret"``
+
+
+extractor.mangadex.client-id & .client-secret
+---------------------------------------------
+Type
+    ``string``
+How To
+    * login and go to your `User Settings <https://mangadex.org/settings>`__
+    * open the "API Clients" section
+    * click "``+ Create``"
+    * choose a name
+    * click "``✔️ Create``"
+    * wait for approval / reload the page
+    * copy the value after "AUTOAPPROVED ACTIVE" in the form "personal-client-..."
+      and put it in your configuration file as ``"client-id"``
+    * click "``Get Secret``", then "``Copy Secret``",
+      and paste it into your configuration file as ``"client-secret"``
 
 
 extractor.reddit.client-id & .user-agent

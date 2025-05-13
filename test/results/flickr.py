@@ -33,9 +33,13 @@ __tests__ = (
     "id"         : 16089302239,
     "height"     : 683,
     "label"      : "Large",
+    "license"    : "0",
+    "license_name": "All Rights Reserved",
     "media"      : "photo",
     "pool"       : list,
     "set"        : list,
+    "safety_level": "0",
+    "tags"       : list,
     "url"        : str,
     "views"      : int,
     "width"      : 1024,
@@ -87,6 +91,16 @@ __tests__ = (
     "#category": ("", "flickr", "image"),
     "#class"   : flickr.FlickrImageExtractor,
     "#pattern" : flickr.FlickrImageExtractor.pattern,
+
+    "id"  : 26140204724,
+    "date": "dt:2016-05-01 10:03:33",
+    "user": {
+        "location": "diebolsheim, france",
+        "nsid": "23965455@N05",
+        "path_alias": "sgu_",
+        "realname": "philippe baumgart",
+        "username": "philippe baumgart",
+    },
 },
 
 {
@@ -152,14 +166,32 @@ __tests__ = (
     "#url"     : "https://www.flickr.com/photos/shona_s/favorites",
     "#category": ("", "flickr", "favorite"),
     "#class"   : flickr.FlickrFavoriteExtractor,
-    "#pattern" : flickr.FlickrImageExtractor.pattern,
-    "#count"   : 4,
+    "#options" : {"info": True},
+    "#urls"    : (
+        "https://live.staticflickr.com/7322/8719105033_4a21140220_o_d.jpg",
+        "https://live.staticflickr.com/7376/8720226282_eae0faefd1_o_d.jpg",
+        "https://live.staticflickr.com/7460/8720245516_ab06f80353_o_d.jpg",
+        "https://live.staticflickr.com/8268/8705102120_64349ebac2_o_d.jpg",
+    ),
+
+    "dates"       : dict,
+    "license"     : "0",
+    "license_name": "All Rights Reserved",
+    "notes"       : dict,
+    "safety_level": "0",
 },
 
 {
     "#url"     : "https://flickr.com/search/?text=mountain",
     "#category": ("", "flickr", "search"),
     "#class"   : flickr.FlickrSearchExtractor,
+    "#range"   : "1-10",
+    "#count"   : 10,
+    "#pattern" : r"https://live\.staticflickr\.com/\d+/.+",
+
+    "search": {
+        "text": "mountain",
+    },
 },
 
 {
