@@ -48,6 +48,8 @@ class FlickrExtractor(Extractor):
     def metadata(self):
         """Return general metadata"""
         self.user = self.api.urls_lookupUser(self.item_id)
+        if self.config("profile", False):
+            self.user.update(self.api.people_getInfo(self.user["nsid"]))
         return {"user": self.user}
 
     def photos(self):
@@ -87,7 +89,11 @@ class FlickrImageExtractor(FlickrExtractor):
         else:
             self.api._extract_photo(photo)
 
-        photo["user"] = photo["owner"]
+        if self.config("profile", False):
+            photo["user"] = self.api.people_getInfo(photo["owner"]["nsid"])
+        else:
+            photo["user"] = photo["owner"]
+
         photo["title"] = photo["title"]["_content"]
         photo["comments"] = text.parse_int(photo["comments"]["_content"])
         photo["description"] = photo["description"]["_content"]
@@ -322,6 +328,26 @@ class FlickrAPI(oauth.OAuth1API):
         params = {"group_id": group_id}
         return self._pagination("groups.pools.getPhotos", params)
 
+    def people_getInfo(self, user_id):
+        """Get information about a user."""
+        params = {"user_id": user_id}
+        user = self._call("people.getInfo", params)
+
+        try:
+            user = user["person"]
+            for key in ("description", "username", "realname", "location",
+                        "profileurl", "photosurl", "mobileurl"):
+                if isinstance(user.get(key), dict):
+                    user[key] = user[key]["_content"]
+            photos = user["photos"]
+            for key in ("count", "firstdate", "firstdatetaken"):
+                if isinstance(photos.get(key), dict):
+                    photos[key] = photos[key]["_content"]
+        except Exception:
+            pass
+
+        return user
+
     def people_getPhotos(self, user_id):
         """Return photos from the given user's photostream."""
         params = {"user_id": user_id}
@@ -470,14 +496,15 @@ class FlickrAPI(oauth.OAuth1API):
         self._extract_metadata(photo)
         photo["id"] = text.parse_int(photo["id"])
 
-        if "owner" in photo:
+        if "owner" not in photo:
+            photo["owner"] = self.extractor.user
+        elif not self.meta_info:
             photo["owner"] = {
                 "nsid"      : photo["owner"],
                 "username"  : photo["ownername"],
                 "path_alias": photo["pathalias"],
             }
-        else:
-            photo["owner"] = self.extractor.user
+
         del photo["pathalias"]
         del photo["ownername"]
 
@@ -527,7 +554,6 @@ class FlickrAPI(oauth.OAuth1API):
         if info and self.meta_info:
             try:
                 photo.update(self.photos_getInfo(photo["id"]))
-                photo["user"] = photo["owner"]
                 photo["title"] = photo["title"]["_content"]
                 photo["comments"] = text.parse_int(
                     photo["comments"]["_content"])
