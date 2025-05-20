@@ -165,13 +165,16 @@ class InstagramExtractor(Extractor):
         if "items" in post:  # story or highlight
             items = post["items"]
             reel_id = str(post["id"]).rpartition(":")[2]
+            expires = post.get("expiring_at")
             data = {
-                "expires": text.parse_timestamp(post.get("expiring_at")),
+                "expires": text.parse_timestamp(expires),
                 "post_id": reel_id,
                 "post_shortcode": shortcode_from_id(reel_id),
             }
             if "title" in post:
                 data["highlight_title"] = post["title"]
+            if expires and not post.get("seen"):
+                post["seen"] = expires - 86400
 
         else:  # regular image/video post
             data = {
@@ -583,7 +586,10 @@ class InstagramStoriesExtractor(InstagramExtractor):
         reel_id = self.highlight_id or self.api.user_id(self.user)
         reels = self.api.reels_media(reel_id)
 
-        if self.media_id and reels:
+        if not reels:
+            return ()
+
+        if self.media_id:
             reel = reels[0]
             for item in reel["items"]:
                 if item["pk"] == self.media_id:
@@ -591,6 +597,16 @@ class InstagramStoriesExtractor(InstagramExtractor):
                     break
             else:
                 raise exception.NotFoundError("story")
+
+        elif self.config("split"):
+            reel = reels[0]
+            reels = []
+            for item in reel["items"]:
+                item.pop("user", None)
+                copy = reel.copy()
+                copy.update(item)
+                copy["items"] = (item,)
+                reels.append(copy)
 
         return reels
 
