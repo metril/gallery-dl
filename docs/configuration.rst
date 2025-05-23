@@ -663,6 +663,7 @@ Type
 Default
     * ``"gallery-dl/VERSION"``: ``[Danbooru]``, ``mangadex``, ``weasyl``
     * ``"gallery-dl/VERSION (by mikf)"``: ``[E621]``
+    * ``"net.umanle.arca.android.playstore/0.9.75"``: ``arcalive``
     * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/LATEST.0.0.0 Safari/537.36"``: ``instagram``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:LATEST) Gecko/20100101 Firefox/LATEST"``: otherwise
@@ -3863,7 +3864,7 @@ Description
 
 
 extractor.pixeldrain.recursive
---------------------------
+------------------------------
 Type
     ``bool``
 Default
@@ -4315,6 +4316,39 @@ Default
     ``false``
 Description
     Refresh download URLs before they expire.
+
+
+extractor.sankaku.tags
+----------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``false``
+Description
+    | Group ``tags`` by type and
+      provide them as ``tags_TYPE`` and ``tag_string_TYPE`` metadata fields,
+    | for example ``tags_artist`` and ``tags_character``.
+
+    ``true``
+        Enable general ``tags`` categories
+
+        Requires:
+
+        * 1 additional API request per 100 tags per post
+
+    ``"extended"``
+        Group ``tags`` by the new, extended tag category system
+        used on ``chan.sankakucomplex.com``
+
+        Requires:
+
+        * 1 additional HTTP request per post
+        * logged-in `cookies <extractor.*.cookies_>`__
+          to fetch full ``tags`` category data
+
+    ``false``
+        Disable ``tags`` categories
 
 
 extractor.sankakucomplex.embeds
