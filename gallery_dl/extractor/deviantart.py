@@ -8,7 +8,7 @@
 
 """Extractors for https://www.deviantart.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache, memcache
 import collections
@@ -873,16 +873,10 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
                    .replace("\\\\", "\\")
 
 
-class DeviantartUserExtractor(DeviantartExtractor):
+class DeviantartUserExtractor(Dispatch, DeviantartExtractor):
     """Extractor for an artist's user profile"""
-    subcategory = "user"
     pattern = BASE_PATTERN + r"/?$"
     example = "https://www.deviantart.com/USER"
-
-    def initialize(self):
-        pass
-
-    skip = Extractor.skip
 
     def items(self):
         base = "{}/{}/".format(self.root, self.user)
@@ -2083,8 +2077,7 @@ class DeviantartEclipseAPI():
         pos = page.find('\\"name\\":\\"watching\\"')
         if pos < 0:
             raise exception.NotFoundError("'watching' module ID")
-        module_id = text.rextract(
-            page, '\\"id\\":', ',', pos)[0].strip('" ')
+        module_id = text.rextr(page, '\\"id\\":', ',', pos).strip('" ')
 
         self._fetch_csrf_token(page)
         return gruser_id, module_id
