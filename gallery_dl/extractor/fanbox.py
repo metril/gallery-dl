@@ -7,7 +7,7 @@
 """Extractors for https://www.fanbox.cc/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, util
 from ..cache import memcache
 import re
 
@@ -85,6 +85,7 @@ class FanboxExtractor(Extractor):
         """Fetch and process post data"""
         url = "https://api.fanbox.cc/post.info?postId="+post_id
         post = self.request(url, headers=self.headers).json()["body"]
+        post["archives"] = ()
 
         content_body = post.pop("body", None)
         if content_body:
@@ -95,28 +96,30 @@ class FanboxExtractor(Extractor):
             if "blocks" in content_body:
                 content = []  # text content
                 images = []   # image IDs in 'body' order
+                files = []    # file IDs in 'body' order
 
-                append = content.append
-                append_img = images.append
                 for block in content_body["blocks"]:
                     if "text" in block:
-                        append(block["text"])
+                        content.append(block["text"])
                     if "links" in block:
                         for link in block["links"]:
-                            append(link["url"])
+                            content.append(link["url"])
                     if "imageId" in block:
-                        append_img(block["imageId"])
-
-                if images and "imageMap" in content_body:
-                    # reorder 'imageMap' (#2718)
-                    image_map = content_body["imageMap"]
-                    content_body["imageMap"] = {
-                        image_id: image_map[image_id]
-                        for image_id in images
-                        if image_id in image_map
-                    }
+                        images.append(block["imageId"])
+                    if "fileId" in block:
+                        files.append(block["fileId"])
 
                 post["content"] = "\n".join(content)
+
+                self._sort_map(content_body, "imageMap", images)
+                file_map = self._sort_map(content_body, "fileMap", files)
+                if file_map:
+                    exts = util.EXTS_ARCHIVE
+                    post["archives"] = [
+                        file
+                        for file in file_map.values()
+                        if file.get("extension", "").lower() in exts
+                    ]
 
         post["date"] = text.parse_datetime(post["publishedDatetime"])
         post["text"] = content_body.get("text") if content_body else None
@@ -144,6 +147,19 @@ class FanboxExtractor(Extractor):
                 post["commentd"] = ()
 
         return content_body, post
+
+    def _sort_map(self, body, key, ids):
+        orig = body.get(key)
+        if not orig:
+            return {} if orig is None else orig
+
+        body[key] = new = {
+            id: orig[id]
+            for id in ids
+            if id in orig
+        }
+
+        return new
 
     @memcache(keyarg=1)
     def _get_user_data(self, creator_id):
