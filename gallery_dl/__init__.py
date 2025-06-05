@@ -188,16 +188,8 @@ def main():
             ujob = update.UpdateJob(extr)
             return ujob.run()
 
-        # category remapping
-        cmap = config.interpolate(("extractor",), "category-map")
-        if cmap is None:
-            cmap = {
-                "coomerparty": "coomer",
-                "kemonoparty": "kemono",
-                "koharu"     : "schalenetwork",
-            }
-        if cmap:
-            config.rename_categories(cmap)
+        # category renaming
+        config.remap_categories()
 
         # extractor modules
         modules = config.get(("extractor",), "modules")
@@ -324,6 +316,17 @@ def main():
             if pformat and len(input_manager.urls) > 1 and \
                     args.loglevel < logging.ERROR:
                 input_manager.progress(pformat)
+
+            catmap = config.interpolate(("extractor",), "category-map")
+            if catmap:
+                if catmap == "compat":
+                    catmap = {
+                        "coomer"       : "coomerparty",
+                        "kemono"       : "kemonoparty",
+                        "schalenetwork": "koharu",
+                    }
+                from .extractor import common
+                common.CATEGORY_MAP = catmap
 
             # process input URLs
             retval = 0

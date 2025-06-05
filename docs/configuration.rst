@@ -4371,6 +4371,16 @@ Description
     Download videos.
 
 
+extractor.sexcom.gifs
+---------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download animated images as ``.gif`` instead of ``.webp``
+
+
 extractor.skeb.article
 ----------------------
 Type
@@ -7487,6 +7497,33 @@ Description
 extractor.category-map
 ----------------------
 Type
+    * ``object`` (`category` -> `category`)
+    * ``string``
+Example
+    .. code:: json
+
+        {
+            "danbooru": "booru",
+            "gelbooru": "booru"
+        }
+Description
+    A JSON object mapping category names to their replacements.
+
+    Special values:
+
+    * ``"compat"``
+        .. code:: json
+
+            {
+                "coomer"       : "coomerparty",
+                "kemono"       : "kemonoparty",
+                "schalenetwork": "koharu"
+            }
+
+
+extractor.config-map
+--------------------
+Type
     ``object`` (`category` -> `category`)
 Default
     .. code:: json
@@ -7497,7 +7534,8 @@ Default
             "koharu"     : "schalenetwork"
         }
 Description
-    A JSON ``object`` mapping category names to their replacements.
+    Duplicate the configuration settings of extractor `categories`
+    to other names.
 
 
 globals
