@@ -133,3 +133,43 @@ class DynastyscansImageExtractor(DynastyscansSearchExtractor):
 
     def images(self):
         return (self.query,)
+
+
+class DynastyscansAnthologyExtractor(DynastyscansSearchExtractor):
+    """Extractor for dynasty-scans anthologies"""
+    subcategory = "anthology"
+    pattern = BASE_PATTERN + r"/anthologies/([^/?#]+)"
+    example = "https://dynasty-scans.com/anthologies/TITLE"
+
+    def items(self):
+        url = "{}/anthologies/{}.atom".format(self.root, self.groups[0])
+        root = self.request_xml(url, xmlns=False)
+
+        data = {
+            "_extractor": DynastyscansChapterExtractor,
+            "anthology" : root[3].text[28:],
+        }
+
+        if self.config("metadata", False):
+            page = self.request(url[:-5]).text
+            alert = text.extr(page, "<div class='alert", "</div>")
+
+            data["alert"] = text.split_html(alert)[1:] if alert else ()
+            data["status"] = text.extr(
+                page, "<small>&mdash; ", "</small>")
+            data["description"] = text.extr(
+                page, "<div class='description'>", "</div>")
+
+        for element in root:
+            if element.tag != "entry":
+                continue
+            content = element[6][0]
+            data["author"] = content[0].text[8:]
+            data["scanlator"] = content[1].text[11:]
+            data["tags"] = content[2].text[6:].lower().split(", ")
+            data["title"] = element[5].text
+            data["date"] = text.parse_datetime(
+                element[1].text, "%Y-%m-%dT%H:%M:%S%z")
+            data["date_updated"] = text.parse_datetime(
+                element[2].text, "%Y-%m-%dT%H:%M:%S%z")
+            yield Message.Queue, element[4].text, data
