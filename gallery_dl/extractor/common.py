@@ -430,7 +430,10 @@ class Extractor():
             headers["User-Agent"] = useragent
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
+
             ssl_ciphers = self.ciphers
+            if ssl_ciphers is not None and ssl_ciphers in SSL_CIPHERS:
+                ssl_ciphers = SSL_CIPHERS[ssl_ciphers]
 
         if BROTLI:
             headers["Accept-Encoding"] = "gzip, deflate, br"
@@ -448,12 +451,21 @@ class Extractor():
 
         custom_headers = self.config("headers")
         if custom_headers:
+            if isinstance(custom_headers, str):
+                if custom_headers in HTTP_HEADERS:
+                    custom_headers = HTTP_HEADERS[custom_headers]
+                else:
+                    self.log.error("Invalid 'headers' value '%s'",
+                                   custom_headers)
+                    custom_headers = ()
             headers.update(custom_headers)
 
         custom_ciphers = self.config("ciphers")
         if custom_ciphers:
             if isinstance(custom_ciphers, list):
                 ssl_ciphers = ":".join(custom_ciphers)
+            elif custom_ciphers in SSL_CIPHERS:
+                ssl_ciphers = SSL_CIPHERS[custom_ciphers]
             else:
                 ssl_ciphers = custom_ciphers
 
@@ -651,7 +663,7 @@ class Extractor():
         util.dump_json(obj, ensure_ascii=False, indent=2)
 
     def _dump_response(self, response, history=True):
-        """Write the response content to a .dump file in the current directory.
+        """Write the response content to a .txt file in the current directory.
 
         The file name is derived from the response url,
         replacing special characters with "_"
@@ -664,7 +676,8 @@ class Extractor():
             Extractor._dump_index += 1
         else:
             Extractor._dump_index = 1
-            Extractor._dump_sanitize = re.compile(r"[\\\\|/<>:\"?*&=#]+").sub
+            Extractor._dump_sanitize = util.re_compile(
+                r"[\\\\|/<>:\"?*&=#]+").sub
 
         fname = "{:>02}_{}".format(
             Extractor._dump_index,
