@@ -2504,8 +2504,23 @@ Type
 Default
     ``null``
 Description
-    Sets a custom image download limit and
-    stops extraction when it gets exceeded.
+    Set a custom image download limit and perform
+    `limits-action <extractor.exhentai.limits-action_>`__
+    when it gets exceeded.
+
+
+extractor.exhentai.limits-action
+--------------------------------
+Type
+    ``string``
+Default
+    ``"stop"``
+Description
+    Action to perform when the image limit is exceeded.
+
+    * `"stop"`: Stop the current extractor run.
+    * `"wait"`: Wait for user input.
+    * `"reset"`: Spend GP to reset your account's image limits.
 
 
 extractor.exhentai.metadata
@@ -2518,8 +2533,8 @@ Description
     Load extended gallery metadata from the
     `API <https://ehwiki.org/wiki/API#Gallery_Metadata>`_.
 
-    Adds ``archiver_key``, ``posted``, and ``torrents``.
-    Makes ``date`` and ``filesize`` more precise.
+    * Adds ``archiver_key``, ``posted``, and ``torrents``
+    * Provides exact ``date`` and ``filesize``
 
 
 extractor.exhentai.original
@@ -2542,6 +2557,8 @@ Description
     Selects an alternative source to download files from.
 
     * ``"hitomi"``:  Download the corresponding gallery from ``hitomi.la``
+    * ``"metadata"``:  Load only a gallery's metadata from the
+      `API <https://ehwiki.org/wiki/API#Gallery_Metadata>`_
 
 
 extractor.exhentai.tags
@@ -5955,17 +5972,25 @@ Description
 downloader.*.rate
 -----------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` with 2 ``strings``
 Default
     ``null``
 Example
-    ``"32000"``, ``"500k"``, ``"2.5M"``
+    * ``"32000"``
+    * ``"500k"``
+    * ``"1M - 2.5M"``
+    * ``["1M", "2.5M"]``
 Description
     Maximum download rate in bytes per second.
 
     Possible values are valid integer or floating-point numbers
     optionally followed by one of ``k``, ``m``. ``g``, ``t``, or ``p``.
     These suffixes are case-insensitive.
+
+    If given as a range, the maximum download rate
+    will be randomly chosen before each download.
+    (see `random.randint() <https://docs.python.org/3/library/random.html#random.randint>`_)
 
 
 downloader.*.retries
@@ -6274,8 +6299,8 @@ Description
     * ``"pipe"``: Suitable for piping to other processes or files
     * ``"terminal"``: Suitable for the standard Windows console
     * ``"color"``: Suitable for terminals that understand ANSI escape codes and colors
-    * ``"auto"``: ``"terminal"`` on Windows with `output.ansi`_ disabled,
-      ``"color"`` otherwise.
+    * ``"auto"``: ``"pipe"`` if not on a TTY, ``"terminal"`` on Windows with
+      `output.ansi`_ disabled, ``"color"`` otherwise.
 
     | It is possible to use custom output format strings
       by setting this option to an ``object`` and specifying
