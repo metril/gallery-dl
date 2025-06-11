@@ -673,11 +673,6 @@ Description
     Setting this value to ``"browser"`` will try to automatically detect
     and use the ``User-Agent`` header of the system's default browser.
 
-    Note:
-    This option has *no* effect if
-    `extractor.browser <extractor.*.browser_>`__
-    is enabled.
-
 
 extractor.*.browser
 -------------------
@@ -5707,10 +5702,22 @@ Type
 Default
     ``true``
 Description
-    Enables the use of |ytdl's| ``generic`` extractor.
+    Enables the use of |ytdl's| ``Generic`` extractor.
 
     Set this option to ``"force"`` for the same effect as
     ``--force-generic-extractor``.
+
+
+extractor.ytdl.generic-category
+-------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    When using |ytdl's| ``Generic`` extractor,
+    change `category` to ``"ytdl-generic"`` and
+    set `subcategory` to the input URL's domain.
 
 
 extractor.ytdl.logging

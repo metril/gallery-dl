@@ -17,9 +17,9 @@ import queue
 import random
 import getpass
 import logging
-import datetime
 import requests
 import threading
+from datetime import datetime
 from xml.etree import ElementTree
 from requests.adapters import HTTPAdapter
 from .message import Message
@@ -290,7 +290,7 @@ class Extractor():
             seconds = float(seconds)
             until = now + seconds
         elif until:
-            if isinstance(until, datetime.datetime):
+            if isinstance(until, datetime):
                 # convert to UTC timestamp
                 until = util.datetime_to_timestamp(until)
             else:
@@ -304,7 +304,7 @@ class Extractor():
             return
 
         if reason:
-            t = datetime.datetime.fromtimestamp(until).time()
+            t = datetime.fromtimestamp(until).time()
             isotime = "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second)
             self.log.info("Waiting until %s (%s)", isotime, reason)
         time.sleep(seconds)
@@ -419,15 +419,7 @@ class Extractor():
                             ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
             ssl_ciphers = SSL_CIPHERS[browser]
         else:
-            useragent = self.config("user-agent")
-            if useragent is None or useragent == "auto":
-                useragent = self.useragent
-            elif useragent == "browser":
-                useragent = _browser_useragent()
-            elif self.useragent is not Extractor.useragent and \
-                    useragent is config.get(("extractor",), "user-agent"):
-                useragent = self.useragent
-            headers["User-Agent"] = useragent
+            headers["User-Agent"] = self.useragent
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
 
@@ -448,6 +440,15 @@ class Extractor():
                 headers["Referer"] = referer
             elif self.root:
                 headers["Referer"] = self.root + "/"
+
+        custom_ua = self.config("user-agent")
+        if custom_ua is None or custom_ua == "auto":
+            pass
+        elif custom_ua == "browser":
+            headers["User-Agent"] = _browser_useragent()
+        elif self.useragent is Extractor.useragent or \
+                custom_ua is not config.get(("extractor",), "user-agent"):
+            headers["User-Agent"] = custom_ua
 
         custom_headers = self.config("headers")
         if custom_headers:
@@ -516,9 +517,11 @@ class Extractor():
                 with open(path) as fp:
                     cookies = util.cookiestxt_load(fp)
             except Exception as exc:
-                self.log.warning("cookies: %s", exc)
+                self.log.warning("cookies: Failed to load '%s' (%s: %s)",
+                                 cookies_source, exc.__class__.__name__, exc)
             else:
-                self.log.debug("Loading cookies from '%s'", cookies_source)
+                self.log.debug("cookies: Loading cookies from '%s'",
+                               cookies_source)
                 set_cookie = self.cookies.set_cookie
                 for cookie in cookies:
                     set_cookie(cookie)
@@ -538,16 +541,16 @@ class Extractor():
                 else:
                     _browser_cookies[key] = cookies
             else:
-                self.log.debug("Using cached cookies from %s", key)
+                self.log.debug("cookies: Using cached cookies from %s", key)
 
             set_cookie = self.cookies.set_cookie
             for cookie in cookies:
                 set_cookie(cookie)
 
         else:
-            self.log.warning(
-                "Expected 'dict', 'list', or 'str' value for 'cookies' "
-                "option, got '%s' (%s)",
+            self.log.error(
+                "cookies: Expected 'dict', 'list', or 'str' value for "
+                "'cookies' option, got '%s' instead (%r)",
                 cookies_source.__class__.__name__, cookies_source)
 
     def cookies_store(self):
@@ -569,7 +572,8 @@ class Extractor():
                 util.cookiestxt_store(fp, self.cookies)
             os.replace(path_tmp, path)
         except OSError as exc:
-            self.log.warning("cookies: %s", exc)
+            self.log.error("cookies: Failed to write to '%s' "
+                           "(%s: %s)", path, exc.__class__.__name__, exc)
 
     def cookies_update(self, cookies, domain=""):
         """Update the session's cookiejar with 'cookies'"""
@@ -615,14 +619,17 @@ class Extractor():
 
                 if diff <= 0:
                     self.log.warning(
-                        "Cookie '%s' has expired", cookie.name)
+                        "cookies: %s/%s expired at %s",
+                        cookie.domain.lstrip("."), cookie.name,
+                        datetime.fromtimestamp(cookie.expires))
                     continue
 
                 elif diff <= 86400:
                     hours = diff // 3600
                     self.log.warning(
-                        "Cookie '%s' will expire in less than %s hour%s",
-                        cookie.name, hours + 1, "s" if hours else "")
+                        "cookies: %s/%s will expire in less than %s hour%s",
+                        cookie.domain.lstrip("."), cookie.name,
+                        hours + 1, "s" if hours else "")
 
             names.discard(cookie.name)
             if not names:
@@ -650,7 +657,7 @@ class Extractor():
             ts = self.config(key, default)
             if isinstance(ts, str):
                 try:
-                    ts = int(datetime.datetime.strptime(ts, fmt).timestamp())
+                    ts = int(datetime.strptime(ts, fmt).timestamp())
                 except ValueError as exc:
                     self.log.warning("Unable to parse '%s': %s", key, exc)
                     ts = default
