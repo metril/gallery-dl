@@ -26,6 +26,11 @@ class VkExtractor(Extractor):
     def _init(self):
         self.offset = text.parse_int(self.config("offset"))
 
+    def finalize(self):
+        if self.offset:
+            self.log.info("Use '-o offset=%s' to continue downloading "
+                          "from the current position", self.offset)
+
     def skip(self, num):
         self.offset += num
         return num
@@ -85,10 +90,13 @@ class VkExtractor(Extractor):
         }
 
         while True:
-            payload = self.request(
-                url, method="POST", headers=headers, data=data,
-            ).json()["payload"][1]
+            response = self.request(
+                url, method="POST", headers=headers, data=data)
+            if response.history and "/challenge.html" in response.url:
+                raise exception.StopExtraction(
+                    "HTTP redirect to 'challenge' page<:\n%s", response.url)
 
+            payload = response.json()["payload"][1]
             if len(payload) < 4:
                 self.log.debug(payload)
                 raise exception.AuthorizationError(
@@ -97,18 +105,20 @@ class VkExtractor(Extractor):
             total = payload[1]
             photos = payload[3]
 
-            data["offset"] += len(photos)
-            if data["offset"] >= total:
+            offset_next = self.offset + len(photos)
+            if offset_next >= total:
                 # the last chunk of photos also contains the first few photos
                 # again if 'total' is not a multiple of 10
-                extra = total - data["offset"]
+                extra = total - offset_next
                 if extra:
                     del photos[extra:]
 
                 yield from photos
+                self.offset = 0
                 return
 
             yield from photos
+            data["offset"] = self.offset = offset_next
 
 
 class VkPhotosExtractor(VkExtractor):
@@ -139,17 +149,25 @@ class VkPhotosExtractor(VkExtractor):
         return data
 
     def _extract_profile(self, url):
-        extr = text.extract_from(self.request(url).text)
-        return {"user": {
-            "name": text.unescape(extr(
-                'rel="canonical" href="https://vk.com/', '"')),
+        page = self.request(url).text
+        extr = text.extract_from(page)
+
+        user = {
+            "id"  : extr('property="og:url" content="https://vk.com/id', '"'),
             "nick": text.unescape(extr(
-                '<h1 class="page_name">', "<")).replace("  ", " "),
-            "info": text.unescape(text.remove_html(extr(
-                '<span class="current_text">', '</span'))),
-            "id"  : (extr('<a href="/albums', '"') or
-                     extr('data-from-id="', '"')),
-        }}
+                "<title>", " | VK</title>")),
+            "info": text.unescape(extr(
+                ',"activity":"', '","')).replace("\\/", "/"),
+            "name": extr('href="https://m.vk.com/', '"'),
+        }
+
+        if user["id"]:
+            user["group"] = False
+        else:
+            user["group"] = True
+            user["id"] = extr('data-from-id="', '"')
+
+        return {"user": user}
 
 
 class VkAlbumExtractor(VkExtractor):
