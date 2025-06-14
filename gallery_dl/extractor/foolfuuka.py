@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -74,8 +74,7 @@ class FoolfuukaExtractor(BaseExtractor):
 
         return url
 
-    @staticmethod
-    def _remote_direct(media):
+    def _remote_direct(self, media):
         return media["remote_media_link"]
 
 
