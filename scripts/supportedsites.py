@@ -114,6 +114,7 @@ CATEGORY_MAP = {
     "nijie"          : "nijie",
     "nozomi"         : "Nozomi.la",
     "nsfwalbum"      : "NSFWalbum.com",
+    "nudostar"       : "NudoStar.TV",
     "paheal"         : "rule #34",
     "photovogue"     : "PhotoVogue",
     "pidgiwiki"      : "PidgiWiki",
@@ -122,6 +123,7 @@ CATEGORY_MAP = {
     "pornpics"       : "PornPics.com",
     "pornreactor"    : "PornReactor",
     "readcomiconline": "Read Comic Online",
+    "redbust"        : "RedBust",
     "rbt"            : "RebeccaBlackTech",
     "redgifs"        : "RedGIFs",
     "rozenarcana"    : "Rozen Arcana",
@@ -333,6 +335,9 @@ SUBCATEGORY_MAP = {
         "usersubmissions": "User Profiles",
         "post"           : "Individual Posts",
         "shorturl"       : "",
+    },
+    "redbust": {
+        "gallery": ("Galleries", "Categories"),
     },
     "redgifs": {
         "collections": "",

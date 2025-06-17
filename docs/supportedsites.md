@@ -326,6 +326,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>Girlsreleased</td>
+    <td>https://girlsreleased.com/</td>
+    <td>Models, Sets, Sites</td>
+    <td></td>
+</tr>
+<tr>
     <td>Gofile</td>
     <td>https://gofile.io/</td>
     <td>Folders</td>
@@ -650,6 +656,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>NudoStar.TV</td>
+    <td>https://nudostar.tv/</td>
+    <td>individual Images, Models</td>
+    <td></td>
+</tr>
+<tr>
     <td>Patreon</td>
     <td>https://www.patreon.com/</td>
     <td>Creators, Posts, User Profiles</td>
@@ -785,6 +797,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Realbooru</td>
     <td>https://realbooru.com/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>RedBust</td>
+    <td>https://redbust.com/</td>
+    <td>Archives, Galleries, Categories, individual Images, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
