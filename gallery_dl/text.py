@@ -204,7 +204,7 @@ def parse_unicode_escapes(txt):
 
 
 def _hex_to_char(match):
-    return chr(int(match.group(1), 16))
+    return chr(int(match[1], 16))
 
 
 def parse_bytes(value, default=0, suffixes="bkmgtp"):
@@ -289,10 +289,17 @@ def parse_query_list(qs, as_list=()):
                     else:
                         result[name] = [value]
                 elif name not in result:
-                    result[name] = unquote(value.replace("+", " "))
+                    result[name] = value
     except Exception:
         pass
     return result
+
+
+def build_query(params):
+    return "&".join([
+        f"{quote(name)}={quote(value)}"
+        for name, value in params.items()
+    ])
 
 
 if sys.hexversion < 0x30c0000:

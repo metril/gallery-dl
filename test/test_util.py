@@ -10,6 +10,7 @@
 import os
 import sys
 import unittest
+from unittest.mock import patch
 
 import io
 import re
@@ -406,6 +407,89 @@ def hash(value):
         self.assertEqual(expr(value), result)
 
 
+class TestDatetime(unittest.TestCase):
+
+    def test_to_datetime(self, f=util.to_datetime):
+
+        def _assert(value, expected):
+            result = f(value)
+            self.assertIsInstance(result, datetime.datetime)
+            self.assertEqual(result, expected, msg=repr(value))
+
+        dt = datetime.datetime(2010, 1, 1)
+        self.assertIs(f(dt), dt)
+
+        _assert(dt            , dt)
+        _assert(1262304000    , dt)
+        _assert(1262304000.0  , dt)
+        _assert(1262304000.123, dt)
+        _assert("1262304000"  , dt)
+
+        _assert("2010-01-01"                      , dt)
+        _assert("2010-01-01 00:00:00"             , dt)
+        _assert("2010-01-01T00:00:00"             , dt)
+        _assert("2010-01-01T00:00:00.123456"      , dt)
+        _assert("2009-12-31T19:00:00-05:00"       , dt)
+        _assert("2009-12-31T19:00:00.123456-05:00", dt)
+        _assert("2010-01-01T00:00:00Z"            , dt)
+        _assert("2010-01-01T00:00:00.123456Z"     , dt)
+
+        _assert(0    , util.EPOCH)
+        _assert(""   , util.EPOCH)
+        _assert("foo", util.EPOCH)
+        _assert(None , util.EPOCH)
+        _assert(()   , util.EPOCH)
+        _assert([]   , util.EPOCH)
+        _assert({}   , util.EPOCH)
+        _assert((1, 2, 3), util.EPOCH)
+
+    @unittest.skipIf(sys.hexversion < 0x30b0000,
+                     "extended fromisoformat timezones")
+    def test_to_datetime_tz(self, f=util.to_datetime):
+
+        def _assert(value, expected):
+            result = f(value)
+            self.assertIsInstance(result, datetime.datetime)
+            self.assertEqual(result, expected, msg=repr(value))
+
+        dt = datetime.datetime(2010, 1, 1)
+
+        _assert("2009-12-31T19:00:00-05"          , dt)
+        _assert("2009-12-31T19:00:00-0500"        , dt)
+        _assert("2009-12-31T19:00:00.123456-05"   , dt)
+        _assert("2009-12-31T19:00:00.123456-0500" , dt)
+
+    def test_datetime_to_timestamp(self, f=util.datetime_to_timestamp):
+        self.assertEqual(f(util.EPOCH), 0.0)
+        self.assertEqual(f(datetime.datetime(2010, 1, 1)), 1262304000.0)
+        self.assertEqual(f(datetime.datetime(2010, 1, 1, 0, 0, 0, 128000)),
+                         1262304000.128000)
+        with self.assertRaises(TypeError):
+            f(None)
+
+    def test_datetime_to_timestamp_string(
+            self, f=util.datetime_to_timestamp_string):
+        self.assertEqual(f(util.EPOCH), "0")
+        self.assertEqual(f(datetime.datetime(2010, 1, 1)), "1262304000")
+        self.assertEqual(f(None), "")
+
+    def test_datetime_from_timestamp(
+            self, f=util.datetime_from_timestamp):
+        self.assertEqual(f(0.0), util.EPOCH)
+        self.assertEqual(f(1262304000.0), datetime.datetime(2010, 1, 1))
+        self.assertEqual(f(1262304000.128000).replace(microsecond=0),
+                         datetime.datetime(2010, 1, 1, 0, 0, 0))
+
+    def test_datetime_utcfromtimestamp(
+            self, f=util.datetime_utcfromtimestamp):
+        self.assertEqual(f(0.0), util.EPOCH)
+        self.assertEqual(f(1262304000.0), datetime.datetime(2010, 1, 1))
+
+    def test_datetime_utcnow(
+            self, f=util.datetime_utcnow):
+        self.assertIsInstance(f(), datetime.datetime)
+
+
 class TestOther(unittest.TestCase):
 
     def test_bencode(self):
@@ -794,86 +878,6 @@ value = 123
         self.assertEqual(f(["a", "b", "c"]), "a, b, c")
         self.assertEqual(f([1, 2, 3]), "1, 2, 3")
 
-    def test_to_datetime(self, f=util.to_datetime):
-
-        def _assert(value, expected):
-            result = f(value)
-            self.assertIsInstance(result, datetime.datetime)
-            self.assertEqual(result, expected, msg=repr(value))
-
-        dt = datetime.datetime(2010, 1, 1)
-        self.assertIs(f(dt), dt)
-
-        _assert(dt            , dt)
-        _assert(1262304000    , dt)
-        _assert(1262304000.0  , dt)
-        _assert(1262304000.123, dt)
-        _assert("1262304000"  , dt)
-
-        _assert("2010-01-01"                      , dt)
-        _assert("2010-01-01 00:00:00"             , dt)
-        _assert("2010-01-01T00:00:00"             , dt)
-        _assert("2010-01-01T00:00:00.123456"      , dt)
-        _assert("2009-12-31T19:00:00-05:00"       , dt)
-        _assert("2009-12-31T19:00:00.123456-05:00", dt)
-        _assert("2010-01-01T00:00:00Z"            , dt)
-        _assert("2010-01-01T00:00:00.123456Z"     , dt)
-
-        _assert(0    , util.EPOCH)
-        _assert(""   , util.EPOCH)
-        _assert("foo", util.EPOCH)
-        _assert(None , util.EPOCH)
-        _assert(()   , util.EPOCH)
-        _assert([]   , util.EPOCH)
-        _assert({}   , util.EPOCH)
-        _assert((1, 2, 3), util.EPOCH)
-
-    @unittest.skipIf(sys.hexversion < 0x30b0000,
-                     "extended fromisoformat timezones")
-    def test_to_datetime_tz(self, f=util.to_datetime):
-
-        def _assert(value, expected):
-            result = f(value)
-            self.assertIsInstance(result, datetime.datetime)
-            self.assertEqual(result, expected, msg=repr(value))
-
-        dt = datetime.datetime(2010, 1, 1)
-
-        _assert("2009-12-31T19:00:00-05"          , dt)
-        _assert("2009-12-31T19:00:00-0500"        , dt)
-        _assert("2009-12-31T19:00:00.123456-05"   , dt)
-        _assert("2009-12-31T19:00:00.123456-0500" , dt)
-
-    def test_datetime_to_timestamp(self, f=util.datetime_to_timestamp):
-        self.assertEqual(f(util.EPOCH), 0.0)
-        self.assertEqual(f(datetime.datetime(2010, 1, 1)), 1262304000.0)
-        self.assertEqual(f(datetime.datetime(2010, 1, 1, 0, 0, 0, 128000)),
-                         1262304000.128000)
-        with self.assertRaises(TypeError):
-            f(None)
-
-    def test_datetime_to_timestamp_string(
-            self, f=util.datetime_to_timestamp_string):
-        self.assertEqual(f(util.EPOCH), "0")
-        self.assertEqual(f(datetime.datetime(2010, 1, 1)), "1262304000")
-        self.assertEqual(f(None), "")
-
-    def test_datetime_from_timestamp(
-            self, f=util.datetime_from_timestamp):
-        self.assertEqual(f(0.0), util.EPOCH)
-        self.assertEqual(f(1262304000.0), datetime.datetime(2010, 1, 1))
-        self.assertEqual(f(1262304000.128000).replace(microsecond=0),
-                         datetime.datetime(2010, 1, 1, 0, 0, 0))
-
-    def test_datetime_utcfromtimestamp(
-            self, f=util.datetime_utcfromtimestamp):
-        self.assertEqual(f(0.0), util.EPOCH)
-        self.assertEqual(f(1262304000.0), datetime.datetime(2010, 1, 1))
-
-    def test_datetime_utcnow(
-            self, f=util.datetime_utcnow):
-        self.assertIsInstance(f(), datetime.datetime)
-
     def test_universal_none(self):
         obj = util.NONE
 
@@ -952,6 +956,26 @@ value = 123
             i += 1
         self.assertEqual(i, 0)
 
+    def test_HTTPBasicAuth(self, f=util.HTTPBasicAuth):
+        class Request:
+            headers = {}
+        request = Request()
+
+        auth = f("", "")
+        auth(request)
+        self.assertEqual(request.headers["Authorization"],
+                         b"Basic Og==")
+
+        f("foo", "bar")(request)
+        self.assertEqual(request.headers["Authorization"],
+                         b"Basic Zm9vOmJhcg==")
+
+        f("ewsxcvbhnjtr",
+          "RVXQ4i9Ju5ypi86VGJ8MqhDYpDKluS0sxiSRBAG7ymB3Imok")(request)
+        self.assertEqual(request.headers["Authorization"],
+                         b"Basic ZXdzeGN2YmhuanRyOlJWWFE0aTlKdTV5cGk4NlZHSjhNc"
+                         b"WhEWXBES2x1UzBzeGlTUkJBRzd5bUIzSW1vaw==")
+
     def test_module_proxy(self):
         proxy = util.ModuleProxy()
 
@@ -965,6 +989,16 @@ value = 123
         self.assertIs(proxy["abcdefghi"], util.NONE)
         self.assertIs(proxy["abc.def.ghi"], util.NONE)
         self.assertIs(proxy["os.path2"], util.NONE)
+
+    def test_lazy_prompt(self):
+        prompt = util.LazyPrompt()
+
+        with patch("getpass.getpass") as p:
+            p.return_value = "***"
+            result = str(prompt)
+
+        self.assertEqual(result, "***")
+        p.assert_called_once_with()
 
     def test_null_context(self):
         with util.NullContext():
