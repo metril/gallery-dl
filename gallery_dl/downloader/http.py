@@ -29,6 +29,7 @@ class HttpDownloader(DownloaderBase):
         self.metadata = extractor.config("http-metadata")
         self.progress = self.config("progress", 3.0)
         self.validate = self.config("validate", True)
+        self.validate_html = self.config("validate-html", True)
         self.headers = self.config("headers")
         self.minsize = self.config("filesize-min")
         self.maxsize = self.config("filesize-max")
@@ -204,8 +205,8 @@ class HttpDownloader(DownloaderBase):
                 return False
 
             # check for invalid responses
-            validate = kwdict.get("_http_validate")
-            if validate and self.validate:
+            if self.validate and \
+                    (validate := kwdict.get("_http_validate")) is not None:
                 try:
                     result = validate(response)
                 except Exception:
@@ -219,6 +220,14 @@ class HttpDownloader(DownloaderBase):
                     self.release_conn(response)
                     self.log.warning("Invalid response")
                     return False
+            if self.validate_html and response.headers.get(
+                    "content-type", "").startswith("text/html") and \
+                    pathfmt.extension not in ("html", "htm"):
+                if response.history:
+                    self.log.warning("HTTP redirect to '%s'", response.url)
+                else:
+                    self.log.warning("HTML response")
+                return False
 
             # check file size
             size = text.parse_int(size, None)
@@ -340,11 +349,11 @@ class HttpDownloader(DownloaderBase):
         self.downloading = False
         if self.mtime:
             if "_http_lastmodified" in kwdict:
-                kwdict["_mtime"] = kwdict["_http_lastmodified"]
+                kwdict["_mtime_http"] = kwdict["_http_lastmodified"]
             else:
-                kwdict["_mtime"] = response.headers.get("Last-Modified")
+                kwdict["_mtime_http"] = response.headers.get("Last-Modified")
         else:
-            kwdict["_mtime"] = None
+            kwdict["_mtime_http"] = None
 
         return True
 
@@ -477,7 +486,8 @@ MIME_TYPES = {
 
 
 def _signature_html(s):
-    return b"<!doctype html".startswith(s[:14].lower())
+    s = s[:14].lstrip()
+    return s and b"<!doctype html".startswith(s.lower())
 
 
 # https://en.wikipedia.org/wiki/List_of_file_signatures

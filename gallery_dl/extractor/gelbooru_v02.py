@@ -21,6 +21,9 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         self.user_id = self.config("user-id")
         self.root_api = self.config_instance("root-api") or self.root
 
+        if self.category == "rule34":
+            self._file_url = self._file_url_rule34
+
     def _api_request(self, params):
         url = self.root_api + "/index.php?page=dapi&s=post&q=index"
         return self.request_xml(url, params=params)
@@ -47,7 +50,9 @@ class GelbooruV02Extractor(booru.BooruExtractor):
 
             if total is None:
                 try:
-                    total = int(root.attrib["count"])
+                    self.kwdict["total"] = total = int(root.attrib["count"])
+                    if "search_tags" in self.kwdict:
+                        self.kwdict["search_count"] = total
                     self.log.debug("%s posts in total", total)
                 except Exception as exc:
                     total = 0
@@ -88,6 +93,16 @@ class GelbooruV02Extractor(booru.BooruExtractor):
             if len(pids) < self.per_page:
                 return
             params["pid"] += self.per_page
+
+    def _file_url_rule34(self, post):
+        url = post["file_url"]
+
+        if text.ext_from_url(url) not in util.EXTS_VIDEO:
+            path = url.partition(".")[2]
+            post["_fallback"] = (url,)
+            post["file_url"] = url = "https://wimg." + path
+
+        return url
 
     def _prepare(self, post):
         post["tags"] = post["tags"].strip()
@@ -161,14 +176,13 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
     pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]*)"
     example = "https://safebooru.org/index.php?page=post&s=list&tags=TAG"
 
-    def metadata(self):
-        self.tags = tags = text.unquote(self.groups[-1].replace("+", " "))
-        return {"search_tags": tags}
-
     def posts(self):
-        if self.tags == "all":
-            self.tags = ""
-        return self._pagination({"tags": self.tags})
+        self.kwdict["search_tags"] = tags = text.unquote(
+            self.groups[-1].replace("+", " "))
+
+        if tags == "all":
+            tags = ""
+        return self._pagination({"tags": tags})
 
 
 class GelbooruV02PoolExtractor(GelbooruV02Extractor):

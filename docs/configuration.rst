@@ -1238,6 +1238,22 @@ Description
     |requests.request()|_ method.
 
 
+extractor.*.truststore
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    | Use a
+      `truststore <https://truststore.readthedocs.io/en/latest/>`__
+      ``SSLContext`` for verifying SSL/TLS certificates
+    | to make use of your system's native certificate stores
+      instead of relying on
+      `certifi <https://pypi.org/project/certifi/>`__
+      certificates.
+
+
 extractor.*.download
 --------------------
 Type
@@ -6164,6 +6180,20 @@ Description
 
     Fail a download when a file does not pass
     instead of downloading a potentially broken file.
+
+
+downloader.http.validate-html
+-----------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Check for unexpected HTML responses.
+
+    Fail file downloads with a ``text/html``
+    `Content-Type header <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Type>`__
+    when expecting a media file instead.
 
 
 downloader.ytdl.cmdline-args
