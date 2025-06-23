@@ -71,7 +71,7 @@ class MtimeAction(argparse.Action):
     def __call__(self, parser, namespace, value, option_string=None):
         namespace.postprocessors.append({
             "name": "mtime",
-            "value": "{" + (self.const or value) + "}",
+            "value": f"{{{self.const or value}}}",
         })
 
 
@@ -156,7 +156,7 @@ class UgoiraAction(argparse.Action):
 class PrintAction(argparse.Action):
     def __call__(self, parser, namespace, value, option_string=None):
         if self.const:
-            if self.const == "+":
+            if self.const == "-":
                 namespace.options.append(((), "skip", False))
                 namespace.options.append(((), "download", False))
                 namespace.options.append((("output",), "mode", False))
@@ -164,6 +164,9 @@ class PrintAction(argparse.Action):
             base = None
             mode = "w"
         else:
+            if self.const is None:
+                namespace.options.append(((), "skip", False))
+                namespace.options.append(((), "download", False))
             value, path = value
             base, filename = os.path.split(path)
             mode = "a"
@@ -190,7 +193,7 @@ class PrintAction(argparse.Action):
             if format_string[1] == "F" and format_string[-1] != "\n":
                 format_string += "\n"
         elif "{" not in format_string and " " not in format_string:
-            format_string = "{" + format_string + "}\n"
+            format_string = f"{{{format_string}}}\n"
         elif format_string[-1] != "\n":
             format_string += "\n"
 
@@ -209,12 +212,19 @@ class Formatter(argparse.HelpFormatter):
     def __init__(self, prog):
         argparse.HelpFormatter.__init__(self, prog, max_help_position=30)
 
-    def _format_action_invocation(self, action, join=", ".join):
+    def _format_action_invocation(self, action):
         opts = action.option_strings
         if action.metavar:
             opts = opts.copy()
-            opts[-1] += " " + action.metavar
-        return join(opts)
+            opts[-1] = f"{opts[-1]} {action.metavar}"
+        return ", ".join(opts)
+
+    def _format_usage(self, usage, actions, groups, prefix):
+        return f"Usage: {self._prog} [OPTIONS] URL [URL...]\n"
+
+    def format_help(self):
+        return self._long_break_matcher.sub(
+            "\n\n", self._root_section.format_help())
 
 
 def _parse_option(opt):
@@ -229,7 +239,6 @@ def _parse_option(opt):
 def build_parser():
     """Build and configure an ArgumentParser object"""
     parser = argparse.ArgumentParser(
-        usage="%(prog)s [OPTION]... URL...",
         formatter_class=Formatter,
         add_help=False,
     )
@@ -399,20 +408,28 @@ def build_parser():
         dest="postprocessors", metavar="[EVENT:]FORMAT",
         action=PrintAction, const="-", default=[],
         help=("Write FORMAT during EVENT (default 'prepare') to standard "
-              "output. Examples: 'id' or 'post:{md5[:8]}'"),
+              "output instead of downloading files. "
+              "Can be used multiple times. "
+              "Examples: 'id' or 'post:{md5[:8]}'"),
     )
     output.add_argument(
         "--Print",
         dest="postprocessors", metavar="[EVENT:]FORMAT",
         action=PrintAction, const="+",
-        help=("Like --print, but also sets --no-download, --no-skip, "
-              "and disables other output to stdout"),
+        help="Like --print, but downloads files as well",
     )
     output.add_argument(
         "--print-to-file",
         dest="postprocessors", metavar="[EVENT:]FORMAT FILE",
-        action=PrintAction, nargs=2,
-        help="Append FORMAT during EVENT to FILE",
+        action=PrintAction, const=None, nargs=2,
+        help=("Append FORMAT during EVENT to FILE instead of downloading "
+              "files. Can be used multiple times"),
+    )
+    output.add_argument(
+        "--Print-to-file",
+        dest="postprocessors", metavar="[EVENT:]FORMAT FILE",
+        action=PrintAction, const=False, nargs=2,
+        help="Like --print-to-file, but downloads files as well",
     )
     output.add_argument(
         "--list-modules",

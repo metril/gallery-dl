@@ -118,8 +118,14 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
 </tr>
 <tr>
     <td align="center"><code>L</code></td>
+    <td>Convert an <a href="https://en.wikipedia.org/wiki/ISO_639-1">ISO 639-1</a> language code to its full name</td>
+    <td><code>{lang!L}</code></td>
+    <td><code>English</code></td>
+</tr>
+<tr>
+    <td align="center"><code>n</code></td>
     <td>Return the <a href="https://docs.python.org/3/library/functions.html#len" rel="nofollow">length</a> of a value</td>
-    <td><code>{foo!L}</code></td>
+    <td><code>{foo!n}</code></td>
     <td><code>7</code></td>
 </tr>
 <tr>
@@ -259,6 +265,12 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td>Concatenates elements of a list with <code>&lt;separator&gt;</code> using <a href="https://docs.python.org/3/library/stdtypes.html#str.join" rel="nofollow"><code>str.join()</code></a></td>
     <td><code>{tags:J - /}</code></td>
     <td><code>sun - tree - water</code></td>
+</tr>
+<tr>
+    <td><code>M&lt;key&gt;/</code></td>
+    <td>Maps a list of objects to a list of corresponding values by looking up <code>&lt;key&gt;</code> in each object</td>
+    <td><code>{users:Mname/}</code></td>
+    <td><code>["John", "David", "Max"]</code></td>
 </tr>
 <tr>
     <td><code>R&lt;old&gt;/&lt;new&gt;/</code></td>
