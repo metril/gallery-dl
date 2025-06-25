@@ -20,6 +20,13 @@ __tests__ = (
         "https://meo.comick.pictures/4-N8Vj2XVdYY4Pv.webp",
     ),
 
+    "filename" : str,
+    "extension": "webp",
+    "width"    : 1424,
+    "height"   : 2000,
+    "size"     : range(67460, 276608),
+    "optimized": None,
+
     "volume": 1,
     "chapter": 10,
     "chapter_minor": ".5",
@@ -130,6 +137,30 @@ __tests__ = (
     "tags" : (),
     "theme": ["School Life"],
     "title": "Yamamoto \"Đuổi\" Hayashi Đi Ư!?",
+},
+
+{
+    "#url"     : "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon",
+    "#comment" : "all chapters",
+    "#class"   : comick.ComickMangaExtractor,
+    "#pattern" : comick.ComickChapterExtractor.pattern,
+    "#count"   : range(890, 1000),
+},
+
+{
+    "#url"     : "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon?lang=pt-br&group=Amadeus+Scans&chap-order=&date-order=1&page=3#chapter-header",
+    "#comment" : "query parameters",
+    "#class"   : comick.ComickMangaExtractor,
+    "#pattern" : comick.ComickChapterExtractor.pattern,
+    "#results" : (
+        "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon/It8UGI_U-chapter-137-pt-br",
+        "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon/YlHNac8_-chapter-138-pt-br",
+        "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon/dnMuDUdy-chapter-139-pt-br",
+        "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon/1oFGBeum-chapter-140-pt-br",
+        "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon/_lIICVw3-chapter-141-pt-br",
+    ),
+
+    "lang": "pt-br",
 },
 
 {
