@@ -472,6 +472,7 @@ Description
     * ``newgrounds``
     * ``nijie`` (R)
     * ``pillowfort``
+    * ``rule34xyz``
     * ``sankaku``
     * ``schalenetwork``
     * ``scrolller``
@@ -693,9 +694,7 @@ Description
     specified after a ``:`` (``windows``, ``linux``, or ``macos``).
 
     Note:
-    This option overrides
-    `user-agent <extractor.*.user-agent_>`__
-    and sets custom
+    This option sets custom
     `headers <extractor.*.headers_>`__
     and
     `ciphers <extractor.*.ciphers_>`__
@@ -1777,6 +1776,16 @@ Description
 
     * ``true``: Match URLs with *all* possible TLDs (e.g. ``bunkr.xyz`` or ``bunkrrr.duck``)
     * ``false``: Match only URLs with known TLDs
+
+
+extractor.chzzk.offset
+----------------------
+Type
+    ``integer``
+Default
+    ``0``
+Description
+    Custom ``offset`` starting value when paginating over comments.
 
 
 extractor.cien.files
@@ -3205,14 +3214,24 @@ Description
 extractor.kemono.duplicates
 ---------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``false``
+Example
+    * ``"attachment,inline"``
+    * ``["file", "attachment"]``
 Description
     Controls how to handle duplicate files in a post.
 
-    * ``true``: Download duplicates
-    * ``false``: Ignore duplicates
+    ``true``
+        Download duplicates
+    ``false``
+        Ignore duplicates
+    any ``list`` or ``string``
+        | Download a duplicate file if its ``type`` is in the given list
+        | Ignore it otherwise
 
 
 extractor.kemono.dms
@@ -5578,6 +5597,17 @@ Description
         | - Set a value to ``false`` to completely remove these extension's ``type`` parameter
         | - Omit an extension to leave its URLs unchanged
 
+
+extractor.webtoons.banners
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download the active comic's ``banner``.
+
+
 extractor.webtoons.thumbnails
 -----------------------------
 Type
@@ -5585,7 +5615,7 @@ Type
 Default
     ``false``
 Description
-    Download the active chapter's ``thumbnail``.
+    Download the active episode's ``thumbnail``.
 
     Useful for creating CBZ archives with actual source thumbnails.
 

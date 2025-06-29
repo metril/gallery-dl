@@ -64,7 +64,7 @@ class WeebcentralChapterExtractor(WeebcentralBase, ChapterExtractor):
         return data
 
     def images(self, page):
-        referer = self.gallery_url
+        referer = self.page_url
         url = referer + "/images"
         params = {
             "is_prev"      : "False",
@@ -97,9 +97,6 @@ class WeebcentralMangaExtractor(WeebcentralBase, MangaExtractor):
     chapterclass = WeebcentralChapterExtractor
     pattern = BASE_PATTERN + r"/series/(\w+)"
     example = "https://weebcentral.com/series/01J7ABCDEFGHIJKLMNOPQRSTUV/TITLE"
-
-    def __init__(self, match):
-        MangaExtractor.__init__(self, match, False)
 
     def chapters(self, _):
         manga_id = self.groups[0]

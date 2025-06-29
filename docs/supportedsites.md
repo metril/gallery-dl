@@ -170,6 +170,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Chzzk</td>
+    <td>https://chzzk.naver.com</td>
+    <td>Comments, Communities</td>
+    <td></td>
+</tr>
+<tr>
     <td>Ci-en</td>
     <td>https://ci-en.net/</td>
     <td>Articles, Creators, Followed Users, Recent Images</td>
@@ -845,7 +851,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Rule 34 XYZ</td>
     <td>https://rule34.xyz/</td>
     <td>Playlists, Posts, Tag Searches</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 <tr>
     <td>Saint</td>
