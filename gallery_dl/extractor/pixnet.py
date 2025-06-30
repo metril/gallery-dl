@@ -24,7 +24,7 @@ class PixnetExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.blog, self.item_id = match.groups()
-        self.root = "https://{}.pixnet.net".format(self.blog)
+        self.root = f"https://{self.blog}.pixnet.net"
 
     def items(self):
         url = self.url_fmt.format(self.root, self.item_id)
@@ -72,12 +72,12 @@ class PixnetImageExtractor(PixnetExtractor):
     def items(self):
         url = "https://api.pixnet.cc/oembed"
         params = {
-            "url": "https://{}.pixnet.net/album/photo/{}".format(
-                self.blog, self.item_id),
+            "url": (f"https://{self.blog}.pixnet.net"
+                    f"/album/photo/{self.item_id}"),
             "format": "json",
         }
 
-        data = self.request(url, params=params).json()
+        data = self.request_json(url, params=params)
         data["id"] = text.parse_int(
             data["url"].rpartition("/")[2].partition("-")[0])
         data["filename"], _, data["extension"] = data["title"].rpartition(".")

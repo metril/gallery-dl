@@ -42,8 +42,8 @@ class PixeldrainFileExtractor(PixeldrainExtractor):
         self.file_id = match[1]
 
     def items(self):
-        url = "{}/api/file/{}".format(self.root, self.file_id)
-        file = self.request(url + "/info").json()
+        url = f"{self.root}/api/file/{self.file_id}"
+        file = self.request_json(url + "/info")
 
         file["url"] = url + "?download"
         file["date"] = self.parse_datetime(file["date_upload"])
@@ -68,8 +68,8 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
         self.file_index = match[2]
 
     def items(self):
-        url = "{}/api/list/{}".format(self.root, self.album_id)
-        album = self.request(url).json()
+        url = f"{self.root}/api/list/{self.album_id}"
+        album = self.request_json(url)
 
         files = album["files"]
         album["count"] = album["file_count"]
@@ -91,8 +91,7 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
         for num, file in enumerate(files, idx+1):
             file["album"] = album
             file["num"] = num
-            file["url"] = url = "{}/api/file/{}?download".format(
-                self.root, file["id"])
+            file["url"] = url = f"{self.root}/api/file/{file['id']}?download"
             file["date"] = self.parse_datetime(file["date_upload"])
             text.nameext_from_url(file["name"], file)
             yield Message.Url, url, file
@@ -120,8 +119,8 @@ class PixeldrainFolderExtractor(PixeldrainExtractor):
     def items(self):
         recursive = self.config("recursive")
 
-        url = "{}/api/filesystem/{}".format(self.root, self.groups[0])
-        stat = self.request(url + "?stat").json()
+        url = f"{self.root}/api/filesystem/{self.groups[0]}"
+        stat = self.request_json(url + "?stat")
 
         paths = stat["path"]
         path = paths[stat["base_index"]]
@@ -143,9 +142,8 @@ class PixeldrainFolderExtractor(PixeldrainExtractor):
         for child in children:
             if child["type"] == "file":
                 num += 1
-                url = "{}/api/filesystem{}?attach".format(
-                    self.root, child["path"])
-                share_url = "{}/d{}".format(self.root, child["path"])
+                url = f"{self.root}/api/filesystem{child['path']}?attach"
+                share_url = f"{self.root}/d{child['path']}"
                 data = self.metadata(child)
                 data.update({
                     "id"       : folder["id"],
@@ -159,7 +157,7 @@ class PixeldrainFolderExtractor(PixeldrainExtractor):
 
             elif child["type"] == "dir":
                 if recursive:
-                    url = "{}/d{}".format(self.root, child["path"])
+                    url = f"{self.root}/d{child['path']}"
                     child["_extractor"] = PixeldrainFolderExtractor
                     yield Message.Queue, url, child
 

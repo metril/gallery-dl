@@ -201,7 +201,7 @@ class SankakuBooksExtractor(SankakuExtractor):
         params = {"tags": self.tags, "pool_type": "0"}
         for pool in self.api.pools_keyset(params):
             pool["_extractor"] = SankakuPoolExtractor
-            url = "https://sankaku.app/books/{}".format(pool["id"])
+            url = f"https://sankaku.app/books/{pool['id']}"
             yield Message.Queue, url, pool
 
 
@@ -216,19 +216,16 @@ class SankakuAPI():
             "Origin"     : extractor.root,
         }
 
-        if extractor.config("id-format") in ("alnum", "alphanumeric"):
-            self.headers["Api-Version"] = "2"
-
         self.username, self.password = extractor._get_auth_info()
         if not self.username:
             self.authenticate = util.noop
 
     def notes(self, post_id):
         params = {"lang": "en"}
-        return self._call("/posts/{}/notes".format(post_id), params)
+        return self._call(f"/posts/{post_id}/notes", params)
 
     def tags(self, post_id):
-        endpoint = "/posts/{}/tags".format(post_id)
+        endpoint = f"/posts/{post_id}/tags"
         params = {
             "lang" : "en",
             "page" : 1,

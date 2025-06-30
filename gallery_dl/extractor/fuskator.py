@@ -22,7 +22,7 @@ class FuskatorGalleryExtractor(GalleryExtractor):
 
     def __init__(self, match):
         self.gallery_hash = match[1]
-        url = "{}/thumbs/{}/index.html".format(self.root, self.gallery_hash)
+        url = f"{self.root}/thumbs/{self.gallery_hash}/index.html"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -39,9 +39,8 @@ class FuskatorGalleryExtractor(GalleryExtractor):
             "hash"  : self.gallery_hash,
             "_"     : int(time.time()),
         }
-        self.data = data = self.request(
-            self.root + "/ajax/gal.aspx", params=params, headers=headers,
-        ).json()
+        self.data = data = self.request_json(
+            self.root + "/ajax/gal.aspx", params=params, headers=headers)
 
         title = text.extr(page, "<title>", "</title>").strip()
         title, _, gallery_id = title.rpartition("#")

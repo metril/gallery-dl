@@ -45,8 +45,8 @@ class BehanceExtractor(Extractor):
             "variables": variables,
         }
 
-        return self.request(url, method="POST", headers=headers,
-                            json=data).json()["data"]
+        return self.request_json(
+            url, method="POST", headers=headers, json=data)["data"]
 
     def _update(self, data):
         # compress data to simple lists
@@ -115,7 +115,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
     def get_gallery_data(self):
         """Collect gallery info dict"""
-        url = "{}/gallery/{}/a".format(self.root, self.gallery_id)
+        url = f"{self.root}/gallery/{self.gallery_id}/a"
         cookies = {
             "gki": '{"feature_project_view":false,'
                    '"feature_discover_login_prompt":false,'

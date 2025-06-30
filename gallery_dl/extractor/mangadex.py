@@ -44,7 +44,7 @@ class MangadexExtractor(Extractor):
     def _items_manga(self):
         data = {"_extractor": MangadexMangaExtractor}
         for manga in self.manga():
-            url = "{}/title/{}".format(self.root, manga["id"])
+            url = f"{self.root}/title/{manga['id']}"
             yield Message.Queue, url, data
 
     def _transform(self, chapter):
@@ -121,7 +121,7 @@ class MangadexChapterExtractor(MangadexExtractor):
 
         server = self.api.athome_server(self.uuid)
         chapter = server["chapter"]
-        base = "{}/data/{}/".format(server["baseUrl"], chapter["hash"])
+        base = f"{server['baseUrl']}/data/{chapter['hash']}/"
 
         enum = util.enumerate_reversed if self.config(
             "page-reverse") else enumerate
@@ -199,7 +199,7 @@ class MangadexAuthorExtractor(MangadexExtractor):
     def items(self):
         for manga in self.api.manga_author(self.uuid):
             manga["_extractor"] = MangadexMangaExtractor
-            url = "{}/title/{}".format(self.root, manga["id"])
+            url = f"{self.root}/title/{manga['id']}"
             yield Message.Queue, url, manga
 
 
@@ -301,8 +301,8 @@ class MangadexAPI():
         self.extractor.log.debug("Using client-id '%s…'", self.client_id[:24])
         url = ("https://auth.mangadex.org/realms/mangadex"
                "/protocol/openid-connect/token")
-        data = self.extractor.request(
-            url, method="POST", data=data, fatal=None).json()
+        data = self.extractor.request_json(
+            url, method="POST", data=data, fatal=None)
 
         try:
             access_token = data["access_token"]
@@ -328,8 +328,8 @@ class MangadexAPI():
             json = {"username": username, "password": password}
 
         self.extractor.log.debug("Using legacy login method")
-        data = self.extractor.request(
-            url, method="POST", json=json, fatal=None).json()
+        data = self.extractor.request_json(
+            url, method="POST", json=json, fatal=None)
         if data.get("result") != "ok":
             raise exception.AuthenticationError()
 

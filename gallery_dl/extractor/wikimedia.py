@@ -27,8 +27,9 @@ class WikimediaExtractor(BaseExtractor):
         if self.category == "wikimedia":
             self.category = self.root.split(".")[-2]
         elif self.category in ("fandom", "wikigg"):
-            self.category = "{}-{}".format(
-                self.category, self.root.partition(".")[0].rpartition("/")[2])
+            self.category = (
+                f"{self.category}-"
+                f"{self.root.partition('.')[0].rpartition('/')[2]}")
 
         self.per_page = self.config("limit", 50)
 
@@ -106,7 +107,7 @@ class WikimediaExtractor(BaseExtractor):
         )
 
         while True:
-            data = self.request(url, params=params).json()
+            data = self.request_json(url, params=params)
 
             # ref: https://www.mediawiki.org/wiki/API:Errors_and_warnings
             error = data.get("error")

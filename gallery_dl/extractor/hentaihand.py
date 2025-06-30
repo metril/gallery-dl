@@ -21,7 +21,7 @@ class HentaihandGalleryExtractor(GalleryExtractor):
 
     def __init__(self, match):
         self.slug = match[1]
-        url = "{}/api/comics/{}".format(self.root, self.slug)
+        url = f"{self.root}/api/comics/{self.slug}"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -44,7 +44,7 @@ class HentaihandGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, _):
-        info = self.request(self.page_url + "/images").json()
+        info = self.request_json(self.page_url + "/images")
         return [(img["source_url"], img) for img in info["images"]]
 
 
@@ -68,8 +68,8 @@ class HentaihandTagExtractor(Extractor):
         else:
             tpl = self.type + "s"
 
-        url = "{}/api/{}/{}".format(self.root, tpl, self.key)
-        tid = self.request(url, notfound=self.type).json()["id"]
+        url = f"{self.root}/api/{tpl}/{self.key}"
+        tid = self.request_json(url, notfound=self.type)["id"]
 
         url = self.root + "/api/comics"
         params = {
@@ -82,10 +82,10 @@ class HentaihandTagExtractor(Extractor):
             "duration": "day",
         }
         while True:
-            info = self.request(url, params=params).json()
+            info = self.request_json(url, params=params)
 
             for gallery in info["data"]:
-                gurl = "{}/en/comic/{}".format(self.root, gallery["slug"])
+                gurl = f"{self.root}/en/comic/{gallery['slug']}"
                 gallery["_extractor"] = HentaihandGalleryExtractor
                 yield Message.Queue, gurl, gallery
 

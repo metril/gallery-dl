@@ -49,8 +49,8 @@ class PlurkExtractor(Extractor):
         }
 
         while True:
-            info = self.request(
-                url, method="POST", headers=headers, data=data).json()
+            info = self.request_json(
+                url, method="POST", headers=headers, data=data)
             yield from info["responses"]
             if not info["has_newer"]:
                 return
@@ -76,7 +76,7 @@ class PlurkTimelineExtractor(PlurkExtractor):
         self.user = match[1]
 
     def plurks(self):
-        url = "{}/{}".format(self.root, self.user)
+        url = f"{self.root}/{self.user}"
         page = self.request(url).text
         user_id, pos = text.extract(page, '"page_user": {"id":', ',')
         plurks = self._load(text.extract(page, "_PLURKS = ", ";\n", pos)[0])
@@ -103,7 +103,7 @@ class PlurkPostExtractor(PlurkExtractor):
     example = "https://www.plurk.com/p/12345"
 
     def plurks(self):
-        url = "{}/p/{}".format(self.root, self.groups[0])
+        url = f"{self.root}/p/{self.groups[0]}"
         page = self.request(url).text
         user, pos = text.extract(page, " GLOBAL=", "\n")
         data, pos = text.extract(page, "plurk =", ";\n", pos)

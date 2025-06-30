@@ -81,8 +81,8 @@ class SkebExtractor(Extractor):
         params["offset"] = 0
 
         while True:
-            posts = self.request(
-                url, params=params, headers=self.headers).json()
+            posts = self.request_json(
+                url, params=params, headers=self.headers)
 
             for post in posts:
                 parts = post["path"].split("/")
@@ -100,13 +100,13 @@ class SkebExtractor(Extractor):
             params["offset"] += 30
 
     def _pagination_users(self, endpoint, params):
-        url = "{}/api{}".format(self.root, endpoint)
+        url = f"{self.root}/api{endpoint}"
         params["offset"] = 0
         params["limit"] = 90
 
         while True:
-            data = self.request(
-                url, params=params, headers=self.headers).json()
+            data = self.request_json(
+                url, params=params, headers=self.headers)
             yield from data
 
             if len(data) < params["limit"]:
@@ -114,9 +114,8 @@ class SkebExtractor(Extractor):
             params["offset"] += params["limit"]
 
     def _get_post_data(self, user_name, post_num):
-        url = "{}/api/users/{}/works/{}".format(
-            self.root, user_name, post_num)
-        resp = self.request(url, headers=self.headers).json()
+        url = f"{self.root}/api/users/{user_name}/works/{post_num}"
+        resp = self.request_json(url, headers=self.headers)
         creator = resp["creator"]
         post = {
             "post_id"          : resp["id"],
@@ -216,7 +215,7 @@ class SkebUserExtractor(SkebExtractor):
     example = "https://skeb.jp/@USER"
 
     def posts(self):
-        url = "{}/api/users/{}/works".format(self.root, self.user_name)
+        url = f"{self.root}/api/users/{self.user_name}/works"
 
         params = {"role": "creator", "sort": "date"}
         posts = self._pagination(url, params)
@@ -266,9 +265,9 @@ class SkebSearchExtractor(SkebExtractor):
         data = {"requests": (request,)}
 
         while True:
-            result = self.request(
+            result = self.request_json(
                 url, method="POST", params=params, headers=headers, json=data,
-            ).json()["results"][0]
+            )["results"][0]
 
             for post in result["hits"]:
                 parts = post["path"].split("/")
@@ -289,7 +288,7 @@ class SkebFollowingExtractor(SkebExtractor):
     items = SkebExtractor._items_users
 
     def users(self):
-        endpoint = "/users/{}/following_creators".format(self.user_name)
+        endpoint = f"/users/{self.user_name}/following_creators"
         params = {"sort": "date"}
         return self._pagination_users(endpoint, params)
 

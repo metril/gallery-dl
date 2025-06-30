@@ -61,6 +61,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     category = "bunkr"
     root = "https://bunkr.si"
     root_dl = "https://get.bunkrr.su"
+    root_api = "https://apidl.bunkr.ru"
     archive_fmt = "{album_id}_{id|id_url}"
     pattern = BASE_PATTERN + r"/a/([^/?#]+)"
     example = "https://bunkr.si/a/ID"
@@ -76,9 +77,9 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
         endpoint = self.config("endpoint")
         if not endpoint:
-            endpoint = self.root_dl + "/api/_001"
+            endpoint = self.root_api + "/api/_001_v2"
         elif endpoint[0] == "/":
-            endpoint = self.root_dl + endpoint
+            endpoint = self.root_api + endpoint
 
         self.endpoint = endpoint
         self.offset = 0
@@ -180,11 +181,11 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         referer = self.root_dl + "/file/" + data_id
 
         headers = {"Referer": referer, "Origin": self.root_dl}
-        data = self.request(self.endpoint, method="POST", headers=headers,
-                            json={"id": data_id}).json()
+        data = self.request_json(self.endpoint, method="POST", headers=headers,
+                                 json={"id": data_id})
 
         if data.get("encrypted"):
-            key = "SECRET_KEY_{}".format(data["timestamp"] // 3600)
+            key = f"SECRET_KEY_{data['timestamp'] // 3600}"
             file_url = util.decrypt_xor(data["url"], key.encode())
         else:
             file_url = data["url"]

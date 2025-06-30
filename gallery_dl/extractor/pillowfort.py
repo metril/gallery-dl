@@ -125,8 +125,8 @@ class PillowfortPostExtractor(PillowfortExtractor):
     example = "https://www.pillowfort.social/posts/12345"
 
     def posts(self):
-        url = "{}/posts/{}/json/".format(self.root, self.item)
-        return (self.request(url).json(),)
+        url = f"{self.root}/posts/{self.item}/json/"
+        return (self.request_json(url),)
 
 
 class PillowfortUserExtractor(PillowfortExtractor):
@@ -136,11 +136,11 @@ class PillowfortUserExtractor(PillowfortExtractor):
     example = "https://www.pillowfort.social/USER"
 
     def posts(self):
-        url = "{}/{}/json/".format(self.root, self.item)
+        url = f"{self.root}/{self.item}/json/"
         params = {"p": 1}
 
         while True:
-            posts = self.request(url, params=params).json()["posts"]
+            posts = self.request_json(url, params=params)["posts"]
             yield from posts
 
             if len(posts) < 20:

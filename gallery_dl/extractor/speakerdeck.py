@@ -28,9 +28,9 @@ class SpeakerdeckPresentationExtractor(GalleryExtractor):
 
         url = self.root + "/oembed.json"
         params = {
-            "url": "{}/{}/{}".format(self.root, user, presentation),
+            "url": f"{self.root}/{user}/{presentation}",
         }
-        data = self.request(url, params=params).json()
+        data = self.request_json(url, params=params)
 
         self.presentation_id = text.extr(
             data["html"], 'src="//speakerdeck.com/player/', '"')
@@ -44,7 +44,7 @@ class SpeakerdeckPresentationExtractor(GalleryExtractor):
         }
 
     def images(self, _):
-        url = "{}/player/{}".format(self.root, self.presentation_id)
+        url = f"{self.root}/player/{self.presentation_id}"
         page = self.request(url).text
         page = util.re(r"\s+").sub(" ", page)
         return [

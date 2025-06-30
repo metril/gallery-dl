@@ -89,12 +89,12 @@ class OAuthBase(Extractor):
         else:
             self.log.info("Please open this URL in your browser:")
 
-        stdout_write("\n{}\n\n".format(url))
+        stdout_write(f"\n{url}\n\n")
         return (recv or self.recv)()
 
     def error(self, msg):
         return self.send(
-            "Remote server reported an error:\n\n{}\n".format(msg))
+            f"Remote server reported an error:\n\n{msg}\n")
 
     def _oauth1_authorization_flow(
             self, default_key, default_secret,
@@ -151,10 +151,7 @@ class OAuthBase(Extractor):
                       "default" if client_id == default_id else "custom",
                       instance or self.subcategory, client_id)
 
-        state = "gallery-dl_{}_{}".format(
-            self.subcategory,
-            oauth.nonce(8),
-        )
+        state = f"gallery-dl_{self.subcategory}_{oauth.nonce(8)}"
 
         auth_params = {
             "client_id"    : client_id,
@@ -170,8 +167,8 @@ class OAuthBase(Extractor):
 
         # check authorization response
         if state != params.get("state"):
-            self.send("'state' mismatch: expected {}, got {}.\n".format(
-                state, params.get("state")))
+            self.send(f"'state' mismatch: expected {state}, "
+                      f"got {params.get('state')}.\n")
             return
         if "error" in params:
             return self.error(params)
@@ -190,8 +187,8 @@ class OAuthBase(Extractor):
             data["client_id"] = client_id
             data["client_secret"] = client_secret
 
-        data = self.request(
-            token_url, method="POST", data=data, auth=auth).json()
+        data = self.request_json(
+            token_url, method="POST", data=data, auth=auth)
 
         # check token response
         if "error" in data:
@@ -233,11 +230,9 @@ class OAuthBase(Extractor):
                 for n in names
             )
             if self.cache:
-                msg += (
-                    "\nor set\n'extractor.{}.{}' to \"cache\""
-                    .format(self.subcategory, names[0])
-                )
-            msg += "\nto use {}.\n".format(_it)
+                msg = (f"{msg}\nor set\n'extractor."
+                       f"{self.subcategory}.{names[0]}' to \"cache\"")
+            msg = f"{msg}\nto use {_it}.\n"
 
         return msg
 
@@ -371,8 +366,8 @@ class OAuthMastodon(OAuthBase):
             application["client-secret"],
             application["client-id"],
             application["client-secret"],
-            "https://{}/oauth/authorize".format(self.instance),
-            "https://{}/oauth/token".format(self.instance),
+            f"https://{self.instance}/oauth/authorize",
+            f"https://{self.instance}/oauth/token",
             instance=self.instance,
             key="access_token",
             cache=mastodon._access_token_cache,
@@ -382,13 +377,13 @@ class OAuthMastodon(OAuthBase):
     def _register(self, instance):
         self.log.info("Registering application for '%s'", instance)
 
-        url = "https://{}/api/v1/apps".format(instance)
+        url = f"https://{instance}/api/v1/apps"
         data = {
             "client_name": "gdl:" + oauth.nonce(8),
             "redirect_uris": self.redirect_uri,
             "scopes": "read",
         }
-        data = self.request(url, method="POST", data=data).json()
+        data = self.request_json(url, method="POST", data=data)
 
         if "client_id" not in data or "client_secret" not in data:
             raise exception.StopExtraction(
@@ -443,11 +438,11 @@ class OAuthPixiv(OAuthBase):
             "redirect_uri"  : "https://app-api.pixiv.net"
                               "/web/v1/users/auth/pixiv/callback",
         }
-        data = self.request(
-            url, method="POST", headers=headers, data=data).json()
+        data = self.request_json(
+            url, method="POST", headers=headers, data=data)
 
         if "error" in data:
-            stdout_write("\n{}\n".format(data))
+            stdout_write(f"\n{data}\n")
             if data["error"] in ("invalid_request", "invalid_grant"):
                 stdout_write("'code' expired, try again\n\n")
             return
