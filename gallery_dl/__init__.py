@@ -323,6 +323,10 @@ def main():
                         "coomer"       : "coomerparty",
                         "kemono"       : "kemonoparty",
                         "schalenetwork": "koharu",
+                        "naver-blog"   : "naver",
+                        "naver-chzzk"  : "chzzk",
+                        "naver-webtoon": "naverwebtoon",
+                        "pixiv-novel"  : "pixiv",
                     }
                 from .extractor import common
                 common.CATEGORY_MAP = catmap
