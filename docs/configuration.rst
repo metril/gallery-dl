@@ -685,6 +685,7 @@ Default
     * ``"firefox"``: ``artstation``, ``fanbox``, ``twitter``
     * ``null``: otherwise
 Example
+    * ``"firefox/128:linux"``
     * ``"chrome:macos"``
 Description
     Try to emulate a real browser (``firefox`` or ``chrome``)
@@ -692,6 +693,15 @@ Description
 
     Optionally, the operating system used in the ``User-Agent`` header can be
     specified after a ``:`` (``windows``, ``linux``, or ``macos``).
+
+    Supported browsers:
+
+    * ``firefox``
+    * ``firefox/140``
+    * ``firefox/128``
+    * ``chrome``
+    * ``chrome/138``
+    * ``chrome/111``
 
     Note:
     This option sets custom
@@ -1865,12 +1875,12 @@ Type
 Default
     ``false``
 Example
-    * ``"generation,version"``
-    * ``["generation", "version"]``
+    * ``"generation,post,version"``
+    * ``["version", "generation"]``
 Description
-    Extract additional ``generation`` and ``version`` metadata.
+    Extract additional ``generation``, ``version``, and ``post`` metadata.
 
-    Note: This requires 1 additional HTTP request per image or video.
+    Note: This requires 1 or more additional API requests per image or video.
 
 
 extractor.civitai.nsfw
