@@ -28,6 +28,7 @@ from . import (
 )
 from .extractor.message import Message
 stdout_write = output.stdout_write
+FLAGS = util.FLAGS
 
 
 class Job():
@@ -153,9 +154,10 @@ class Job():
         try:
             for msg in extractor:
                 self.dispatch(msg)
-        except exception.StopExtraction as exc:
-            if exc.message:
-                log.error(exc.message)
+        except exception.StopExtraction:
+            pass
+        except exception.AbortExtraction as exc:
+            log.error(exc.message)
             self.status |= exc.code
         except (exception.TerminateExtraction, exception.RestartExtraction):
             raise
@@ -199,6 +201,8 @@ class Job():
             if self.pred_url(url, kwdict):
                 self.update_kwdict(kwdict)
                 self.handle_url(url, kwdict)
+            if FLAGS.FILE is not None:
+                FLAGS.FILE = FLAGS.process(FLAGS.FILE)
 
         elif msg[0] == Message.Directory:
             self.update_kwdict(msg[1])
@@ -211,6 +215,8 @@ class Job():
             if self.pred_queue(url, kwdict):
                 self.update_kwdict(kwdict)
                 self.handle_queue(url, kwdict)
+            if FLAGS.CHILD is not None:
+                FLAGS.CHILD = FLAGS.process(FLAGS.CHILD)
 
     def handle_url(self, url, kwdict):
         """Handle Message.Url"""
@@ -389,6 +395,8 @@ class DownloadJob(Job):
             if "post-after" in self.hooks:
                 for callback in self.hooks["post-after"]:
                     callback(self.pathfmt)
+            if FLAGS.POST is not None:
+                FLAGS.POST = FLAGS.process(FLAGS.POST)
             self.pathfmt.set_directory(kwdict)
         if "post" in self.hooks:
             for callback in self.hooks["post"]:
@@ -656,7 +664,26 @@ class DownloadJob(Job):
                         clist, negate)(extr):
                     continue
 
-                name = pp_dict.get("name")
+                name = pp_dict.get("name", "")
+                if "__init__" not in pp_dict:
+                    name, sep, event = name.rpartition("@")
+                    if sep:
+                        pp_dict["name"] = name
+                        if "event" not in pp_dict:
+                            pp_dict["event"] = event
+                    else:
+                        name = event
+
+                    name, sep, mode = name.rpartition("/")
+                    if sep:
+                        pp_dict["name"] = name
+                        if "mode" not in pp_dict:
+                            pp_dict["mode"] = mode
+                    else:
+                        name = mode
+
+                    pp_dict["__init__"] = None
+
                 pp_cls = postprocessor.find(name)
                 if not pp_cls:
                     pp_log.warning("module '%s' not found", name)
