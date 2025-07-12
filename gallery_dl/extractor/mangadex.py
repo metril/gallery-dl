@@ -354,7 +354,7 @@ class MangadexAPI():
                 self.extractor.wait(until=until)
                 continue
 
-            msg = ", ".join('{title}: "{detail}"'.format_map(error)
+            msg = ", ".join(f'{error["title"]}: "{error["detail"]}"'
                             for error in response.json()["errors"])
             raise exception.AbortExtraction(
                 f"{response.status_code} {response.reason} ({msg})")
@@ -384,6 +384,8 @@ class MangadexAPI():
             ratings = config("ratings")
             if ratings is None:
                 ratings = ("safe", "suggestive", "erotica", "pornographic")
+            elif isinstance(ratings, str):
+                ratings = ratings.split(",")
             params["contentRating[]"] = ratings
         params["offset"] = 0
 

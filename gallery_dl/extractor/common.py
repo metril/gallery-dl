@@ -58,7 +58,12 @@ class Extractor():
         self.kwdict = {}
 
         if self.category in CATEGORY_MAP:
-            self.category = CATEGORY_MAP[self.category]
+            catsub = f"{self.category}:{self.subcategory}"
+            if catsub in CATEGORY_MAP:
+                self.category, self.subcategory = CATEGORY_MAP[catsub]
+            else:
+                self.category = CATEGORY_MAP[self.category]
+
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
 
@@ -417,7 +422,7 @@ class Extractor():
 
             for key, value in HEADERS[browser]:
                 if value and "{}" in value:
-                    headers[key] = value.format(platform)
+                    headers[key] = value.replace("{}", platform)
                 else:
                     headers[key] = value
 
@@ -874,11 +879,15 @@ class Dispatch():
     def initialize(self):
         pass
 
-    def _dispatch_extractors(self, extractor_data, default=()):
+    def _dispatch_extractors(self, extractor_data, default=(), alt=None):
         extractors = {
             data[0].subcategory: data
             for data in extractor_data
         }
+
+        if alt is not None:
+            for sub, sub_alt in alt:
+                extractors[sub_alt] = extractors[sub]
 
         include = self.config("include", default) or ()
         if include == "all":

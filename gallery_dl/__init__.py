@@ -91,16 +91,22 @@ def main():
 
         if signals := config.get((), "signals-actions"):
             import signal
+
+            def signals_handler(event, action):
+                def handler(signal_num, frame):
+                    signal_name = signal.Signals(signal_num).name
+                    output.stderr_write(f"{signal_name} received\n")
+                    util.FLAGS.__dict__[event] = action
+                return handler
+
             for signal_name, action in signals.items():
                 signal_num = getattr(signal, signal_name, None)
                 if signal_num is None:
                     log.warning("signal '%s' is not defined", signal_name)
                 else:
-                    def handler(signal_num, frame):
-                        signal_name = signal.Signals(signal_num).name
-                        output.stderr_write(f"{signal_name} received\n")
-                        util.FLAGS.__dict__[action.upper()] = "stop"
-                    signal.signal(signal_num, handler)
+                    event, _, action = action.rpartition(":")
+                    signal.signal(signal_num, signals_handler(
+                        event.upper() if event else "FILE", action.lower()))
 
         # enable ANSI escape sequences on Windows
         if util.WINDOWS and config.get(("output",), "ansi", output.COLORS):
@@ -339,6 +345,10 @@ def main():
                         "naver-chzzk"  : "chzzk",
                         "naver-webtoon": "naverwebtoon",
                         "pixiv-novel"  : "pixiv",
+                        "pixiv-novel:novel"   : ("pixiv", "novel"),
+                        "pixiv-novel:user"    : ("pixiv", "novel-user"),
+                        "pixiv-novel:series"  : ("pixiv", "novel-series"),
+                        "pixiv-novel:bookmark": ("pixiv", "novel-bookmark"),
                     }
                 from .extractor import common
                 common.CATEGORY_MAP = catmap

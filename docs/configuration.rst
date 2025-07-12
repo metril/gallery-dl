@@ -3490,9 +3490,14 @@ Description
 extractor.mangadex.ratings
 --------------------------
 Type
-    ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``["safe", "suggestive", "erotica", "pornographic"]``
+Example
+    * ``"safe"``
+    * ``"erotica,suggestive"``
+    * ``["erotica", "suggestive"]``
 Description
     List of acceptable content ratings for returned chapters.
 
@@ -7783,7 +7788,11 @@ Description
                 "naver-chzzk"  : "chzzk",
                 "naver-blog"   : "naver",
                 "naver-webtoon": "naverwebtoon",
-                "pixiv-novel"  : "pixiv"
+                "pixiv-novel"  : "pixiv",
+                "pixiv-novel:novel"   : ["pixiv", "novel"],
+                "pixiv-novel:user"    : ["pixiv", "novel-user"],
+                "pixiv-novel:series"  : ["pixiv", "novel-series"],
+                "pixiv-novel:bookmark": ["pixiv", "novel-bookmark"]
             }
 
 
