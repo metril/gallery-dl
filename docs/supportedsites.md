@@ -518,6 +518,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Iwara</td>
+    <td>https://www.iwara.tv/</td>
+    <td>Favorites, Followers, Followed Users, individual Images, Playlists, Search Results, Tag Searches, User Profiles, User Images, User Playlists, User Videos, Videos</td>
+    <td>Supported</td>
+</tr>
+<tr>
     <td>Keenspot</td>
     <td>http://www.keenspot.com/</td>
     <td>Comics</td>
@@ -616,7 +622,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Motherless</td>
     <td>https://motherless.com/</td>
-    <td>Galleries, Media Files</td>
+    <td>Galleries, Groups, Media Files</td>
     <td></td>
 </tr>
 <tr>
