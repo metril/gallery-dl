@@ -28,21 +28,17 @@ def parse(format_string, default=NONE, fmt=format):
     except KeyError:
         pass
 
-    cls = StringFormatter
-    if format_string.startswith("\f"):
+    if format_string and format_string[0] == "\f":
         kind, _, format_string = format_string.partition(" ")
-        kind = kind[1:]
-
-        if kind == "T":
-            cls = TemplateFormatter
-        elif kind == "TF":
-            cls = TemplateFStringFormatter
-        elif kind == "E":
-            cls = ExpressionFormatter
-        elif kind == "M":
-            cls = ModuleFormatter
-        elif kind == "F":
-            cls = FStringFormatter
+        try:
+            cls = _FORMATTERS[kind[1:]]
+        except KeyError:
+            import logging
+            logging.getLogger("formatter").error(
+                "Invalid formatter type '%s'", kind[1:])
+            cls = StringFormatter
+    else:
+        cls = StringFormatter
 
     formatter = _CACHE[key] = cls(format_string, default, fmt)
     return formatter
@@ -208,6 +204,24 @@ class ExpressionFormatter():
         self.format_map = util.compile_expression(expression)
 
 
+class FStringFormatter():
+    """Generate text by evaluating an f-string literal"""
+
+    def __init__(self, fstring, default=NONE, fmt=None):
+        self.format_map = util.compile_expression(f'f"""{fstring}"""')
+
+
+class JinjaFormatter():
+    """Generate text by evaluating a Jinja template string"""
+    env = None
+
+    def __init__(self, source, default=NONE, fmt=None):
+        if self.env is None:
+            import jinja2
+            JinjaFormatter.env = jinja2.Environment()
+        self.format_map = self.env.from_string(source).render
+
+
 class ModuleFormatter():
     """Generate text by calling an external function"""
 
@@ -215,13 +229,6 @@ class ModuleFormatter():
         module_name, _, function_name = function_spec.rpartition(":")
         module = util.import_file(module_name)
         self.format_map = getattr(module, function_name)
-
-
-class FStringFormatter():
-    """Generate text by evaluating an f-string literal"""
-
-    def __init__(self, fstring, default=NONE, fmt=None):
-        self.format_map = util.compile_expression(f'f"""{fstring}"""')
 
 
 class TemplateFormatter(StringFormatter):
@@ -240,6 +247,15 @@ class TemplateFStringFormatter(FStringFormatter):
         with open(util.expand_path(path)) as fp:
             fstring = fp.read()
         FStringFormatter.__init__(self, fstring, default, fmt)
+
+
+class TemplateJinjaFormatter(JinjaFormatter):
+    """Generate text by evaluating a Jinja template"""
+
+    def __init__(self, path, default=NONE, fmt=None):
+        with open(util.expand_path(path)) as fp:
+            source = fp.read()
+        JinjaFormatter.__init__(self, source, default, fmt)
 
 
 def parse_field_name(field_name):
@@ -492,6 +508,18 @@ _literal = Literal()
 
 _CACHE = {}
 _SEPARATOR = "/"
+_FORMATTERS = {
+    "E" : ExpressionFormatter,
+    "F" : FStringFormatter,
+    "J" : JinjaFormatter,
+    "M" : ModuleFormatter,
+    "S" : StringFormatter,
+    "T" : TemplateFormatter,
+    "TF": TemplateFStringFormatter,
+    "FT": TemplateFStringFormatter,
+    "TJ": TemplateJinjaFormatter,
+    "JT": TemplateJinjaFormatter,
+}
 _GLOBALS = {
     "_env": lambda: os.environ,
     "_lit": lambda: _literal,
