@@ -684,7 +684,7 @@ extractor.*.browser
 Type
     ``string``
 Default
-    * ``"firefox"``: ``artstation``, ``fanbox``, ``twitter``
+    * ``"firefox"``: ``artstation``, ``behance``, ``fanbox``, ``twitter``
     * ``null``: otherwise
 Example
     * ``"firefox/128:linux"``
@@ -1829,7 +1829,7 @@ Type
     * ``string``
     * ``list`` of ``strings``
 Default
-    ``["user-models", "user-posts"]``
+    ``["user-images", "user-videos"]``
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
@@ -1842,6 +1842,13 @@ Description
     * ``"user-videos"``
 
     It is possible to use ``"all"`` instead of listing all values separately.
+Note
+    To get a more complete set of metadata
+    like ``model['name']`` and ``post['title']``,
+    include ``user-models`` and ``user-posts``
+    as well as the default ``user-images`` and ``user-videos``:
+
+    ``["user-models", "user-posts", "user-images", "user-videos"]``
 
 
 extractor.civitai.metadata
@@ -2593,6 +2600,28 @@ description
     Extract comments that include photo attachments made by the author of the post.
 
 
+extractor.facebook.include
+--------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"photos"``
+Example
+    * ``"avatar,photos"``
+    * ``["avatar", "photos"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Supported values are
+
+    * ``avatar``
+    * ``photos``
+
+    It is possible to use ``"all"`` instead of listing all values separately.
+
+
 extractor.facebook.videos
 -------------------------
 Type
@@ -3025,10 +3054,13 @@ Example
 Description
     Controls from which position to start the extraction process from.
 
-    * ``true``: Start from the beginning.
-      Log the most recent ``cursor`` value when interrupted before reaching the end.
-    * ``false``: Start from the beginning.
-    * any ``string``: Start from the position defined by this value.
+    ``true``
+        | Start from the beginning.
+        | Log the most recent ``cursor`` value when interrupted before reaching the end.
+    ``false``
+        Start from the beginning.
+    any ``string``
+        Start from the position defined by this value.
 
 
 extractor.instagram.include
@@ -3152,6 +3184,30 @@ Default
     ``false``
 Description
     Split ``stories`` elements into separate posts.
+
+
+extractor.itaku.include
+-----------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"gallery"``
+Example
+    * ``"stars,gallery"``
+    * ``["stars", "gallery"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Supported values are
+
+    * ``gallery``
+    * ``followers``
+    * ``following``
+    * ``stars``
+
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
 extractor.itaku.videos
@@ -3822,6 +3878,27 @@ Description
     Note: This requires 1 additional HTTP request per post.
 
 
+extractor.patreon.cursor
+------------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Example
+    ``"03:eyJ2IjoxLCJjIjoiMzU0NDQ1MjAiLCJ0IjoiIn0=:DTcmjBoVj01o_492YBYqHhqx"``
+Description
+    Controls from which position to start the extraction process from.
+
+    ``true``
+        | Start from the beginning.
+        | Log the most recent ``cursor`` value when interrupted before reaching the end.
+    ``false``
+        Start from the beginning.
+    any ``string``
+        Start from the position defined by this value.
+
+
 extractor.patreon.files
 -----------------------
 Type
@@ -3861,6 +3938,16 @@ Description
     * ``thumbnail`` (``"h":360,"w":360``)
     * ``thumbnail_large`` (``"h":1080,"w":1080``)
     * ``thumbnail_small`` (``"h":100,"w":100``)
+
+
+extractor.patreon.user.date-max
+-------------------------------
+Type
+    |Date|_
+Default
+    ``0``
+Description
+    Sets the |Date|_ to start from.
 
 
 extractor.[philomena].api-key
@@ -5176,12 +5263,15 @@ Example
 Description
     Controls from which position to start the extraction process from.
 
-    * ``true``: Start from the beginning.
-      Log the most recent ``cursor`` value when interrupted before reaching the end.
-    * ``false``: Start from the beginning.
-    * any ``string``: Start from the position defined by this value.
-
-    Note: A ``cursor`` value from one timeline cannot be used with another.
+    ``true``
+        | Start from the beginning.
+        | Log the most recent ``cursor`` value when interrupted before reaching the end.
+    ``false``
+        Start from the beginning.
+    any ``string``
+        Start from the position defined by this value.
+Note
+    A ``cursor`` value from one timeline cannot be used with another.
 
 
 extractor.twitter.expand

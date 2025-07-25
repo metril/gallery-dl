@@ -274,7 +274,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Facebook</td>
     <td>https://www.facebook.com/</td>
-    <td>Photos, Profiles, Sets, Videos</td>
+    <td>Avatars, Photos, Profile Photos, Sets, User Profiles, Videos</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
@@ -446,6 +446,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>ImgAdult</td>
+    <td>https://imgadult.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>ImgBB</td>
     <td>https://imgbb.com/</td>
     <td>Albums, individual Images, User Profiles</td>
@@ -508,7 +514,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Itaku</td>
     <td>https://itaku.ee/</td>
-    <td>Galleries, individual Images, Search Results, Stars</td>
+    <td>Followers, Followed Users, Galleries, individual Images, Search Results, Stars, User Profiles</td>
     <td></td>
 </tr>
 <tr>
