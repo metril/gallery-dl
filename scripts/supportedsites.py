@@ -293,6 +293,9 @@ SUBCATEGORY_MAP = {
         "saved": "Saved Posts",
         "tagged": "Tagged Posts",
     },
+    "itaku": {
+        "posts": "",
+    },
     "iwara": {
         "user-images": "User Images",
         "user-videos": "User Videos",
@@ -635,9 +638,9 @@ def build_extractor_list():
     default["e-hentai"] = default["exhentai"]
     domains["e-hentai"] = domains["exhentai"].replace("x", "-")
 
-    # add coomer.su
+    # add coomer.st
     default["coomer"] = default["kemono"]
-    domains["coomer"] = domains["kemono"].replace("kemono", "coomer")
+    domains["coomer"] = "https://coomer.st/"
 
     # add wikifeetx.com
     default["wikifeetx"] = default["wikifeet"]

@@ -211,7 +211,7 @@ class ExecTest(BasePostprocessorTest):
                 self.pathfmt.filename),
             shell=True,
             creationflags=0,
-            start_new_session=None,
+            start_new_session=False,
         )
         i.wait.assert_called_once_with()
 
@@ -235,7 +235,7 @@ class ExecTest(BasePostprocessorTest):
             ],
             shell=False,
             creationflags=0,
-            start_new_session=None,
+            start_new_session=False,
         )
 
     def test_command_many(self):
@@ -260,7 +260,7 @@ class ExecTest(BasePostprocessorTest):
                     self.pathfmt.filename),
                 shell=True,
                 creationflags=0,
-                start_new_session=None,
+                start_new_session=False,
             ),
             call(
                 [
@@ -270,7 +270,7 @@ class ExecTest(BasePostprocessorTest):
                 ],
                 shell=False,
                 creationflags=0,
-                start_new_session=None,
+                start_new_session=False,
             ),
         ])
 
@@ -314,6 +314,7 @@ class ExecTest(BasePostprocessorTest):
 
         with patch("gallery_dl.util.Popen") as p:
             i = Mock()
+            i.wait.return_value = 0
             p.return_value = i
             self._trigger(("after",))
 
@@ -334,6 +335,7 @@ class ExecTest(BasePostprocessorTest):
 
         with patch("gallery_dl.util.Popen") as p:
             i = Mock()
+            i.wait.return_value = 0
             p.return_value = i
             self._trigger(("after",))
 

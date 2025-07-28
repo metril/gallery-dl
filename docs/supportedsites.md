@@ -201,7 +201,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Coomer</td>
-    <td>https://coomer.su/</td>
+    <td>https://coomer.st/</td>
     <td>Artists, Favorites, Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
@@ -514,7 +514,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Itaku</td>
     <td>https://itaku.ee/</td>
-    <td>Followers, Followed Users, Galleries, individual Images, Search Results, Stars, User Profiles</td>
+    <td>Bookmarks, Followers, Followed Users, Galleries, individual Images, Posts, Search Results, Stars, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -537,7 +537,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Kemono</td>
-    <td>https://kemono.su/</td>
+    <td>https://kemono.cr/</td>
     <td>Artists, Discord Servers, Favorites, Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
