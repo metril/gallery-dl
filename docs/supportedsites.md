@@ -158,6 +158,12 @@ Consider all listed sites to potentially be NSFW.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
+    <td>BOOTH</td>
+    <td>https://booth.pm/</td>
+    <td>Items, Shops</td>
+    <td></td>
+</tr>
+<tr>
     <td>Bunkr</td>
     <td>https://bunkr.si/</td>
     <td>Albums, Media Files</td>
@@ -1502,6 +1508,12 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Misskey.design</td>
     <td>https://misskey.design/</td>
+    <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Misskey.art</td>
+    <td>https://misskey.art/</td>
     <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
     <td></td>
 </tr>
