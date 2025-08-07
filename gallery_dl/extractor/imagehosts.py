@@ -383,3 +383,30 @@ class FappicImageExtractor(ImagehostImageExtractor):
             filename = filename[13:]
 
         return url, filename
+
+
+class PicstateImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from picstate.com"""
+    category = "picstate"
+    pattern = r"(?:https?://)?((?:www\.)?picstate\.com/view/full/([^/?#]+))"
+    example = "https://picstate.com/view/full/123"
+
+    def get_info(self, page):
+        pos = page.index(' id="image_container"')
+        url     , pos = text.extract(page, '<img src="', '"', pos)
+        filename, pos = text.extract(page, 'alt="', '"', pos)
+        return url, filename
+
+
+class ImgdriveImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imgdrive.net"""
+    category = "imgdrive"
+    pattern = r"(?:https?://)?((?:www\.)?imgdrive\.net/img-(\w+)\.html)"
+    example = "https://imgdrive.net/img-0123456789abc.html"
+
+    def get_info(self, page):
+        title, pos = text.extract(
+            page, 'property="og:title" content="', '"')
+        url  , pos = text.extract(
+            page, 'property="og:image" content="', '"', pos)
+        return url.replace("/small/", "/big/"), title.rsplit(" | ", 2)[0]

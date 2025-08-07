@@ -476,6 +476,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>ImgDrive.net</td>
+    <td>https://imgdrive.net/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Imgspice</td>
     <td>https://imgspice.com/</td>
     <td>individual Images</td>
@@ -731,6 +737,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Picarto</td>
     <td>https://picarto.tv/</td>
     <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Picstate</td>
+    <td>https://picstate.com/</td>
+    <td>individual Images</td>
     <td></td>
 </tr>
 <tr>
@@ -1173,6 +1185,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Wikifeetx</td>
     <td>https://www.wikifeetx.com/</td>
     <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Xasiat</td>
+    <td>https://www.xasiat.com</td>
+    <td>Albums, Categories, Models, Tag Searches</td>
     <td></td>
 </tr>
 <tr>

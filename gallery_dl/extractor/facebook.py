@@ -61,6 +61,7 @@ class FacebookExtractor(Extractor):
             "user_id": text.extr(
                 set_page, '"owner":{"__typename":"User","id":"', '"'
             ),
+            "user_pfbid": "",
             "title": self.decode_all(text.extr(
                 set_page, '"title":{"text":"', '"'
             )),
@@ -73,6 +74,13 @@ class FacebookExtractor(Extractor):
                 set_page, '{"__typename":"Photo","id":"', '"'
             )
         }
+
+        if directory["user_id"].startswith("pfbid"):
+            directory["user_pfbid"] = directory["user_id"]
+            directory["user_id"] = (
+                text.extr(
+                    set_page, '"actors":[{"__typename":"User","id":"', '"') or
+                directory["set_id"].split(".")[1])
 
         return directory
 
@@ -92,6 +100,7 @@ class FacebookExtractor(Extractor):
             "user_id": text.extr(
                 photo_page, '"owner":{"__typename":"User","id":"', '"'
             ),
+            "user_pfbid": "",
             "caption": self.decode_all(text.extr(
                 photo_page,
                 '"message":{"delight_ranges"',
@@ -114,6 +123,11 @@ class FacebookExtractor(Extractor):
                 '"'
             )
         }
+
+        if photo["user_id"].startswith("pfbid"):
+            photo["user_pfbid"] = photo["user_id"]
+            photo["user_id"] = text.extr(
+                photo_page, r'\"content_owner_id_new\":\"', r'\"')
 
         text.nameext_from_url(photo["url"], photo)
 
@@ -301,14 +315,15 @@ class FacebookExtractor(Extractor):
 
         for _ in range(self.fallback_retries + 1):
             profile_photos_page = self.request(profile_photos_url).text
-            if set_id := self._extract_profile_set_id(profile_photos_page):
+            set_id = self._extract_profile_set_id(profile_photos_page)
+            avatar_page_url = text.extr(
+                profile_photos_page, ',"profilePhoto":{"url":"', '"')
+
+            if set_id or avatar_page_url:
                 break
             self.log.debug("Got empty profile photos page, retrying...")
         else:
             raise exception.AbortExtraction("Failed to extract profile data")
-
-        avatar_page_url = text.extr(
-            profile_photos_page, ',"profilePhoto":{"url":"', '"')
 
         return set_id, avatar_page_url.replace("\\/", "/")
 
@@ -426,6 +441,9 @@ class FacebookPhotosExtractor(FacebookExtractor):
 
     def items(self):
         set_id = self._extract_profile_photos_page(self.groups[0])[0]
+        if not set_id:
+            return iter(())
+
         set_url = f"{self.root}/media/set/?set={set_id}"
         set_page = self.request(set_url).text
         set_data = self.parse_set_page(set_page)
