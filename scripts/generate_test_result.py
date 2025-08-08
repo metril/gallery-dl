@@ -11,9 +11,10 @@
 
 import logging
 import argparse
+import json
 import util
 from pyprint import pyprint
-from gallery_dl import extractor, job
+from gallery_dl import extractor, job, config
 
 LOG = logging.getLogger("gen-test")
 
@@ -31,19 +32,35 @@ def generate_test_result(args):
     if args.only_matching:
         opts = meta = None
     else:
+        if args.options:
+            args.options_parsed = options = {}
+            for opt in args.options:
+                key, _, value = opt.partition("=")
+                try:
+                    value = json.loads(value)
+                except ValueError:
+                    pass
+                options[key] = value
+                config.set((), key, value)
+        if args.range:
+            config.set((), "image-range"  , args.range)
+            config.set((), "chapter-range", args.range)
+
         djob = job.DataJob(args.extr, file=None)
         djob.filter = dict.copy
         djob.run()
 
-        opts = generate_opts(args, djob.data_urls)
+        opts = generate_opts(args, djob.data_urls, djob.exception)
+        ool = (len(opts) > 1 or "#options" in opts)
+
         if args.metadata:
             meta = generate_meta(args, djob.data_meta)
         else:
             meta = None
 
-    result = pyprint(head)
+    result = pyprint(head, oneline=False, lmin=9)
     if opts:
-        result = result[:-2] + pyprint(opts)[1:]
+        result = result[:-2] + pyprint(opts, oneline=ool, lmin=9)[1:]
     if meta:
         result = result[:-1] + pyprint(meta)[1:]
     return result + ",\n\n"
@@ -63,10 +80,18 @@ def generate_head(args):
     return head
 
 
-def generate_opts(args, urls):
+def generate_opts(args, urls, exc=None):
     opts = {}
 
-    if not urls:
+    if args.options:
+        opts["#options"] = args.options_parsed
+
+    if args.range:
+        opts["#range"] = args.range
+
+    if exc:
+        opts["#exception"] = exc.__class__
+    elif not urls:
         opts["#count"] = 0
     elif len(urls) == 1:
         opts["#results"] = urls[0]
@@ -112,7 +137,9 @@ def parse_args(args=None):
     parser.add_argument("-C", dest="comment", action="store_const", const="")
     parser.add_argument("-l", "--limit_urls", type=int, default=10)
     parser.add_argument("-m", "--metadata", action="store_true")
-    parser.add_argument("-o", "--only-matching", action="store_true")
+    parser.add_argument("-o", "--option", dest="options", action="append")
+    parser.add_argument("-O", "--only-matching", action="store_true")
+    parser.add_argument("-r", "--range")
     parser.add_argument("URL")
 
     return parser.parse_args()

@@ -429,14 +429,11 @@ class PixivArtworksExtractor(PixivExtractor):
         self.user_id = u1 or u2
         self.tag = t1 or t2
 
-        if self.sanity_workaround:
-            self.cookies_domain = domain = ".pixiv.net"
-            self._init_cookies()
-            if self._warn_phpsessid:
-                PixivArtworksExtractor._warn_phpsessid = False
-                if not self.cookies.get("PHPSESSID", domain=domain):
-                    self.log.warning("No 'PHPSESSID' cookie set. Can detect on"
-                                     "ly non R-18 'limit_sanity_level' works.")
+        if self.sanity_workaround and self._warn_phpsessid:
+            PixivArtworksExtractor._warn_phpsessid = False
+            if not self.cookies.get("PHPSESSID", domain=self.cookies_domain):
+                self.log.warning("No 'PHPSESSID' cookie set. Can detect only "
+                                 "non R-18 'limit_sanity_level' works.")
 
     def metadata(self):
         if self.config("metadata"):
@@ -449,16 +446,14 @@ class PixivArtworksExtractor(PixivExtractor):
         if self.sanity_workaround:
             body = self._request_ajax(
                 f"/user/{self.user_id}/profile/all")
-            if not body:
-                return ()
             try:
                 ajax_ids = list(map(int, body["illusts"]))
                 ajax_ids.extend(map(int, body["manga"]))
                 ajax_ids.sort()
             except Exception as exc:
+                self.log.debug("", exc_info=exc)
                 self.log.warning("u%s: Failed to collect artwork IDs "
-                                 "using AJAX API (%s: %s)",
-                                 self.user_id, exc.__class__.__name__, exc)
+                                 "using AJAX API", self.user_id)
             else:
                 works = self._extend_sanity(works, ajax_ids)
 
