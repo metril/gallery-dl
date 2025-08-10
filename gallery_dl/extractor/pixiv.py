@@ -443,9 +443,8 @@ class PixivArtworksExtractor(PixivExtractor):
     def works(self):
         works = self.api.user_illusts(self.user_id)
 
-        if self.sanity_workaround:
-            body = self._request_ajax(
-                f"/user/{self.user_id}/profile/all")
+        if self.sanity_workaround and (body := self._request_ajax(
+                f"/user/{self.user_id}/profile/all")):
             try:
                 ajax_ids = list(map(int, body["illusts"]))
                 ajax_ids.extend(map(int, body["manga"]))
@@ -1262,7 +1261,7 @@ class PixivAppAPI():
 
     def user_illusts(self, user_id):
         params = {"user_id": user_id}
-        return self._pagination("/v1/user/illusts", params)
+        return self._pagination("/v1/user/illusts", params, user_data="user")
 
     def user_novels(self, user_id):
         params = {"user_id": user_id}
@@ -1297,22 +1296,29 @@ class PixivAppAPI():
                 self.extractor.wait(seconds=300)
                 continue
 
-            raise exception.AbortExtraction(f"API request failed: {error}")
+            msg = (f"'{msg}'" if (msg := error.get("user_message")) else
+                   f"'{msg}'" if (msg := error.get("message")) else
+                   error)
+            raise exception.AbortExtraction(f"API request failed: {msg}")
 
     def _pagination(self, endpoint, params,
-                    key_items="illusts", key_data=None):
-        while True:
-            data = self._call(endpoint, params)
+                    key_items="illusts", key_data=None, user_data=None):
+        data = self._call(endpoint, params)
 
-            if key_data:
-                self.data = data.get(key_data)
-                key_data = None
+        if key_data is not None:
+            self.data = data.get(key_data)
+        if user_data is not None:
+            if not data[user_data].get("id"):
+                raise exception.NotFoundError("user")
+
+        while True:
             yield from data[key_items]
 
             if not data["next_url"]:
                 return
             query = data["next_url"].rpartition("?")[2]
             params = text.parse_query(query)
+            data = self._call(endpoint, params)
 
 
 @cache(maxage=36500*86400, keyarg=0)

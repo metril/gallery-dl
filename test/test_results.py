@@ -145,7 +145,8 @@ class TestExtractorResults(unittest.TestCase):
                 config.set((), key, None)
 
         if auth and not any(extr.config(key) for key in AUTH_KEYS):
-            return self._skipped.append((result["#url"], "no auth"))
+            self._skipped.append((result["#url"], "no auth"))
+            self.skipTest("no auth")
 
         if "#options" in result:
             for key, value in result["#options"].items():
@@ -158,8 +159,11 @@ class TestExtractorResults(unittest.TestCase):
         tjob = ResultJob(extr, content=("#sha1_content" in result))
 
         if "#exception" in result:
-            with self.assertRaises(result["#exception"], msg="#exception"):
+            with self.assertRaises(result["#exception"], msg="#exception"), \
+                    self.assertLogs() as log_info:
                 tjob.run()
+            if "#log" in result:
+                self.assertLogEqual(result["#log"], log_info.output)
             return
 
         try:

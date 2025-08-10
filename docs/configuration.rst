@@ -2678,8 +2678,10 @@ Description
 
     Supported values are
 
+    * ``info``
     * ``avatar``
     * ``photos``
+    * ``albums``
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
