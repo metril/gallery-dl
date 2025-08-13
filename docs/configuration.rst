@@ -446,7 +446,6 @@ Default
     * ``"3.0-6.0"``
         ``bilibili``,
         ``exhentai``,
-        ``idolcomplex``,
         ``[reactor]``,
         ``readcomiconline``
     * ``"6.0-6.1"``
@@ -4745,6 +4744,28 @@ Default
     ``false``
 Description
     Download article images.
+
+
+extractor.skeb.include
+----------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"works"``
+Example
+    * ``"works,sent-requests"``
+    * ``["works", "sent-requests"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+
+    * ``"works"``
+    * ``"sent-requests"``
+
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
 extractor.skeb.sent-requests

@@ -417,7 +417,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Idol Complex</td>
-    <td>https://idol.sankakucomplex.com/</td>
+    <td>https://www.idolcomplex.com/</td>
     <td>Pools, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
@@ -952,7 +952,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Skeb</td>
     <td>https://skeb.jp/</td>
-    <td>Followed Creators, Followed Users, Posts, Search Results, User Profiles</td>
+    <td>Followed Creators, Followed Users, Posts, Search Results, Sent Requests, User Profiles, Works</td>
     <td></td>
 </tr>
 <tr>
@@ -1052,7 +1052,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Tumblr</td>
     <td>https://www.tumblr.com/</td>
-    <td>Days, Likes, Posts, Search Results, Tag Searches, User Profiles</td>
+    <td>Days, Followers, Followed Users, Likes, Posts, Search Results, Tag Searches, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
