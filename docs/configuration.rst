@@ -1994,6 +1994,18 @@ Description
     `quality <extractor.civitai.quality_>`__ ones.
 
 
+extractor.civitai.search-models.token
+-------------------------------------
+extractor.civitai.search-images.token
+-------------------------------------
+Type
+    ``string``
+Default
+    ``"8c46eb2508e21db1e9828a97968d91ab1ca1caa5f70a00e88a2ba1e286603b61"``
+Description
+    ``Authorization`` header value used for `/multi-search` queries.
+
+
 extractor.comick.lang
 ---------------------
 Type
@@ -2446,6 +2458,14 @@ Description
 
     | Each format is parsed as ``SIZE.EXT``.
     | Leave ``SIZE`` empty to download the regular, small avatar format.
+Note
+    | Consider updating
+      `archive-format <extractor.*.archive-format_>`__
+      for ``avatar`` results to
+    | ``"a_{_username}_{index}{title[6:]}.{extension}"``
+    | or similar when using an
+      `archive <extractor.*.archive_>`__
+      to be able to handle different formats.
 
 
 extractor.deviantart.folder.subfolders
@@ -2957,8 +2977,9 @@ Type
 Default
     ``null``
 Description
-    Values from the API Access Credentials section found at the bottom of your
-    `Account Options <https://gelbooru.com/index.php?page=account&s=options>`__
+    Values from the `API Access Credentials` section
+    found at the bottom of your account's
+    `Options <https://gelbooru.com/index.php?page=account&s=options>`__
     page.
 
 
