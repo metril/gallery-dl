@@ -877,6 +877,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries, individual Images, Videos</td>
     <td></td>
 </tr>
+<tr id="sizebooru" title="sizebooru">
+    <td>Size Booru</td>
+    <td>https://sizebooru.com/</td>
+    <td>Favorites, Galleries, Posts, Tag Searches, User Uploads</td>
+    <td></td>
+</tr>
 <tr id="skeb" title="skeb">
     <td>Skeb</td>
     <td>https://skeb.jp/</td>
@@ -1134,12 +1140,6 @@ Consider all listed sites to potentially be NSFW.
     <td>https://www.zerochan.net/</td>
     <td>individual Images, Tag Searches</td>
     <td>Supported</td>
-</tr>
-<tr id="zzup" title="zzup">
-    <td>Zzup</td>
-    <td>https://zzup.com/</td>
-    <td>Galleries</td>
-    <td></td>
 </tr>
 <tr id="kabeuchi" title="kabeuchi">
     <td>かべうち</td>
@@ -1548,12 +1548,6 @@ Consider all listed sites to potentially be NSFW.
 
 <tr id="shimmie2" title="shimmie2">
     <td colspan="4"><strong>Shimmie2 Instances</strong></td>
-</tr>
-<tr id="giantessbooru" title="giantessbooru">
-    <td>Giantessbooru</td>
-    <td>https://sizechangebooru.com/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
 </tr>
 <tr id="cavemanon" title="cavemanon">
     <td>Cavemanon</td>
