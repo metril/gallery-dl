@@ -196,7 +196,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="comick" title="comick">
     <td>Comick</td>
     <td>https://comick.io/</td>
-    <td>Chapters, Manga</td>
+    <td>Chapters, Covers, Manga</td>
     <td></td>
 </tr>
 <tr id="coomer" title="coomer">
@@ -994,7 +994,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="tungsten" title="tungsten">
     <td>Tungsten</td>
     <td>https://tungsten.run/</td>
-    <td>Models, Posts</td>
+    <td>Models, Posts, User Profiles</td>
     <td></td>
 </tr>
 <tr id="twibooru" title="twibooru">
@@ -1175,20 +1175,20 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr id="jpgfish" title="jpgfish">
     <td>JPG Fish</td>
-    <td>https://jpg5.su/</td>
-    <td>Albums, individual Images, User Profiles</td>
+    <td>https://jpg6.su/</td>
+    <td>Albums, individual Images, User Profiles, Videos</td>
     <td></td>
 </tr>
 <tr id="imgkiwi" title="imgkiwi">
     <td>IMG.Kiwi</td>
     <td>https://img.kiwi/</td>
-    <td>Albums, individual Images, User Profiles</td>
+    <td>Albums, individual Images, User Profiles, Videos</td>
     <td></td>
 </tr>
 <tr id="imagepond" title="imagepond">
     <td>ImagePond</td>
     <td>https://imagepond.net/</td>
-    <td>Albums, individual Images, User Profiles</td>
+    <td>Albums, individual Images, User Profiles, Videos</td>
     <td></td>
 </tr>
 
