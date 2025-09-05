@@ -9,7 +9,7 @@
 """Extractors for https://fansly.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, util
 import time
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?fansly\.com"
@@ -25,6 +25,7 @@ class FanslyExtractor(Extractor):
 
     def _init(self):
         self.api = FanslyAPI(self)
+        self.formats = self.config("format") or (303, 302, 1, 2, 4)
 
     def items(self):
         for post in self.posts():
@@ -40,49 +41,71 @@ class FanslyExtractor(Extractor):
 
     def _extract_files(self, post):
         files = []
-
         for attachment in post.pop("attachments"):
-            media = attachment["media"]
-            file = {
-                **media,
-                "date": text.parse_timestamp(media["createdAt"]),
-                "date_updated": text.parse_timestamp(media["updatedAt"]),
-            }
+            try:
+                self._extract_attachment(files, post, attachment)
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
+                self.log.error(
+                    "%s/%s, Failed to extract media (%s: %s)",
+                    post["id"], attachment.get("id"),
+                    exc.__class__.__name__, exc)
+        return files
 
-            width = 0
-            for variant in media["variants"]:
-                if variant["width"] > width:
-                    width = variant["width"]
-                    variant_max = variant
-                if variant["type"] == 303:
-                    break
-            else:
-                # image
-                file["type"] = "image"
-                files.append({
-                    "file": file,
-                    "url" : variant_max["locations"][0]["location"],
-                })
-                continue
+    def _extract_attachment(self, files, post, attachment):
+        media = attachment["media"]
+        variants = {
+            variant["type"]: variant
+            for variant in media.pop("variants", ())
+        }
+        variants[media["type"]] = media
 
-            # video
-            location = variant["locations"][0]
+        for fmt in self.formats:
+            if fmt in variants and (variant := variants[fmt]).get("locations"):
+                break
+        else:
+            return self.log.warning(
+                "%s/%s: Requested format not available",
+                post["id"], attachment["id"])
+
+        mime = variant["mimetype"]
+        location = variant.pop("locations")[0]
+        if "metadata" in variant:
+            try:
+                variant.update(util.json_loads(variant.pop("metadata")))
+            except Exception:
+                pass
+
+        file = {
+            **variant,
+            "format": fmt,
+            "date": text.parse_timestamp(media["createdAt"]),
+            "date_updated": text.parse_timestamp(media["updatedAt"]),
+        }
+
+        if "metadata" in location:
+            # manifest
             meta = location["metadata"]
 
             file["type"] = "video"
             files.append({
                 "file": file,
                 "url": f"ytdl:{location['location']}",
-                "_fallback": (media["locations"][0]["location"],),
-                "_ytdl_manifest": "dash",
+                #  "_fallback": (media["locations"][0]["location"],),
+                "_ytdl_manifest":
+                    "dash" if mime == "application/dash+xml" else "hls",
                 "_ytdl_manifest_cookies": (
                     ("CloudFront-Key-Pair-Id", meta["Key-Pair-Id"]),
                     ("CloudFront-Signature"  , meta["Signature"]),
                     ("CloudFront-Policy"     , meta["Policy"]),
                 ),
             })
-
-        return files
+        else:
+            file["type"] = "image" if mime.startswith("image/") else "video"
+            files.append({
+                "file": file,
+                "url" : location["location"],
+            })
 
 
 class FanslyPostExtractor(FanslyExtractor):
@@ -96,11 +119,18 @@ class FanslyPostExtractor(FanslyExtractor):
 
 class FanslyHomeExtractor(FanslyExtractor):
     subcategory = "home"
-    pattern = rf"{BASE_PATTERN}/home(?:/(subscribed|list/(\d+)))?"
+    pattern = rf"{BASE_PATTERN}/home(?:/(?:subscribed()|list/(\d+)))?"
     example = "https://fansly.com/home"
 
-    def items(self):
-        pass
+    def posts(self):
+        subscribed, list_id = self.groups
+        if subscribed is not None:
+            mode = "1"
+        elif list_id is not None:
+            mode = None
+        else:
+            mode = "0"
+        return self.api.timeline_home(mode, list_id)
 
 
 class FanslyListExtractor(FanslyExtractor):
@@ -109,7 +139,24 @@ class FanslyListExtractor(FanslyExtractor):
     example = "https://fansly.com/lists/1234567890"
 
     def items(self):
-        pass
+        base = f"{self.root}/"
+        for account in self.api.lists_itemsnew(self.groups[0]):
+            account["_extractor"] = FanslyCreatorPostsExtractor
+            url = f"{base}{account['username']}/posts"
+            yield Message.Queue, url, account
+
+
+class FanslyListsExtractor(FanslyExtractor):
+    subcategory = "lists"
+    pattern = rf"{BASE_PATTERN}/lists"
+    example = "https://fansly.com/lists"
+
+    def items(self):
+        base = f"{self.root}/lists/"
+        for list in self.api.lists_account():
+            list["_extractor"] = FanslyListExtractor
+            url = f"{base}{list['id']}#{list['label']}"
+            yield Message.Queue, url, list
 
 
 class FanslyCreatorPostsExtractor(FanslyExtractor):
@@ -118,7 +165,11 @@ class FanslyCreatorPostsExtractor(FanslyExtractor):
     example = "https://fansly.com/CREATOR/posts"
 
     def posts(self):
-        account = self.api.account(self.groups[0])
+        creator = self.groups[0]
+        if creator.startswith("id:"):
+            account = self.api.account_by_id(creator[3:])
+        else:
+            account = self.api.account(creator)
         wall_id = account["walls"][0]["id"]
         return self.api.timeline_new(account["id"], wall_id)
 
@@ -142,12 +193,46 @@ class FanslyAPI():
     def account(self, username):
         endpoint = "/v1/account"
         params = {"usernames": username}
-        return self._call(endpoint, params)["response"][0]
+        return self._call(endpoint, params)[0]
+
+    def account_by_id(self, account_id):
+        endpoint = "/v1/account"
+        params = {"ids": account_id}
+        return self._call(endpoint, params)[0]
+
+    def accounts_by_id(self, account_ids):
+        endpoint = "/v1/account"
+        params = {"ids": ",".join(map(str, account_ids))}
+        return self._call(endpoint, params)
+
+    def lists_account(self):
+        endpoint = "/v1/lists/account"
+        params = {"itemId": ""}
+        return self._call(endpoint, params)
+
+    def lists_itemsnew(self, list_id, sort="3"):
+        endpoint = "/v1/lists/itemsnew"
+        params = {
+            "listId"  : list_id,
+            "limit"   : 50,
+            "after"   : None,
+            "sortMode": sort,
+        }
+        return self._pagination(endpoint, params)
 
     def post(self, post_id):
         endpoint = "/v1/post"
         params = {"ids": post_id}
         return self._update_posts(self._call(endpoint, params))
+
+    def timeline_home(self, mode="0", list_id=None):
+        endpoint = "/v1/timeline/home"
+        params = {"before": "0", "after": "0"}
+        if list_id is None:
+            params["mode"] = mode
+        else:
+            params["listId"] = list_id
+        return self._pagination(endpoint, params)
 
     def timeline_new(self, account_id, wall_id):
         endpoint = f"/v1/timelinenew/{account_id}"
@@ -159,8 +244,7 @@ class FanslyAPI():
         }
         return self._pagination(endpoint, params)
 
-    def _update_posts(self, data):
-        response = data["response"]
+    def _update_posts(self, response):
         accounts = {
             account["id"]: account
             for account in response["accounts"]
@@ -177,21 +261,34 @@ class FanslyAPI():
         posts = response["posts"]
         for post in posts:
             post["account"] = accounts[post.pop("accountId")]
-            att = []
 
+            attachments = []
             for attachment in post["attachments"]:
                 cid = attachment["contentId"]
                 if cid in media:
-                    att.append(media[cid])
+                    attachments.append(media[cid])
                 elif cid in bundles:
-                    content = bundles[cid]["bundleContent"]
-                    content.sort(key=lambda c: c["pos"])
-                    att.extend(
-                        media[c["accountMediaId"]]
-                        for c in content
+                    bundle = bundles[cid]["bundleContent"]
+                    bundle.sort(key=lambda c: c["pos"])
+                    attachments.extend(
+                        media[m["accountMediaId"]]
+                        for m in bundle
+                        if m["accountMediaId"] in media
                     )
-            post["attachments"] = att
+                else:
+                    self.extractor.log.warning(
+                        "%s: Unhandled 'contentId' %s",
+                        post["id"], cid)
+            post["attachments"] = attachments
         return posts
+
+    def _update_items(self, items):
+        ids = [item["id"] for item in items]
+        accounts = {
+            account["id"]: account
+            for account in self.accounts_by_id(ids)
+        }
+        return [accounts[id] for id in ids]
 
     def _call(self, endpoint, params):
         url = f"{self.ROOT}/api{endpoint}"
@@ -199,15 +296,23 @@ class FanslyAPI():
         headers = self.headers.copy()
         headers["fansly-client-ts"] = str(int(time.time() * 1000))
 
-        return self.extractor.request_json(url, params=params, headers=headers)
+        data = self.extractor.request_json(
+            url, params=params, headers=headers)
+        return data["response"]
 
     def _pagination(self, endpoint, params):
         while True:
-            data = self._call(endpoint, params)
+            response = self._call(endpoint, params)
 
-            posts = self._update_posts(data)
-            if not posts:
-                return
-            yield from posts
+            if isinstance(response, list):
+                if not response:
+                    return
+                yield from self._update_items(response)
+                params["after"] = response[-1]["sortId"]
 
-            params["before"] = min(p["id"] for p in posts)
+            else:
+                if not response.get("posts"):
+                    return
+                posts = self._update_posts(response)
+                yield from posts
+                params["before"] = min(p["id"] for p in posts)

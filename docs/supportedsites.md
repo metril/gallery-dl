@@ -106,7 +106,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="ao3" title="ao3">
     <td>Archive of Our Own</td>
     <td>https://archiveofourown.org/</td>
-    <td>Search Results, Series, Subscriptions, Tag Searches, User Profiles, Bookmarks, Works</td>
+    <td>Search Results, Series, Subscriptions, Tag Searches, User Profiles, User Bookmarks, User Series, User Works, Works</td>
     <td>Supported</td>
 </tr>
 <tr id="artstation" title="artstation">
@@ -280,7 +280,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="fansly" title="fansly">
     <td>Fansly</td>
     <td>https://fansly.com/</td>
-    <td>Creator-posts, Home Feed, Lists, Posts</td>
+    <td>Creator Posts, Home Feed, Lists, Account Lists, Posts</td>
     <td></td>
 </tr>
 <tr id="fantia" title="fantia">
@@ -1582,6 +1582,12 @@ Consider all listed sites to potentially be NSFW.
 <tr id="nozrip" title="nozrip">
     <td>GaryC Booru</td>
     <td>https://noz.rip/booru/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr id="thecollectionS" title="thecollectionS">
+    <td>The /co/llection</td>
+    <td>https://co.llection.pics/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
