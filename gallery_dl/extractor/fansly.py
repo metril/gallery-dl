@@ -86,12 +86,17 @@ class FanslyExtractor(Extractor):
         if "metadata" in location:
             # manifest
             meta = location["metadata"]
-
             file["type"] = "video"
+
+            try:
+                fallback = (media["locations"][0]["location"],)
+            except Exception:
+                fallback = ()
+
             files.append({
                 "file": file,
                 "url": f"ytdl:{location['location']}",
-                #  "_fallback": (media["locations"][0]["location"],),
+                "_fallback": fallback,
                 "_ytdl_manifest":
                     "dash" if mime == "application/dash+xml" else "hls",
                 "_ytdl_manifest_cookies": (
@@ -179,16 +184,17 @@ class FanslyAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-
-        token = extractor.config("token")
-        if not token:
-            self.extractor.log.warning("No 'token' provided")
-
         self.headers = {
             "fansly-client-ts": None,
             "Origin"          : extractor.root,
-            "authorization"   : token,
         }
+
+        if token := extractor.config("token"):
+            self.headers["authorization"] = token
+            self.extractor.log.debug(
+                "Using authorization 'token' %.5s...", token)
+        else:
+            self.extractor.log.warning("No 'token' provided")
 
     def account(self, username):
         endpoint = "/v1/account"

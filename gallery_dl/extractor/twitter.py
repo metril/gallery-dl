@@ -1447,7 +1447,8 @@ class TwitterAPI():
             "includePromotedContent": False,
         }
         return self._pagination_tweets(
-            endpoint, variables, ("bookmark_timeline_v2", "timeline"), False)
+            endpoint, variables, ("bookmark_timeline_v2", "timeline"),
+            stop_tweets=128)
 
     def search_timeline(self, query, product="Latest"):
         endpoint = "/graphql/4fpceYZ6-YQCx_JSl_Cn_A/SearchTimeline"
@@ -1458,9 +1459,17 @@ class TwitterAPI():
             "product": product,
             "withGrokTranslatedBio": False,
         }
+
+        if self.extractor.config("pagination-search") in (
+                "id", "tweet_id", "max_id"):
+            update_variables = self._update_variables_search
+        else:
+            update_variables = None
+
         return self._pagination_tweets(
             endpoint, variables,
-            ("search_by_raw_query", "search_timeline", "timeline"))
+            ("search_by_raw_query", "search_timeline", "timeline"),
+            stop_tweets=3, update_variables=update_variables)
 
     def community_query(self, community_id):
         endpoint = "/graphql/2W09l7nD7ZbxGQHXvfB22w/CommunityQuery"
@@ -1870,11 +1879,12 @@ class TwitterAPI():
             params["cursor"] = extr._update_cursor(cursor)
 
     def _pagination_tweets(self, endpoint, variables,
-                           path=None, stop_tweets=True,
+                           path=None, stop_tweets=0, update_variables=None,
                            features=None, field_toggles=None):
         extr = self.extractor
         original_retweets = (extr.retweets == "original")
         pinned_tweet = extr.pinned
+        stop_tweets_max = stop_tweets
 
         params = {"variables": None}
         if cursor := extr._init_cursor():
@@ -2067,11 +2077,24 @@ class TwitterAPI():
                             tweet.get("rest_id"))
                         continue
 
-            if stop_tweets and not tweet:
-                return extr._update_cursor(None)
+            if tweet:
+                stop_tweets = stop_tweets_max
+                last_tweet = tweet
+            else:
+                if stop_tweets <= 0:
+                    return extr._update_cursor(None)
+                self.log.debug(
+                    "No Tweet results (%s/%s)",
+                    stop_tweets_max - stop_tweets + 1, stop_tweets_max)
+                stop_tweets -= 1
+
             if not cursor or cursor == variables.get("cursor"):
                 return extr._update_cursor(None)
-            variables["cursor"] = extr._update_cursor(cursor)
+
+            if update_variables is None:
+                variables["cursor"] = extr._update_cursor(cursor)
+            else:
+                variables = update_variables(variables, cursor, last_tweet)
 
     def _pagination_users(self, endpoint, variables, path=None):
         extr = self.extractor
@@ -2139,6 +2162,30 @@ class TwitterAPI():
                 self.log.warning('"%s"', text)
 
         self.log.debug("Skipping %s ('%s')", tweet_id, text)
+
+    def _update_variables_search(self, variables, cursor, tweet):
+        try:
+            tweet_id = tweet.get("id_str") or tweet["legacy"]["id_str"]
+            max_id = f"max_id:{int(tweet_id)-1}"
+
+            query, n = text.re(r"\bmax_id:\d+").subn(
+                max_id, variables["rawQuery"])
+            if n:
+                variables["rawQuery"] = query
+            else:
+                variables["rawQuery"] = f"{query} {max_id}"
+
+            if prefix := self.extractor._cursor_prefix:
+                self.extractor._cursor_prefix = \
+                    f"{prefix.partition('_')[0]}_{tweet_id}/"
+            variables["cursor"] = None
+        except Exception as exc:
+            self.extractor.log.debug(
+                "Failed to update 'max_id' search query (%s: %s). Falling "
+                "back to 'cursor' pagination", exc.__class__.__name__, exc)
+            variables["cursor"] = self.extractor._update_cursor(cursor)
+
+        return variables
 
 
 @cache(maxage=365*86400, keyarg=1)
