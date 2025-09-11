@@ -211,6 +211,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, Media Files</td>
     <td></td>
 </tr>
+<tr id="cyberfile" title="cyberfile">
+    <td>CyberFile</td>
+    <td>https://cyberfile.me/</td>
+    <td>Files, Folders</td>
+    <td></td>
+</tr>
 <tr id="dankefuerslesen" title="dankefuerslesen">
     <td>Danke fürs Lesen</td>
     <td>https://danke.moe/</td>
@@ -875,6 +881,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Sex.com</td>
     <td>https://www.sex.com/</td>
     <td>Boards, Likes, Pins, User Pins, related Pins, Search Results</td>
+    <td></td>
+</tr>
+<tr id="simpcity" title="simpcity">
+    <td>SimpCity Forums</td>
+    <td>https://simpcity.cr/</td>
+    <td>Forums, Posts, Threads</td>
     <td></td>
 </tr>
 <tr id="simplyhentai" title="simplyhentai">
