@@ -68,6 +68,21 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://fansly.com/Oliviaus/posts/wall/785261459306196992",
+    "#class"   : fansly.FanslyCreatorPostsExtractor,
+},
+
+{
+    "#url"     : "https://fansly.com/Oliviaus/media",
+    "#class"   : fansly.FanslyCreatorMediaExtractor,
+},
+
+{
+    "#url"     : "https://fansly.com/Oliviaus/media/wall/785261459306196992",
+    "#class"   : fansly.FanslyCreatorMediaExtractor,
+},
+
+{
     "#url"     : "https://fansly.com/home",
     "#class"   : fansly.FanslyHomeExtractor,
 },
