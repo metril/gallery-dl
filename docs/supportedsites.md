@@ -15,7 +15,7 @@ Consider all listed sites to potentially be NSFW.
 <tbody valign="top">
 <tr id="2ch" title="2ch">
     <td>2ch</td>
-    <td>https://2ch.hk/</td>
+    <td>https://2ch.su/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
@@ -457,6 +457,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries, individual Images</td>
     <td></td>
 </tr>
+<tr id="imgpile" title="imgpile">
+    <td>imgpile</td>
+    <td>https://imgpile.com/</td>
+    <td>Posts, User Profiles</td>
+    <td></td>
+</tr>
 <tr id="imgth" title="imgth">
     <td>imgth</td>
     <td>https://imgth.com/</td>
@@ -592,7 +598,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="mangadex" title="mangadex">
     <td>MangaDex</td>
     <td>https://mangadex.org/</td>
-    <td>Authors, Chapters, Updates Feed, Library, MDLists, Manga</td>
+    <td>Authors, Chapters, Covers, Updates Feed, Library, MDLists, Manga</td>
     <td>Supported</td>
 </tr>
 <tr id="mangapark" title="mangapark">
