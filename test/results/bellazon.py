@@ -73,6 +73,11 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/#comment-4351049",
+    "#class"   : bellazon.BellazonPostExtractor,
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/3556-bipasha-basu/#findComment-2134610",
     "#class"   : bellazon.BellazonPostExtractor,
     "#results" : "https://www.bellazon.com/main/uploads/monthly_04_2010/post-35864-1270985307.jpg",
@@ -175,6 +180,17 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/66334-charly-jordan/page/31/#comment-5317926",
+    "#comment" : "video embed (#8239)",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#results" : "https://www.bellazon.com/main/uploads/monthly_2021_07/215731864_146910617534875_8340126104113274819_n.mp4.2f3cd5cd8cac6bf04c51d511892f187b.mp4",
+
+    "extension": "mp4",
+    "filename" : "215731864_146910617534875_8340126104113274819_n.mp4.2f3cd5cd8cac6bf04c51d511892f187b",
+    "id"       : "10919171",
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#pattern" : r"https://www\.bellazon\.com/main/uploads/monthly_\d+_\d+/.+\.jpg",
@@ -228,6 +244,7 @@ __tests__ = (
     "#url"     : "https://www.bellazon.com/main/topic/1774-zhang-ziyi/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#range"   : "1-5",
+    "#options" : {"prder-posts": "asc"},
     "#results" : (
         "http://img292.echo.cx/my.php?image=4moon011rk.jpg",
         "http://img294.echo.cx/my.php?image=heroclip3jb.jpg",
