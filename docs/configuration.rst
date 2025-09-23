@@ -5000,6 +5000,22 @@ Description
     Download animated images as ``.gif`` instead of ``.webp``
 
 
+extractor.simpcity.order-posts
+------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    posts of a ``thread`` are processed.
+
+    ``"asc"``
+        Ascending order (oldest first)
+    ``"desc"`` | ``"reverse"``
+        Descending order (newest first)
+
+
 extractor.sizebooru.metadata
 ----------------------------
 Type
@@ -6051,6 +6067,22 @@ Description
 
     Note: Requires `login <extractor.*.username & .password_>`__
     or `cookies <extractor.*.cookies_>`__
+
+
+extractor.vipergirls.order-posts
+--------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    posts of a ``thread`` are processed.
+
+    ``"asc"``
+        Ascending order (oldest first)
+    ``"desc"`` | ``"reverse"``
+        Descending order (newest first)
 
 
 extractor.vk.offset
@@ -7985,6 +8017,23 @@ Description
     See `metadata.event`_ for a list of available events.
 
 
+python.expression
+-----------------
+Type
+    ``string``
+Example
+    * ``"print('Foo Bar')"``
+    * ``"terminate()"``
+Description
+    A
+    `Python expression <https://docs.python.org/3/glossary.html#term-expression>`__
+    to
+    `evaluate <https://docs.python.org/3/library/functions.html#eval>`__.
+
+    Note: Only used with
+    `"mode": "eval" <python.mode_>`__
+
+
 python.function
 ---------------
 Type
@@ -8000,6 +8049,23 @@ Description
       ``<function name>`` is the name of the function in that module.
 
     It gets called with the current metadata dict as argument.
+
+
+python.mode
+-----------
+Type
+    ``string``
+Default
+    ``"function"``
+Description
+    Selects what Python code to run.
+
+    ``"eval"``
+        Evaluate an
+        `expression <python.expression_>`__
+    ``function"``
+        Call a
+        `function <python.function_>`__
 
 
 rename.from
