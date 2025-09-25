@@ -60,14 +60,16 @@ class ThehentaiworldExtractor(Extractor):
                 "<li>Posted: ", "<"), "%Y-%m-%d"),
         }
 
-        if "/videos/" in url:
+        if (c := url[27]) == "v":
             post["type"] = "video"
             post["width"] = post["height"] = 0
             post["votes"] = text.parse_int(extr("(<strong>", "</strong>"))
             post["score"] = text.parse_float(extr("<strong>", "<"))
             post["file_url"] = extr('<source src="', '"')
         else:
-            post["type"] = "image"
+            post["type"] = ("animated" if c == "g" else
+                            "3d cgi" if c == "3" else
+                            "image")
             post["width"] = text.parse_int(extr("<li>Size: ", " "))
             post["height"] = text.parse_int(extr("x ", "<"))
             post["file_url"] = extr('a href="', '"')
@@ -109,16 +111,6 @@ class ThehentaiworldExtractor(Extractor):
             pnum += 1
 
 
-class ThehentaiworldPostExtractor(ThehentaiworldExtractor):
-    subcategory = "post"
-    pattern = (rf"{BASE_PATTERN}"
-               rf"(/(?:(?:3d-cgi-)?hentai-image|video)s/([^/?#]+))")
-    example = "https://thehentaiworld.com/hentai-images/SLUG/"
-
-    def posts(self):
-        return (f"{self.root}{self.groups[0]}/",)
-
-
 class ThehentaiworldTagExtractor(ThehentaiworldExtractor):
     subcategory = "tag"
     per_page = 24
@@ -137,3 +129,13 @@ class ThehentaiworldTagExtractor(ThehentaiworldExtractor):
         self.page_start += pages
         self.post_start += posts
         return num
+
+
+class ThehentaiworldPostExtractor(ThehentaiworldExtractor):
+    subcategory = "post"
+    pattern = (rf"{BASE_PATTERN}("
+               rf"/(?:video|(?:[\w-]+-)?hentai-image)s/([^/?#]+))")
+    example = "https://thehentaiworld.com/hentai-images/SLUG/"
+
+    def posts(self):
+        return (f"{self.root}{self.groups[0]}/",)
