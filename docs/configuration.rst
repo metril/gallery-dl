@@ -706,7 +706,7 @@ extractor.*.user-agent
 Type
     ``string``
 Default
-    * ``"gallery-dl/VERSION"``: ``[Danbooru]``, ``mangadex``, ``weasyl``
+    * ``"gallery-dl/VERSION"``: ``[Danbooru]``, ``mangadex``, ``weasyl``, ``zerochan``
     * ``"gallery-dl/VERSION (by mikf)"``: ``[E621]``
     * ``"net.umanle.arca.android.playstore/0.9.75"``: ``arcalive``
     * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``
@@ -3806,6 +3806,17 @@ Example
     * ``["erotica", "suggestive"]``
 Description
     List of acceptable content ratings for returned chapters.
+
+
+extractor.mangafire.manga.lang
+------------------------------
+Type
+    ``string``
+Default
+    ``"en"``
+Description
+    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__
+    language code selecting which chapters to download.
 
 
 extractor.mangapark.source
