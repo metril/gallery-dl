@@ -106,8 +106,8 @@ Description
           5977527
         subcategory
           image
-
-    Note: Even if the value of the ``extension`` key is missing or
+Note
+    Even if the value of the ``extension`` key is missing or
     ``None``, it will be filled in later when the file download is
     starting. This key is therefore always available to provide
     a valid filename extension.
@@ -254,8 +254,8 @@ Default
     ``"\u0000-\u001f\u007f"`` (ASCII control characters)
 Description
     Set of characters to remove from generated path names.
-
-    Note: In a string with 2 or more characters, ``[]^-\`` need to be
+Note
+    In a string with 2 or more characters, ``[]^-\`` need to be
     escaped with backslashes, e.g. ``"\\[\\]"``
 
 
@@ -535,8 +535,8 @@ Description
 
     (R) Login with username & password or supplying logged-in
     `cookies <extractor.*.cookies_>`__ is required
-
-    Note: Leave the ``password`` value empty or undefined
+Note
+    Leave the ``password`` value empty or undefined
     to be prompted for a password when performing a login
     (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
 
@@ -669,9 +669,8 @@ Description
       It is also possible to set a proxy for a specific host by using
       ``scheme://host`` as key.
       See `Requests' proxy documentation`_ for more details.
-
-    Note: If a proxy URL does not include a scheme,
-    ``http://`` is assumed.
+Note
+    If a proxy URL does not include a scheme, ``http://`` is assumed.
 
 
 extractor.*.proxy-env
@@ -984,8 +983,8 @@ Description
     * A category or basecategory name (``"imgur"``, ``"mastodon"``)
     * | A (base)category-subcategory pair, where both names are separated by a colon (``"redgifs:user"``).
       | Both names can be a `*` or left empty, matching all possible names (``"*:image"``, ``":user"``).
-
-    Note: Any ``blacklist`` setting will automatically include
+Note
+    Any ``blacklist`` setting will automatically include
     ``"oauth"``, ``"recursive"``, and ``"test"``.
 
 
@@ -1013,10 +1012,10 @@ Description
     `PostgreSQL Connection URI <https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS>`__,
     the archive will use this PostgreSQL database as backend (requires
     `Psycopg <https://www.psycopg.org/>`__).
+Note
+    Archive files that do not already exist get generated automatically.
 
-    Note: Archive files that do not already exist get generated automatically.
-
-    Note: Archive paths support regular `format string`_ replacements,
+    Archive paths support basic `format string`_ replacements,
     but be aware that using external inputs for building local paths
     may pose a security risk.
 
@@ -1325,8 +1324,8 @@ Description
     | Arguments for range and slice notation are optional
       and will default to begin (``1``) or end (``sys.maxsize``) if omitted.
     | For example ``5-``, ``5:``, and ``5::`` all mean "Start at file number 5".
-
-    Note: The index of the first file is ``1``.
+Note
+    The index of the first file is ``1``.
 
 
 extractor.*.chapter-range
@@ -1400,8 +1399,8 @@ Description
     `date-min` and `date-max`.
 
     See |strptime|_ for a list of formatting directives.
-
-    Note: Despite its name, this option does **not** control how
+Note
+    Despite its name, this option does **not** control how
     ``{date}`` metadata fields are formatted.
     To use a different formatting for those values other than the default
     ``%Y-%m-%d %H:%M:%S``, put |strptime|_ formatting directives
@@ -1956,8 +1955,8 @@ Example
     * ``["version", "generation"]``
 Description
     Extract additional ``generation``, ``version``, and ``post`` metadata.
-
-    Note: This requires 1 or more additional API requests per image or video.
+Note
+    This requires 1 or more additional API requests per image or video.
 
 
 extractor.civitai.nsfw
@@ -1999,8 +1998,8 @@ Description
     to pass with every image URL.
 
     Known available options include ``original``, ``quality``, ``width``
-
-    Note: Set this option to an arbitrary letter, e.g., ``"w"``,
+Note
+    Set this option to an arbitrary letter, e.g., ``"w"``,
     to download images in JPEG format at their original resolution.
 
 
@@ -2046,8 +2045,7 @@ Example
     * ``"fr,it,pl"``
     * ``["fr", "it", "pl"]``
 Description
-    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language codes
-    to filter chapters by.
+    |ISO 639-1| code(s) to filter chapters by.
 
 
 extractor.cyberdrop.domain
@@ -2074,7 +2072,7 @@ Default
 Description
     Password value used to access protected files and folders.
 
-    Note: Leave this value empty or undefined
+    Leave this value empty or undefined
     to be interactively prompted for a password when needed
     (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
 
@@ -2142,8 +2140,8 @@ Description
     It is possible to specify a custom list of metadata includes.
     See `available_includes <https://github.com/danbooru/danbooru/blob/2cf7baaf6c5003c1a174a8f2d53db010cf05dca7/app/models/post.rb#L1842-L1849>`__
     for possible field names. ``aibooru`` also supports ``ai_metadata``.
-
-    Note: This requires 1 additional HTTP request per 200-post batch.
+Note
+    This requires 1 additional HTTP request per 200-post batch.
 
 
 extractor.[Danbooru].threshold
@@ -2157,8 +2155,8 @@ Description
     Stop paginating over API results if the length of a batch of returned
     posts is less than the specified number. Defaults to the per-page limit
     of the current instance, which is 200.
-
-    Note: Changing this setting is normally not necessary. When the value is
+Note
+    Changing this setting is normally not necessary. When the value is
     greater than the per-page limit, gallery-dl will stop after the first
     batch. The value cannot be less than 1.
 
@@ -2213,8 +2211,8 @@ Default
     ``false``
 Description
     Download the avatar of each commenting user.
-
-    Note: Enabling this option also enables deviantart.comments_.
+Note
+    Enabling this option also enables deviantart.comments_.
 
 
 extractor.deviantart.extra
@@ -2226,8 +2224,8 @@ Default
 Description
     Download extra Sta.sh resources from
     description texts and journals.
-
-    Note: Enabling this option also enables deviantart.metadata_.
+Note
+    Enabling this option also enables deviantart.metadata_.
 
 
 extractor.deviantart.flat
@@ -2245,9 +2243,9 @@ Description
       favorites-collections and transfer any further work to other
       extractors (``folder`` or ``collection``), which will then
       create individual subdirectories for each of them.
-
-      Note: Going through all gallery folders will not be able to
-      fetch deviations which aren't in any folder.
+Note
+    Going through all gallery folders will not
+    fetch deviations not contained in any folder.
 
 
 extractor.deviantart.folders
@@ -2259,8 +2257,8 @@ Default
 Description
     Provide a ``folders`` metadata field that contains the names of all
     folders a deviation is present in.
-
-    Note: Gathering this information requires a lot of API calls.
+Note
+    Gathering this information requires a lot of API calls.
     Use with caution.
 
 
@@ -2345,8 +2343,8 @@ Description
     Update `JSON Web Tokens <https://jwt.io/>`__ (the ``token`` URL parameter)
     of otherwise non-downloadable, low-resolution images
     to be able to download them in full resolution.
-
-    Note: No longer functional as of 2023-10-11
+Note
+    No longer functional as of 2023-10-11
 
 
 extractor.deviantart.mature
@@ -2475,8 +2473,8 @@ Description
 
     Using a ``refresh-token`` allows you to access private or otherwise
     not publicly available deviations.
-
-    Note: The ``refresh-token`` becomes invalid
+Note
+    The ``refresh-token`` becomes invalid
     `after 3 months <https://www.deviantart.com/developers/authentication#refresh>`__
     or whenever your `cache file <cache.file_>`__ is deleted or cleared.
 
@@ -2579,8 +2577,8 @@ Example
     * ``["notes", "pools"]``
 Description
     Extract additional metadata (notes, pool metadata) if available.
-
-    Note: This requires 0-2 additional HTTP requests per post.
+Note
+    This requires 0-2 additional HTTP requests per post.
 
 
 extractor.[E621].threshold
@@ -2594,8 +2592,8 @@ Description
     Stop paginating over API results if the length of a batch of returned
     posts is less than the specified number. Defaults to the per-page limit
     of the current instance, which is 320.
-
-    Note: Changing this setting is normally not necessary. When the value is
+Note
+    Changing this setting is normally not necessary. When the value is
     greater than the per-page limit, gallery-dl will stop after the first
     batch. The value cannot be less than 1.
 
@@ -2643,10 +2641,10 @@ Example
 Description
     After downloading a gallery,
     add it to your account's favorites as the given category number.
+Note
+    Set this to `"favdel"` to remove galleries from your favorites.
 
-    Note: Set this to `"favdel"` to remove galleries from your favorites.
-
-    Note: This will remove any Favorite Notes when applied
+    This will remove any Favorite Notes when applied
     to already favorited galleries.
 
 
@@ -2797,8 +2795,8 @@ Default
     ``false``
 Description
     Extract ``comments`` metadata.
-
-    Note: This requires 1 or more additional API requests per post,
+Note
+    This requires 1 or more additional API requests per post,
     depending on the number of comments.
 
 
@@ -2826,8 +2824,8 @@ Type
 Description
     Do not request API data or extract files from posts
     that require a fee (``feeRequired``) greater than the specified amount.
-
-    Note: This option has no effect on individual post URLs.
+Note
+    This option has no effect on individual post URLs.
 
 
 extractor.fanbox.metadata
@@ -2849,8 +2847,8 @@ Description
     * ``comments``
     * ``plan``
     * ``user``
-
-    Note: ``comments`` can also be enabled via
+Note
+    ``comments`` can also be enabled via
     `fanbox.comments <extractor.fanbox.comments_>`__
 
 
@@ -2896,8 +2894,8 @@ Default
 Description
     For each photo, return the albums and pools it belongs to
     as ``set`` and ``pool`` metadata.
-
-    Note: This requires 1 additional API call per photo.
+Note
+    This requires 1 additional API call per photo.
     See `flickr.photos.getAllContexts <https://www.flickr.com/services/api/flickr.photos.getAllContexts.html>`__ for details.
 
 
@@ -2910,8 +2908,8 @@ Default
 Description
     For each photo, return its EXIF/TIFF/GPS tags
     as ``exif`` and ``camera`` metadata.
-
-    Note: This requires 1 additional API call per photo.
+Note
+    This requires 1 additional API call per photo.
     See `flickr.photos.getExif <https://www.flickr.com/services/api/flickr.photos.getExif.html>`__ for details.
 
 
@@ -2924,8 +2922,8 @@ Default
 Description
     For each photo, retrieve its "full" metadata as provided by
     `flickr.photos.getInfo <https://www.flickr.com/services/api/flickr.photos.getInfo.html>`__
-
-    Note: This requires 1 additional API call per photo.
+Note
+    This requires 1 additional API call per photo.
 
 
 extractor.flickr.metadata
@@ -2957,8 +2955,8 @@ Default
     ``false``
 Description
     Extract additional ``user`` profile metadata.
-
-    Note: This requires 1 additional API call per user profile.
+Note
+    This requires 1 additional API call per user profile.
     See `flickr.people.getInfo <https://www.flickr.com/services/api/flickr.people.getInfo.html>`__ for details.
 
 
@@ -3137,8 +3135,8 @@ Description
     * Select `Network` -> `XHR`
     * Open a gallery page
     * Select the last `Network` entry and copy its ``crt`` value
-
-    Note: You will also need your browser's
+Note
+    You will also need your browser's
     `user-agent <extractor.*.user-agent_>`__
 
 
@@ -3360,8 +3358,8 @@ Default
 Description
     Provide extended ``user`` metadata even when referring to a user by ID,
     e.g. ``instagram.com/id:12345678``.
-
-    Note: This metadata is always available when referring to a user by name,
+Note
+    This metadata is always available when referring to a user by name,
     e.g. ``instagram.com/USERNAME``.
 
 
@@ -3377,8 +3375,8 @@ Description
     * ``"asc"``: Same order as displayed in a post
     * ``"desc"``: Reverse order as displayed in a post
     * ``"reverse"``: Same as ``"desc"``
-
-    Note: This option does *not* affect ``{num}``.
+Note
+    This option does *not* affect ``{num}``.
     To enumerate files in reverse order, use ``count - num + 1``.
 
 
@@ -3396,8 +3394,8 @@ Description
     * ``"id"`` or ``"id_asc"``: Ascending order by ID
     * ``"id_desc"``: Descending order by ID
     * ``"reverse"``: Same as ``"desc"``
-
-    Note: This option only affects ``highlights``.
+Note
+    This option only affects ``highlights``.
 
 
 extractor.instagram.previews
@@ -3535,8 +3533,8 @@ Default
 Description
     Extract additional metadata for ``archives`` files, including
     ``file``, ``file_list``, and ``password``.
-
-    Note: This requires 1 additional HTTP request per ``archives`` file.
+Note
+    This requires 1 additional HTTP request per ``archives`` file.
 
 
 extractor.kemono.comments
@@ -3547,8 +3545,8 @@ Default
     ``false``
 Description
     Extract ``comments`` metadata.
-
-    Note: This requires 1 additional HTTP request per post.
+Note
+    This requires 1 additional HTTP request per post.
 
 
 extractor.kemono.duplicates
@@ -3665,8 +3663,8 @@ Description
     Extract post revisions.
 
     Set this to ``"unique"`` to filter out duplicate revisions.
-
-    Note: This requires 1 additional HTTP request per post.
+Note
+    This requires 1 additional HTTP request per post.
 
 
 extractor.kemono.order-revisions
@@ -3789,8 +3787,7 @@ Example
     * ``"fr,it"``
     * ``["fr", "it"]``
 Description
-    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language codes
-    to filter chapters by.
+    |ISO 639-1| code(s) to filter chapters by.
 
 
 extractor.mangadex.ratings
@@ -3815,8 +3812,7 @@ Type
 Default
     ``"en"``
 Description
-    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__
-    language code selecting which chapters to download.
+    |ISO 639-1| code selecting which chapters to download.
 
 
 extractor.mangapark.source
@@ -3846,11 +3842,9 @@ Default
 Description
     The ``access-token`` value you get from `linking your account to
     gallery-dl <OAuth_>`__.
-
-    Note: gallery-dl comes with built-in tokens for ``mastodon.social``,
-    ``pawoo`` and ``baraag``. For other instances, you need to obtain an
-    ``access-token`` in order to use usernames in place of numerical
-    user IDs.
+Note
+    gallery-dl comes with built-in tokens for
+    ``mastodon.social``, ``pawoo``, and ``baraag``.
 
 
 extractor.[mastodon].cards
@@ -3952,8 +3946,8 @@ Default
     ``false``
 Description
     Extract extended ``pool`` metadata.
-
-    Note: Not supported by all ``moebooru`` instances.
+Note
+    Not supported by all ``moebooru`` instances.
 
 
 extractor.naver-blog.videos
@@ -4122,8 +4116,8 @@ Default
     ``6414``
 Description
     Port number to listen on during OAuth authorization.
-
-    Note: All redirects will go to port ``6414``, regardless
+Note
+    All redirects will go to port ``6414``, regardless
     of the port specified here. You'll have to manually adjust the
     port number in your browser's address bar when using a different
     port than the default.
@@ -4137,8 +4131,8 @@ Default
     ``false``
 Description
     Extract additional metadata (``source``, ``uploader``)
-
-    Note: This requires 1 additional HTTP request per post.
+Note
+    This requires 1 additional HTTP request per post.
 
 
 extractor.patreon.cursor
@@ -4405,8 +4399,8 @@ Description
     For works bookmarked by
     `your own account <extractor.pixiv.refresh-token_>`__,
     fetch bookmark tags as ``tags_bookmark`` metadata.
-
-    Note: This requires 1 additional API request per bookmarked post.
+Note
+    This requires 1 additional API request per bookmarked post.
 
 
 extractor.pixiv.captions
@@ -4428,8 +4422,8 @@ Default
     ``false``
 Description
     Fetch ``comments`` metadata.
-
-    Note: This requires 1 or more additional API requests per post,
+Note
+    This requires 1 or more additional API requests per post,
     depending on the number of comments.
 
 
@@ -4508,8 +4502,8 @@ Default
     ``false``
 Description
     Fetch ``comments`` metadata.
-
-    Note: This requires 1 or more additional API requests per novel,
+Note
+    This requires 1 or more additional API requests per novel,
     depending on the number of comments.
 
 
@@ -4577,8 +4571,8 @@ Description
     For novels bookmarked by
     `your own account <extractor.pixiv-novel.refresh-token_>`__,
     fetch bookmark tags as ``tags_bookmark`` metadata.
-
-    Note: This requires 1 additional API request per bookmarked post.
+Note
+    This requires 1 additional API request per bookmarked post.
 
 
 extractor.pixiv-novel.refresh-token
@@ -4721,8 +4715,8 @@ Default
 Description
     Retrieve additional comments by resolving the ``more`` comment
     stubs in the base comment tree.
-
-    Note: This requires 1 additional API call for every 100 extra comments.
+Note
+    This requires 1 additional API call for every 100 extra comments.
 
 
 extractor.reddit.embeds
@@ -4987,8 +4981,8 @@ Description
     * Select `Network` -> `XHR`
     * Open a gallery page
     * Select the last `Network` entry and copy its ``crt`` value
-
-    Note: You will also need your browser's
+Note
+    You will also need your browser's
     `user-agent <extractor.*.user-agent_>`__
 
 
@@ -5258,8 +5252,7 @@ Examples
     * ``["fr", "it"]``
 Description
     Only include assets that are in the specified languages. ``all`` can be
-    used to specify all languages. Valid values are `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__
-    language codes.
+    used to specify all languages. Valid values are |ISO 639-1| codes.
 
 
 extractor.steamgriddb.nsfw
@@ -5737,8 +5730,8 @@ Description
     as running ``gallery-dl https://twitter.com/i/web/status/<TweetID>``
     with enabled `conversations <extractor.twitter.conversations_>`__ option
     for each Tweet in said timeline.
-
-    Note: This requires at least 1 additional API call per initial Tweet.
+Note
+    This requires at least 1 additional API call per initial Tweet.
 
 
 extractor.twitter.unavailable
@@ -5911,8 +5904,8 @@ Description
 
     If this value is ``"self"``, only consider replies where
     reply and original Tweet are from the same user.
-
-    Note: Twitter will automatically expand conversations if you
+Note
+    Twitter will automatically expand conversations if you
     use the ``/with_replies`` timeline while logged in. For example,
     media from Tweets which the user replied to will also be downloaded.
 
@@ -6053,8 +6046,8 @@ Description
     * ``"timeline"``: ``https://twitter.com/id:{rest_id}/timeline``
     * ``"tweets"``: ``https://twitter.com/id:{rest_id}/tweets``
     * ``"media"``: ``https://twitter.com/id:{rest_id}/media``
-
-    Note: To allow gallery-dl to follow custom URL formats, set the blacklist__
+Note
+    To allow gallery-dl to follow custom URL formats, set the blacklist__
     for ``twitter`` to a non-default value, e.g. an empty string ``""``.
 
 .. __: `extractor.*.blacklist & .whitelist`_
@@ -6108,8 +6101,8 @@ Default
     ``false``
 Description
     Automatically `like` posts after downloading their images.
-
-    Note: Requires `login <extractor.*.username & .password_>`__
+Note
+    Requires `login <extractor.*.username & .password_>`__
     or `cookies <extractor.*.cookies_>`__
 
 
@@ -6213,8 +6206,8 @@ Default
     ``false``
 Description
     Extract additional metadata (tags, uploader)
-
-    Note: This requires 1 additional HTTP request per post.
+Note
+    This requires 1 additional HTTP request per post.
 
 
 extractor.weasyl.api-key
@@ -6238,8 +6231,8 @@ Description
     | Fetch extra submission metadata during gallery downloads.
     | (``comments``, ``description``, ``favorites``, ``folder_name``,
       ``tags``, ``views``)
-
-    Note: This requires 1 additional HTTP request per submission.
+Note
+    This requires 1 additional HTTP request per submission.
 
 
 extractor.webtoons.quality
@@ -6491,8 +6484,8 @@ Default
 Description
     Route |ytdl's| output through gallery-dl's logging system.
     Otherwise it will be written directly to stdout/stderr.
-
-    Note: Set ``quiet`` and ``no_warnings`` in
+Note
+    Set ``quiet`` and ``no_warnings`` in
     `extractor.ytdl.raw-options`_ to ``true`` to suppress all output.
 
 
@@ -6557,8 +6550,8 @@ Default
     ``false``
 Description
     Extract additional metadata (date, md5, tags, ...)
-
-    Note: This requires 1-2 additional HTTP requests per post.
+Note
+    This requires 1-2 additional HTTP requests per post.
 
 
 extractor.zerochan.pagination
@@ -6596,8 +6589,8 @@ Description
     Group ``tags`` by type and
     provide them as ``tags_<type>`` metadata fields,
     for example ``tags_artist`` or ``tags_character``.
-
-    Note: This requires 1 additional HTTP request per post.
+Note
+    This requires 1 additional HTTP request per post.
 
 
 extractor.[booru].notes
@@ -6608,8 +6601,8 @@ Default
     ``false``
 Description
     Extract overlay notes (position and text).
-
-    Note: This requires 1 additional HTTP request per post.
+Note
+    This requires 1 additional HTTP request per post.
 
 
 extractor.[booru].url
@@ -6894,8 +6887,8 @@ Default
 Description
     Number of seconds to sleep when receiving a `429 Too Many Requests`
     response before `retrying <downloader.*.retries_>`__ the request.
-
-    Note: Requires
+Note
+    Requires
     `retry-codes <downloader.http.retry-codes_>`__
     to include ``429``.
 
@@ -7000,8 +6993,8 @@ Default
 Description
     Route |ytdl's| output through gallery-dl's logging system.
     Otherwise it will be written directly to stdout/stderr.
-
-    Note: Set ``quiet`` and ``no_warnings`` in
+Note
+    Set ``quiet`` and ``no_warnings`` in
     `downloader.ytdl.raw-options`_ to ``true`` to suppress all output.
 
 
@@ -7042,8 +7035,8 @@ Description
     * ``"default"``: use |ytdl's| default, currently
       ``"%(title)s [%(id)s].%(ext)s"`` for yt-dlp_ /
       ``"%(title)s-%(id)s.%(ext)s"`` for youtube-dl_
-
-    Note: An output template other than ``null`` might
+Note
+    An output template other than ``null`` might
     cause unexpected results in combination with certain options
     (e.g. ``"skip": "enumerate"``)
 
@@ -7163,8 +7156,8 @@ Description
 
     When this option is specified as a simple ``string``,
     it is interpreted as ``{"encoding": "<string-value>", "errors": "replace"}``
-
-    Note: ``errors`` always defaults to ``"replace"``
+Note
+    ``errors`` always defaults to ``"replace"``
 
 
 output.shorten
@@ -7718,8 +7711,8 @@ Example
 Description
     Custom format string to build filename extensions for metadata
     files with, which will replace the original filename extensions.
-
-    Note: `metadata.extension`_ is ignored if this option is set.
+Note
+    When this option is set, `metadata.extension`_ is ignored.
 
 
 metadata.metadata-path
@@ -7786,8 +7779,8 @@ Example
     ``["id", "width", "height", "description"]``
 Description
     Include only the given top-level keys when writing JSON data.
-
-    Note: Missing or undefined fields will be silently ignored.
+Note
+    Missing or undefined fields will be silently ignored.
 
 
 metadata.exclude
@@ -7798,8 +7791,8 @@ Example
     ``["blocked", "watching", "status"]``
 Description
     Exclude all given keys from written JSON data.
-
-    Note: Cannot be used with `metadata.include`_.
+Note
+    Cannot be used with `metadata.include`_.
 
 
 metadata.fields
@@ -7838,8 +7831,8 @@ Example
     * ``["tags:", "", "{tags:J\n}"]``
 Description
     Custom format string to build the content of metadata files with.
-
-    Note: Only applies for ``"mode": "custom"``.
+Note
+    Only applies to ``"mode": "custom"``.
 
 
 metadata.ascii
@@ -7852,8 +7845,8 @@ Description
     Escape all non-ASCII characters.
 
     See the ``ensure_ascii`` argument of |json.dump()|_ for further details.
-
-    Note: Only applies for ``"mode": "json"`` and ``"jsonl"``.
+Note
+    Only applies to ``"mode": "json"`` and ``"jsonl"``.
 
 
 metadata.indent
@@ -7867,8 +7860,8 @@ Description
     Indentation level of JSON output.
 
     See the ``indent`` argument of |json.dump()|_ for further details.
-
-    Note: Only applies for ``"mode": "json"``.
+Note
+    Only applies to ``"mode": "json"``.
 
 
 metadata.separators
@@ -7882,8 +7875,8 @@ Description
     to separate JSON keys and values with.
 
     See the ``separators`` argument of |json.dump()|_ for further details.
-
-    Note: Only applies for ``"mode": "json"`` and ``"jsonl"``.
+Note
+    Only applies to ``"mode": "json"`` and ``"jsonl"``.
 
 
 metadata.sort
@@ -7896,8 +7889,8 @@ Description
     Sort output by `key`.
 
     See the ``sort_keys`` argument of |json.dump()|_ for further details.
-
-    Note: Only applies for ``"mode": "json"`` and ``"jsonl"``.
+Note
+    Only applies to ``"mode": "json"`` and ``"jsonl"``.
 
 
 metadata.open
@@ -8011,8 +8004,8 @@ Description
 
     This value must be either a UNIX timestamp or a
     |datetime|_ object.
-
-    Note: This option gets ignored if `mtime.value`_ is set.
+Note
+    This option is ignored if `mtime.value`_ is set.
 
 
 mtime.value
@@ -8073,9 +8066,8 @@ Description
     `Python expression <https://docs.python.org/3/glossary.html#term-expression>`__
     to
     `evaluate <https://docs.python.org/3/library/functions.html#eval>`__.
-
-    Note: Only used with
-    `"mode": "eval" <python.mode_>`__
+Note
+    Only used with `"mode": "eval" <python.mode_>`__
 
 
 python.function
@@ -8354,8 +8346,8 @@ Example
     ``["info.json"]``
 Description
     List of extra files to be added to a ZIP archive.
-
-    Note: Relative paths are relative to the current
+Note
+    Relative paths are relative to the current
     `download directory <extractor.*.directory_>`__.
 
 
@@ -8419,8 +8411,8 @@ Description
     gets `imported <https://docs.python.org/3/reference/import.html>`__
     and searched for potential extractors,
     i.e. classes with a ``pattern`` attribute.
-
-    Note: ``null`` references internal extractors defined in
+Note
+    ``null`` references internal extractors defined in
     `extractor/__init__.py <https://github.com/mikf/gallery-dl/blob/master/gallery_dl/extractor/__init__.py#L12>`__
     or by `extractor.modules`_.
 
@@ -8887,7 +8879,7 @@ Description
     Simple `tilde expansion <https://docs.python.org/3/library/os.path.html#os.path.expanduser>`__
     and `environment variable expansion <https://docs.python.org/3/library/os.path.html#os.path.expandvars>`__
     is supported.
-Note:
+Note
     In Windows environments,
     both backslashes ``\`` as well as forward slashes ``/``
     can be used as path separators.
@@ -8963,8 +8955,8 @@ Description
     * encoding
         * File encoding
         * Default: ``"utf-8"``
-
-    Note: path, mode, and encoding are only applied when configuring
+Note
+    path, mode, and encoding are only applied when configuring
     logging output to a file.
 
 
@@ -9116,6 +9108,7 @@ Description
 .. |mode: color| replace:: ``"mode": "color"``
 .. |open()| replace:: the built-in ``open()`` function
 .. |json.dump()| replace:: ``json.dump()``
+.. |ISO 639-1| replace:: `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language
 
 .. _directory: `extractor.*.directory`_
 .. _base-directory: `extractor.*.base-directory`_
