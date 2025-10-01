@@ -177,6 +177,7 @@ class InstagramExtractor(Extractor):
                 "post_id": reel_id,
                 "post_shortcode": shortcode_from_id(reel_id),
                 "post_url": post_url,
+                "type": "story" if expires else "highlight",
             }
             if "title" in post:
                 data["highlight_title"] = post["title"]
@@ -187,7 +188,6 @@ class InstagramExtractor(Extractor):
             data = {
                 "post_id" : post["pk"],
                 "post_shortcode": post["code"],
-                "post_url": f"{self.root}/p/{post['code']}/",
                 "likes": post.get("like_count", 0),
                 "liked": post.get("has_liked", False),
                 "pinned": self._extract_pinned(post),
@@ -284,7 +284,7 @@ class InstagramExtractor(Extractor):
             if manifest is not None:
                 media["_ytdl_manifest_data"] = manifest
             if "owner" in item:
-                media["owner2"] = item["owner"]
+                media["owner"] = item["owner"]
             if "reshared_story_media_author" in item:
                 media["author"] = item["reshared_story_media_author"]
             if "expiring_at" in item:
@@ -292,6 +292,14 @@ class InstagramExtractor(Extractor):
 
             self._extract_tagged_users(item, media)
             files.append(media)
+
+        if "type" not in data:
+            if len(files) == 1 and files[0]["video_url"]:
+                data["type"] = "reel"
+                data["post_url"] = f"{self.root}/reel/{post['code']}/"
+            else:
+                data["type"] = "post"
+                data["post_url"] = f"{self.root}/p/{post['code']}/"
 
         return data
 
@@ -447,6 +455,32 @@ class InstagramExtractor(Extractor):
                 user[key] = user.pop(old)["count"]
             except Exception:
                 user[key] = 0
+
+
+class InstagramPostExtractor(InstagramExtractor):
+    """Extractor for an Instagram post"""
+    subcategory = "post"
+    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
+               r"/(?:share/()|[^/?#]+/)?(?:p|tv|reels?())/([^/?#]+)")
+    example = "https://www.instagram.com/p/abcdefg/"
+
+    def __init__(self, match):
+        if match[2] is not None:
+            self.subcategory = "reel"
+        InstagramExtractor.__init__(self, match)
+
+    def posts(self):
+        share, reel, shortcode = self.groups
+        if share is not None:
+            url = text.ensure_http_scheme(self.url)
+            headers = {
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "same-origin",
+            }
+            location = self.request_location(url, headers=headers)
+            shortcode = location.split("/")[-2]
+        return self.api.media(shortcode)
 
 
 class InstagramUserExtractor(Dispatch, InstagramExtractor):
@@ -744,27 +778,6 @@ class InstagramAvatarExtractor(InstagramExtractor):
             "like_count": 0,
             "image_versions2": {"candidates": (avatar,)},
         },)
-
-
-class InstagramPostExtractor(InstagramExtractor):
-    """Extractor for an Instagram post"""
-    subcategory = "post"
-    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/(?:share/()|[^/?#]+/)?(?:p|tv|reel)/([^/?#]+)")
-    example = "https://www.instagram.com/p/abcdefg/"
-
-    def posts(self):
-        share, shortcode = self.groups
-        if share is not None:
-            url = text.ensure_http_scheme(self.url)
-            headers = {
-                "Sec-Fetch-Dest": "empty",
-                "Sec-Fetch-Mode": "navigate",
-                "Sec-Fetch-Site": "same-origin",
-            }
-            location = self.request_location(url, headers=headers)
-            shortcode = location.split("/")[-2]
-        return self.api.media(shortcode)
 
 
 class InstagramRestAPI():
