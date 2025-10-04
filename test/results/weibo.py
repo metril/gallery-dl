@@ -262,7 +262,7 @@ __tests__ = (
     "#comment" : "missing 'playback_list' (#2792)",
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
-    "#count"   : 10,
+    "#count"   : 9,
 },
 
 {
@@ -306,6 +306,44 @@ __tests__ = (
     "#url"     : "https://m.weibo.cn/5746766133/4339748116375525",
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
+},
+
+{
+    "#url"     : "https://weibo.com/7926989456/5160875674043425",
+    "#comment" : "'replay_hd' video (live replay #8339)",
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#results" : "ytdl:https://live.video.weibocdn.com/4817f457-c9be-47f7-a5a0-8591fd363cb1_index.m3u8",
+},
+
+{
+    "#url"     : "https://weibo.com/7117031969/5208376084532264",
+    "#comment" : "'.m3u8' manifest (live replay #8339)",
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#pattern" : r"ytdl:https://live.video.weibocdn.com/0f9e059c-3438-49ab-a84c-671a04d37b92_index.m3u8\?media_id=5208391172685924&.+&KID=unistore,video",
+    "#count"   : 1,
+},
+
+{
+    "#url"     : "https://weibo.com/2683260651/3774796733364550",
+    "#comment" : "'.m3u8' manifest (from 2014)",
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#pattern" : r"ytdl:https://us.sinaimg.cn/001xN98Njx06NszB2n15010d0100008H0k01.m3u8\?ori=0&.+&KID=unistore,video",
+    "#count"   : 1,
+},
+
+{
+    "#url"     : "https://weibo.com/3317906495/5217357545080355",
+    "#comment" : "stream as 'wblive-out.api.weibo.com' URL (#8339)",
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#results" : "ytdl:https://live.video.weibocdn.com/5073cc59-42fc-4b9c-9a61-852d44b0ccc3_index.m3u8",
+},
+
+{
+    "#url"     : "https://weibo.com/7130470964/5217692969600188",
+    "#comment" : "stream without replay (#8339)",
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#count"   : 0,
+    "#log"     : "HttpError: '404 ' for 'https://wblive-out.api.weibo.com/2/wblive/room/play?id=1022:2321325216257942356128'",
 },
 
 )

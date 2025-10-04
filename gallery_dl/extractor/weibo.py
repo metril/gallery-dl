@@ -86,16 +86,25 @@ class WeiboExtractor(Extractor):
             status["count"] = len(files)
             yield Message.Directory, status
 
-            for num, file in enumerate(files, 1):
-                if file["url"].startswith("http:"):
-                    file["url"] = "https:" + file["url"][5:]
+            num = 0
+            for file in files:
+                url = file["url"]
+                if not url:
+                    continue
+                if url.startswith("http:"):
+                    url = f"https:{url[5:]}"
                 if "filename" not in file:
-                    text.nameext_from_url(file["url"], file)
+                    text.nameext_from_url(url, file)
                     if file["extension"] == "json":
                         file["extension"] = "mp4"
+                if file["extension"] == "m3u8":
+                    url = f"ytdl:{url}"
+                    file["_ytdl_manifest"] = "hls"
+                    file["extension"] = "mp4"
+                num += 1
                 file["status"] = status
                 file["num"] = num
-                yield Message.Url, file["url"], file
+                yield Message.Url, url, file
 
     def _extract_status(self, status, files):
         if "mix_media_info" in status:
@@ -143,10 +152,21 @@ class WeiboExtractor(Extractor):
             media = max(info["playback_list"],
                         key=lambda m: m["meta"]["quality_index"])
         except Exception:
-            return {"url": (info.get("stream_url_hd") or
-                            info.get("stream_url") or "")}
+            video = {"url": (info.get("replay_hd") or
+                             info.get("stream_url_hd") or
+                             info.get("stream_url") or "")}
         else:
-            return media["play_info"].copy()
+            video = media["play_info"].copy()
+
+        if "//wblive-out." in video["url"] and \
+                not text.ext_from_url(video["url"]):
+            try:
+                video["url"] = self.request_location(video["url"])
+            except exception.HttpError as exc:
+                self.log.warning("%s: %s", exc.__class__.__name__, exc)
+                video["url"] = ""
+
+        return video
 
     def _status_by_id(self, status_id):
         url = f"{self.root}/ajax/statuses/show?id={status_id}"
