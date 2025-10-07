@@ -14,7 +14,7 @@ from ..cache import cache
 import random
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|m\.)?weibo\.c(?:om|n)"
-USER_PATTERN = BASE_PATTERN + r"/(?:(u|n|p(?:rofile)?)/)?([^/?#]+)(?:/home)?"
+USER_PATTERN = rf"{BASE_PATTERN}/(?:(u|n|p(?:rofile)?)/)?([^/?#]+)(?:/home)?"
 
 
 class WeiboExtractor(Extractor):
@@ -29,6 +29,12 @@ class WeiboExtractor(Extractor):
         Extractor.__init__(self, match)
         self._prefix, self.user = match.groups()
 
+    def _init_cookies(self):
+        cookies = _cookie_cache()
+        if cookies is not None:
+            self.session.cookies.update(cookies)
+        Extractor._init_cookies(self)
+
     def _init(self):
         self.livephoto = self.config("livephoto", True)
         self.retweets = self.config("retweets", False)
@@ -36,10 +42,6 @@ class WeiboExtractor(Extractor):
         self.movies = self.config("movies", False)
         self.gifs = self.config("gifs", True)
         self.gifs_video = (self.gifs == "video")
-
-        cookies = _cookie_cache()
-        if cookies is not None:
-            self.cookies.update(cookies)
 
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
@@ -148,6 +150,10 @@ class WeiboExtractor(Extractor):
                     self.log.debug("%s: Ignoring 'movie' video", status["id"])
 
     def _extract_video(self, info):
+        if info.get("live_status") == 1:
+            self.log.debug("Skipping ongoing live stream")
+            return {"url": ""}
+
         try:
             media = max(info["playback_list"],
                         key=lambda m: m["meta"]["quality_index"])
@@ -182,7 +188,7 @@ class WeiboExtractor(Extractor):
             return self.request_json(url)["data"]["user"]["idstr"]
 
     def _pagination(self, endpoint, params):
-        url = self.root + "/ajax" + endpoint
+        url = f"{self.root}/ajax{endpoint}"
         headers = {
             "X-Requested-With": "XMLHttpRequest",
             "X-XSRF-TOKEN": None,
@@ -201,8 +207,12 @@ class WeiboExtractor(Extractor):
                     raise exception.AbortExtraction(
                         f'"{data.get("msg") or "unknown error"}"')
 
-            data = data["data"]
-            statuses = data["list"]
+            try:
+                data = data["data"]
+                statuses = data["list"]
+            except KeyError:
+                return
+
             yield from statuses
 
             # videos, newvideo
@@ -215,7 +225,8 @@ class WeiboExtractor(Extractor):
             # album
             if since_id := data.get("since_id"):
                 params["sinceid"] = since_id
-                continue
+            else:
+                params["sinceid"] = None
 
             # home, article
             if "page" in params:
@@ -263,7 +274,7 @@ class WeiboExtractor(Extractor):
 class WeiboUserExtractor(WeiboExtractor):
     """Extractor for weibo user profiles"""
     subcategory = "user"
-    pattern = USER_PATTERN + r"(?:$|#)"
+    pattern = rf"{USER_PATTERN}(?:$|#)"
     example = "https://weibo.com/USER"
 
     # do NOT override 'initialize()'
@@ -274,18 +285,18 @@ class WeiboUserExtractor(WeiboExtractor):
     def items(self):
         base = f"{self.root}/u/{self._user_id()}?tabtype="
         return Dispatch._dispatch_extractors(self, (
-            (WeiboHomeExtractor    , base + "home"),
-            (WeiboFeedExtractor    , base + "feed"),
-            (WeiboVideosExtractor  , base + "video"),
-            (WeiboNewvideoExtractor, base + "newVideo"),
-            (WeiboAlbumExtractor   , base + "album"),
+            (WeiboHomeExtractor    , f"{base}home"),
+            (WeiboFeedExtractor    , f"{base}feed"),
+            (WeiboVideosExtractor  , f"{base}video"),
+            (WeiboNewvideoExtractor, f"{base}newVideo"),
+            (WeiboAlbumExtractor   , f"{base}album"),
         ), ("feed",))
 
 
 class WeiboHomeExtractor(WeiboExtractor):
     """Extractor for weibo 'home' listings"""
     subcategory = "home"
-    pattern = USER_PATTERN + r"\?tabtype=home"
+    pattern = rf"{USER_PATTERN}\?tabtype=home"
     example = "https://weibo.com/USER?tabtype=home"
 
     def statuses(self):
@@ -297,19 +308,19 @@ class WeiboHomeExtractor(WeiboExtractor):
 class WeiboFeedExtractor(WeiboExtractor):
     """Extractor for weibo user feeds"""
     subcategory = "feed"
-    pattern = USER_PATTERN + r"\?tabtype=feed"
+    pattern = rf"{USER_PATTERN}\?tabtype=feed"
     example = "https://weibo.com/USER?tabtype=feed"
 
     def statuses(self):
         endpoint = "/statuses/mymblog"
-        params = {"uid": self._user_id(), "feature": "0"}
+        params = {"uid": self._user_id(), "page": 1, "feature": "0"}
         return self._pagination(endpoint, params)
 
 
 class WeiboVideosExtractor(WeiboExtractor):
     """Extractor for weibo 'video' listings"""
     subcategory = "videos"
-    pattern = USER_PATTERN + r"\?tabtype=video"
+    pattern = rf"{USER_PATTERN}\?tabtype=video"
     example = "https://weibo.com/USER?tabtype=video"
 
     def statuses(self):
@@ -323,7 +334,7 @@ class WeiboVideosExtractor(WeiboExtractor):
 class WeiboNewvideoExtractor(WeiboExtractor):
     """Extractor for weibo 'newVideo' listings"""
     subcategory = "newvideo"
-    pattern = USER_PATTERN + r"\?tabtype=newVideo"
+    pattern = rf"{USER_PATTERN}\?tabtype=newVideo"
     example = "https://weibo.com/USER?tabtype=newVideo"
 
     def statuses(self):
@@ -335,7 +346,7 @@ class WeiboNewvideoExtractor(WeiboExtractor):
 class WeiboArticleExtractor(WeiboExtractor):
     """Extractor for weibo 'article' listings"""
     subcategory = "article"
-    pattern = USER_PATTERN + r"\?tabtype=article"
+    pattern = rf"{USER_PATTERN}\?tabtype=article"
     example = "https://weibo.com/USER?tabtype=article"
 
     def statuses(self):
@@ -347,7 +358,7 @@ class WeiboArticleExtractor(WeiboExtractor):
 class WeiboAlbumExtractor(WeiboExtractor):
     """Extractor for weibo 'album' listings"""
     subcategory = "album"
-    pattern = USER_PATTERN + r"\?tabtype=album"
+    pattern = rf"{USER_PATTERN}\?tabtype=album"
     example = "https://weibo.com/USER?tabtype=album"
 
     def statuses(self):
@@ -367,9 +378,9 @@ class WeiboAlbumExtractor(WeiboExtractor):
 
 
 class WeiboStatusExtractor(WeiboExtractor):
-    """Extractor for images from a status on weibo.cn"""
+    """Extractor for a weibo status"""
     subcategory = "status"
-    pattern = BASE_PATTERN + r"/(detail|status|\d+)/(\w+)"
+    pattern = rf"{BASE_PATTERN}/(detail|status|\d+)/(\w+)"
     example = "https://weibo.com/detail/12345"
 
     def statuses(self):
