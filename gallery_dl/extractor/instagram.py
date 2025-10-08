@@ -100,7 +100,7 @@ class InstagramExtractor(Extractor):
                     if videos:
                         file["_http_headers"] = videos_headers
                         text.nameext_from_url(url, file)
-                        if videos_dash and "_ytdl_manifest_data" in post:
+                        if videos_dash and "_ytdl_manifest_data" in file:
                             file["_fallback"] = (url,)
                             file["_ytdl_manifest"] = "dash"
                             url = f"ytdl:{post['post_url']}{file['num']}.mp4"
@@ -293,6 +293,8 @@ class InstagramExtractor(Extractor):
             self._extract_tagged_users(item, media)
             files.append(media)
 
+        if "subscription_media_visibility" in post:
+            data["subscription"] = post["subscription_media_visibility"]
         if "type" not in data:
             if len(files) == 1 and files[0]["video_url"]:
                 data["type"] = "reel"
