@@ -44,6 +44,8 @@ class BlueskyExtractor(Extractor):
         for post in self.posts():
             if "post" in post:
                 post = post["post"]
+            elif "item" in post:
+                post = post["item"]
             if self._user_did and post["author"]["did"] != self._user_did:
                 self.log.debug("Skipping %s (repost)", self._pid(post))
                 continue
@@ -148,9 +150,15 @@ class BlueskyExtractor(Extractor):
 
         if "images" in media:
             for image in media["images"]:
-                files.append(self._extract_media(image, "image"))
+                try:
+                    files.append(self._extract_media(image, "image"))
+                except Exception:
+                    pass
         if "video" in media and self.videos:
-            files.append(self._extract_media(media, "video"))
+            try:
+                files.append(self._extract_media(media, "video"))
+            except Exception:
+                pass
 
         post["count"] = len(files)
         return files
@@ -372,6 +380,15 @@ class BlueskyHashtagExtractor(BlueskyExtractor):
         return self.api.search_posts("#"+hashtag, order)
 
 
+class BlueskyBookmarkExtractor(BlueskyExtractor):
+    subcategory = "bookmark"
+    pattern = BASE_PATTERN + r"/saved"
+    example = "https://bsky.app/saved"
+
+    def posts(self):
+        return self.api.get_bookmarks()
+
+
 class BlueskyAPI():
     """Interface for the Bluesky API
 
@@ -406,6 +423,10 @@ class BlueskyAPI():
             "limit" : "100",
         }
         return self._pagination(endpoint, params)
+
+    def get_bookmarks(self):
+        endpoint = "app.bsky.bookmark.getBookmarks"
+        return self._pagination(endpoint, {}, "bookmarks", check_empty=True)
 
     def get_feed(self, actor, feed):
         endpoint = "app.bsky.feed.getFeed"

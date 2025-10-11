@@ -188,11 +188,28 @@ Description
 extractor.*.base-directory
 --------------------------
 Type
-    |Path|_
+    * |Path|_
+    * ``object`` (Condition_ → |Path|_)
 Default
     ``"./gallery-dl/"``
+Example
+    .. code:: json
+
+        "~/Downloads/gallery-dl"
+
+    .. code:: json
+
+        {
+            "score >= 100": "$DL",
+            "duration"    : "$DL/video",
+            ""            : "/tmp/files/"
+        }
 Description
     Directory path used as base for all download destinations.
+
+    If this is an ``object``,
+    it must contain Conditions_ mapping to the |Path|_ to use.
+    Specifying a default |Path|_ with ``""`` is required.
 
 
 extractor.*.parent-directory
@@ -7490,15 +7507,12 @@ Description
 output.log
 ----------
 Type
-    * ``string``
+    * `Format String`_
     * |Logging Configuration|_
 Default
     ``"[{name}][{levelname}] {message}"``
 Description
     Configuration for logging output to stderr.
-
-    If this is a simple ``string``, it specifies
-    the format string for logging messages.
 
 
 output.logfile
@@ -7518,7 +7532,7 @@ Type
 Description
     File to write external URLs unsupported by *gallery-dl* to.
 
-    The default format string here is ``"{message}"``.
+    The default `Format String`_ here is ``"{message}"``.
 
 
 output.errorfile
@@ -7529,7 +7543,7 @@ Type
 Description
     File to write input URLs which returned an error to.
 
-    The default format string here is also ``"{message}"``.
+    The default `Format String`_ here is also ``"{message}"``.
 
     When combined with
     ``-I``/``--input-file-comment`` or
@@ -7706,8 +7720,8 @@ Description
       name and any further elements its arguments.
 
       Each element of this list is evaluated as a `Format String`_ using
-      the files' metadata as well as ``{_path}``, ``{_directory}``,
-      and ``{_filename}``.
+      the files' metadata as well as
+      ``{_path}``, ``{_temppath}``, ``{_directory}``, and ``{_filename}``.
 
 
 exec.commands
@@ -8045,6 +8059,10 @@ Description
     ``"mode": "modify"``
         An object with metadata field names mapping to a `Format String`_
         whose result is assigned to that field name.
+Note:
+    Unlike standard `Format Strings`_, replacement fields here
+    preserve the original type of their value
+    instead of automatically converting it to |type-str|_.
 
 
 metadata.content-format
@@ -8229,7 +8247,7 @@ Description
     Name of the metadata field whose value should be used.
 
     This value must be either a UNIX timestamp or a
-    |datetime|_ object.
+    |type-datetime|_ object.
 Note
     This option is ignored if `mtime.value`_ is set.
 
@@ -8247,7 +8265,11 @@ Description
     The `Format String`_ whose value should be used.
 
     The resulting value must be either a UNIX timestamp or a
-    |datetime|_ object.
+    |type-datetime|_ object.
+Note:
+    Unlike standard `Format Strings`_, replacement fields here
+    preserve the original type of their value
+    instead of automatically converting it to |type-str|_.
 
 
 python.archive
@@ -9164,8 +9186,8 @@ Description
     Extended logging output configuration.
 
     * format
-        * General format string for logging messages
-          or an ``object`` with format strings for each loglevel.
+        * General `Format String`_ for logging messages
+          or an ``object`` with `Format Strings`_ for each loglevel.
 
           In addition to the default
           `LogRecord attributes <https://docs.python.org/3/library/logging.html#logrecord-attributes>`__,
@@ -9348,9 +9370,7 @@ Example
     * ``["width > 800", "0.9 < width/height < 1.1"]``
 Description
     A Condition_ is an Expression_
-    whose result is evaluated as a
-    `boolean <https://docs.python.org/3/library/stdtypes.html#boolean-type-bool>`__
-    value.
+    whose result is evaluated as a |type-bool|_ value.
 
 
 Format String
@@ -9385,7 +9405,9 @@ Reference
 .. |verify| replace:: ``verify``
 .. |mature_content| replace:: ``mature_content``
 .. |webbrowser.open()| replace:: ``webbrowser.open()``
-.. |datetime| replace:: ``datetime``
+.. |type-str| replace:: ``str``
+.. |type-bool| replace:: ``boolean``
+.. |type-datetime| replace:: ``datetime``
 .. |datetime.max| replace:: ``datetime.max``
 .. |Date| replace:: ``Date``
 .. |Duration| replace:: ``Duration``
@@ -9419,7 +9441,9 @@ Reference
 .. _Conversion(s):      https://gdl-org.github.io/docs/formatting.html#conversions
 .. _.netrc:             https://stackoverflow.com/tags/.netrc/info
 .. _Last-Modified:      https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29
-.. _datetime:           https://docs.python.org/3/library/datetime.html#datetime-objects
+.. _type-str:           https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str
+.. _type-bool:          https://docs.python.org/3/library/stdtypes.html#boolean-type-bool
+.. _type-datetime:      https://docs.python.org/3/library/datetime.html#datetime-objects
 .. _datetime.max:       https://docs.python.org/3/library/datetime.html#datetime.datetime.max
 .. _strptime:           https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
 .. _webbrowser.open():  https://docs.python.org/3/library/webbrowser.html
