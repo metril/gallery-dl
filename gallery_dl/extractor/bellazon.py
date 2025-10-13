@@ -27,7 +27,7 @@ class BellazonExtractor(Extractor):
         native = (f"{self.root}/", f"{self.root[6:]}/")
         extract_urls = text.re(
             r'(?s)<('
-            r'(?:video .*?<source src|a [^>]*?href)="([^"]+).*?</a>'
+            r'(?:video .*?<source [^>]*?src|a [^>]*?href)="([^"]+).*?</a>'
             r'|img [^>]*?src="([^"]+)"[^>]*>'
             r')'
         ).findall
@@ -52,7 +52,11 @@ class BellazonExtractor(Extractor):
                 url = text.unescape(url or url_img)
 
                 if url.startswith(native):
-                    if "/uploads/emoticons/" in url or "/profile/" in url:
+                    if (
+                        "/uploads/emoticons/" in url or
+                        "/profile/" in url or
+                        "/topic/" in url
+                    ):
                         continue
                     data["num"] += 1
                     if not (alt := text.extr(info, ' alt="', '"')) or (
