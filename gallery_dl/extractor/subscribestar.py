@@ -161,7 +161,7 @@ class SubscribestarExtractor(Extractor):
         attachments = text.extr(
             html, 'class="uploads-docs"', 'class="post-edit_form"')
         if attachments:
-            for att in util.re(r'class="doc_preview[" ]').split(
+            for att in text.re(r'class="doc_preview[" ]').split(
                     attachments)[1:]:
                 media.append({
                     "id"  : text.parse_int(text.extr(
@@ -175,7 +175,7 @@ class SubscribestarExtractor(Extractor):
         audios = text.extr(
             html, 'class="uploads-audios"', 'class="post-edit_form"')
         if audios:
-            for audio in util.re(r'class="audio_preview-data[" ]').split(
+            for audio in text.re(r'class="audio_preview-data[" ]').split(
                     audios)[1:]:
                 media.append({
                     "id"  : text.parse_int(text.extr(
@@ -221,7 +221,7 @@ class SubscribestarExtractor(Extractor):
 class SubscribestarUserExtractor(SubscribestarExtractor):
     """Extractor for media from a subscribestar user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/(?!posts/)([^/?#]+)"
     example = "https://www.subscribestar.com/USER"
 
     def posts(self):
@@ -243,7 +243,7 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
 class SubscribestarPostExtractor(SubscribestarExtractor):
     """Extractor for media from a single subscribestar post"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/posts/(\d+)"
+    pattern = rf"{BASE_PATTERN}/posts/(\d+)"
     example = "https://www.subscribestar.com/posts/12345"
 
     def posts(self):

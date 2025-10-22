@@ -5,7 +5,7 @@
 # published by the Free Software Foundation.
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, exception
 from ..cache import cache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?girlswithmuscle\.com"
@@ -60,7 +60,7 @@ class GirlswithmuscleExtractor(Extractor):
 class GirlswithmusclePostExtractor(GirlswithmuscleExtractor):
     """Extractor for individual posts on girlswithmuscle.com"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/(\d+)"
+    pattern = rf"{BASE_PATTERN}/(\d+)"
     example = "https://www.girlswithmuscle.com/12345/"
 
     def items(self):
@@ -143,7 +143,7 @@ class GirlswithmusclePostExtractor(GirlswithmuscleExtractor):
 class GirlswithmuscleSearchExtractor(GirlswithmuscleExtractor):
     """Extractor for search results on girlswithmuscle.com"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/images/(.*)"
+    pattern = rf"{BASE_PATTERN}/images/(.*)"
     example = "https://www.girlswithmuscle.com/images/?name=MODEL"
 
     def pages(self):
@@ -155,7 +155,7 @@ class GirlswithmuscleSearchExtractor(GirlswithmuscleExtractor):
             raise exception.AuthorizationError(msg)
         page = response.text
 
-        match = util.re(r"Page (\d+) of (\d+)").search(page)
+        match = text.re(r"Page (\d+) of (\d+)").search(page)
         current, total = match.groups()
         current, total = text.parse_int(current), text.parse_int(total)
 
