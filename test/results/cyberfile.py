@@ -104,4 +104,37 @@ __tests__ = (
     "#exception": exception.AuthorizationError,
 },
 
+{
+    "#url"     : "https://cyberfile.me/folder/8b17bbfdf25fca19aa51176bd246c97c/Helena_Price_Onlyfans",
+    "#class"   : cyberfile.CyberfileFolderExtractor,
+    "#results" : (
+        "https://cyberfile.me/folder/c2cfdcfcf1a6e6e57de7bc948804b0fc/PICS",
+        "https://cyberfile.me/folder/bdc7c36e7d4dfdc3fb908a6d3fe1cae5/VIDEO",
+    ),
+
+    "folder"     : "Helena Price Onlyfans",
+    "folder_hash": "8b17bbfdf25fca19aa51176bd246c97c",
+    "folder_num" : 18322,
+},
+
+{
+    "#url"     : "https://cyberfile.me/shared/tao35avvfc",
+    "#class"   : cyberfile.CyberfileSharedExtractor,
+},
+
+{
+    "#url"     : "https://cyberfile.me/shared/l7zoinbctg",
+    "#class"   : cyberfile.CyberfileSharedExtractor,
+    "#results" : (
+        "https://cyberfile.me/gb3s",
+        "https://cyberfile.me/gb8m"
+    ),
+},
+
+{
+    "#url"     : "https://cyberfile.me/shared/wqpd9n0si5",
+    "#class"   : cyberfile.CyberfileSharedExtractor,
+    "#results" : "https://cyberfile.me/folder/9f611ebab76f363e4b818397c7828a73/CF_DSPRMTRS",
+},
+
 )

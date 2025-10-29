@@ -220,7 +220,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="cyberfile" title="cyberfile">
     <td>CyberFile</td>
     <td>https://cyberfile.me/</td>
-    <td>Files, Folders</td>
+    <td>Files, Folders, Shares</td>
     <td></td>
 </tr>
 <tr id="dandadan" title="dandadan">
@@ -1654,6 +1654,12 @@ Consider all listed sites to potentially be NSFW.
 <tr id="thecollectionS" title="thecollectionS">
     <td>The /co/llection</td>
     <td>https://co.llection.pics/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr id="soybooru" title="soybooru">
+    <td>Soybooru</td>
+    <td>https://soybooru.com/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
