@@ -3707,6 +3707,24 @@ Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.itaku.order
+---------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    images/posts/users are returned.
+
+    ``"asc"`` | ``"reverse"``
+        Ascending order (oldest first)
+    ``"desc"``
+        Descending order (newest first)
+    any other ``string``
+        Custom result order
+
+
 extractor.itaku.videos
 ----------------------
 Type
@@ -4424,6 +4442,32 @@ Available Formats
     * ``thumbnail`` (``"h":360,"w":360``)
     * ``thumbnail_large`` (``"h":1080,"w":1080``)
     * ``thumbnail_small`` (``"h":100,"w":100``)
+
+
+extractor.patreon.order-posts
+-----------------------------
+Type
+    ``string``
+Default
+    ``collection``
+        ``"asc"``
+    otherwise
+        ``"desc"``
+Example
+    * ``"-published_at"``
+    * ``"collection_order"``
+Description
+    Controls the order in which
+    posts are returned and processed.
+
+    ``"asc"``
+        Ascending order (oldest first)
+    ``"desc"``
+        Descending order (newest first)
+    ``"reverse"``
+        Reverse order
+    any other ``string``
+        Custom ``sort`` order
 
 
 extractor.patreon.user.date-max
