@@ -160,8 +160,12 @@ class PathFormat():
 
     def exists(self):
         """Return True if the file exists on disk"""
-        if self.extension and os.path.exists(self.realpath):
-            return self.check_file()
+        if self.extension:
+            try:
+                os.lstat(self.realpath)  # raises OSError if file doesn't exist
+                return self.check_file()
+            except OSError:
+                pass
         return False
 
     def check_file(self):
@@ -174,7 +178,7 @@ class PathFormat():
                 prefix = format(num) + "."
                 self.kwdict["extension"] = prefix + self.extension
                 self.build_path()
-                os.stat(self.realpath)  # raises OSError if file doesn't exist
+                os.lstat(self.realpath)  # raises OSError if file doesn't exist
                 num += 1
         except OSError:
             pass
