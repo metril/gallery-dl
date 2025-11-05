@@ -58,8 +58,16 @@ class ImagehostImageExtractor(Extractor):
         url, filename = self.get_info(page)
         if not url:
             return
-        data = text.nameext_from_url(filename, {"token": self.token})
+
+        if filename:
+            data = text.nameext_from_name(filename)
+            if not data["extension"]:
+                data["extension"] = text.ext_from_url(url)
+        else:
+            data = text.nameext_from_url(url)
+        data["token"] = self.token
         data.update(self.metadata(page))
+
         if self._https and url.startswith("http:"):
             url = "https:" + url[5:]
         if self._validate is not None:
@@ -304,9 +312,10 @@ class PixhostGalleryExtractor(ImagehostImageExtractor):
 class PostimgImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from postimages.org"""
     category = "postimg"
-    pattern = (r"(?:https?://)?((?:www\.)?(?:postim(?:ages|g)|pixxxels)"
-               r"\.(?:cc|org)/(?!gallery/)(?:image/)?([^/?#]+)/?)")
-    example = "https://postimages.org/ID"
+    root = "https://postimg.cc"
+    pattern = (r"(?:https?://)?(?:www\.)?(?:postim(?:ages|g)|pixxxels)"
+               r"\.(?:cc|org)(/(?!gallery/)(?:image/)?([^/?#]+)/?)")
+    example = "https://postimg.cc/ID"
 
     def get_info(self, page):
         pos = page.index(' id="download"')
@@ -319,9 +328,10 @@ class PostimgGalleryExtractor(ImagehostImageExtractor):
     """Extractor for images galleries from postimages.org"""
     category = "postimg"
     subcategory = "gallery"
-    pattern = (r"(?:https?://)?((?:www\.)?(?:postim(?:ages|g)|pixxxels)"
-               r"\.(?:cc|org)/gallery/([^/?#]+))")
-    example = "https://postimages.org/gallery/ID"
+    root = "https://postimg.cc"
+    pattern = (r"(?:https?://)?(?:www\.)?(?:postim(?:ages|g)|pixxxels)"
+               r"\.(?:cc|org)(/gallery/([^/?#]+))")
+    example = "https://postimg.cc/gallery/ID"
 
     def items(self):
         page = self.request(self.page_url).text
@@ -339,7 +349,7 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
 
     def get_info(self, page):
         url = text.extract(page, 'src="', '"', page.index("<img "))[0]
-        return url, url
+        return url, None
 
 
 class TurboimagehostGalleryExtractor(ImagehostImageExtractor):
@@ -378,7 +388,7 @@ class ViprImageExtractor(ImagehostImageExtractor):
 
     def get_info(self, page):
         url = text.extr(page, '<img src="', '"')
-        return url, url
+        return url, None
 
 
 class ImgclickImageExtractor(ImagehostImageExtractor):
@@ -455,14 +465,16 @@ class ImgdriveImageExtractor(ImagehostImageExtractor):
 class SilverpicImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from silverpic.com"""
     category = "silverpic"
-    pattern = (r"(?:https?://)?((?:www\.)?silverpic\.com"
-               r"/([a-z0-9]{10,})/[\S]+\.html)")
-    example = "https://silverpic.com/a1b2c3d4f5g6/NAME.EXT.html"
+    root = "https://silverpic.net"
+    _params = "complex"
+    pattern = (r"(?:https?://)?(?:www\.)?silverpic\.(?:net|com)"
+               r"(/([a-z0-9]{10,})/[\S]+\.html)")
+    example = "https://silverpic.net/a1b2c3d4f5g6/NAME.EXT.html"
 
     def get_info(self, page):
         url, pos = text.extract(page, '<img src="/img/', '"')
         alt, pos = text.extract(page, 'alt="', '"', pos)
-        return f"https://silverpic.com/img/{url}", alt
+        return f"{self.root}/img/{url}", alt
 
     def metadata(self, page):
         pos = page.find('<img src="/img/')
