@@ -7,7 +7,7 @@
 """Extractors for Misskey instances"""
 
 from .common import BaseExtractor, Message, Dispatch
-from .. import text, exception
+from .. import text, dt, exception
 from ..cache import memcache
 
 
@@ -17,10 +17,6 @@ class MisskeyExtractor(BaseExtractor):
     directory_fmt = ("misskey", "{instance}", "{user[username]}")
     filename_fmt = "{category}_{id}_{file[id]}.{extension}"
     archive_fmt = "{id}_{file[id]}"
-
-    def __init__(self, match):
-        BaseExtractor.__init__(self, match)
-        self.item = self.groups[-1]
 
     def _init(self):
         self.api = MisskeyAPI(self)
@@ -110,7 +106,7 @@ class MisskeyUserExtractor(Dispatch, MisskeyExtractor):
     example = "https://misskey.io/@USER"
 
     def items(self):
-        base = f"{self.root}/@{self.item}/"
+        base = f"{self.root}/@{self.groups[-1]}/"
         return self._dispatch_extractors((
             (MisskeyInfoExtractor      , base + "info"),
             (MisskeyAvatarExtractor    , base + "avatar"),
@@ -126,7 +122,8 @@ class MisskeyNotesExtractor(MisskeyExtractor):
     example = "https://misskey.io/@USER/notes"
 
     def notes(self):
-        return self.api.users_notes(self.api.user_id_by_username(self.item))
+        return self.api.users_notes(self.api.user_id_by_username(
+            self.groups[-1]))
 
 
 class MisskeyInfoExtractor(MisskeyExtractor):
@@ -136,7 +133,7 @@ class MisskeyInfoExtractor(MisskeyExtractor):
     example = "https://misskey.io/@USER/info"
 
     def items(self):
-        user = self.api.users_show(self.item)
+        user = self.api.users_show(self.groups[-1])
         return iter(((Message.Directory, user),))
 
 
@@ -147,7 +144,7 @@ class MisskeyAvatarExtractor(MisskeyExtractor):
     example = "https://misskey.io/@USER/avatar"
 
     def notes(self):
-        user = self.api.users_show(self.item)
+        user = self.api.users_show(self.groups[-1])
         url = user.get("avatarUrl")
         return (self._make_note("avatar", user, url),) if url else ()
 
@@ -159,7 +156,7 @@ class MisskeyBackgroundExtractor(MisskeyExtractor):
     example = "https://misskey.io/@USER/banner"
 
     def notes(self):
-        user = self.api.users_show(self.item)
+        user = self.api.users_show(self.groups[-1])
         url = user.get("bannerUrl")
         return (self._make_note("background", user, url),) if url else ()
 
@@ -171,7 +168,7 @@ class MisskeyFollowingExtractor(MisskeyExtractor):
     example = "https://misskey.io/@USER/following"
 
     def items(self):
-        user_id = self.api.user_id_by_username(self.item)
+        user_id = self.api.user_id_by_username(self.groups[-1])
         for user in self.api.users_following(user_id):
             user = user["followee"]
             url = f"{self.root}/@{user['username']}"
@@ -188,7 +185,7 @@ class MisskeyNoteExtractor(MisskeyExtractor):
     example = "https://misskey.io/notes/98765"
 
     def notes(self):
-        return (self.api.notes_show(self.item),)
+        return (self.api.notes_show(self.groups[-1]),)
 
 
 class MisskeyFavoriteExtractor(MisskeyExtractor):
@@ -251,8 +248,20 @@ class MisskeyAPI():
         return self.extractor.request_json(url, method="POST", json=data)
 
     def _pagination(self, endpoint, data):
+        extr = self.extractor
         data["limit"] = 100
-        data["withRenotes"] = self.extractor.renotes
+        data["withRenotes"] = extr.renotes
+        data["withFiles"] = False if extr.config("text-posts") else True
+
+        date_min, date_max = extr._get_date_min_max()
+        if date_min is not None:
+            data["sinceDate"] = date_min * 1000
+            if date_max is None:
+                # ensure notes are returned in descending order
+                # TODO: implement 'order-posts' option
+                data["untilDate"] = (int(dt.to_ts(dt.now())) + 1000) * 1000
+        if date_max is not None:
+            data["untilDate"] = date_max * 1000
 
         while True:
             notes = self._call(endpoint, data)

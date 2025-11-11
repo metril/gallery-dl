@@ -1503,12 +1503,19 @@ extractor.*.date-format
 Type
     ``string``
 Default
-    ``"%Y-%m-%dT%H:%M:%S"``
+    ``null``
 Description
     Format string used to parse ``string`` values of
     `date-min` and `date-max`.
 
     See |strptime|_ for a list of formatting directives.
+Special Values
+    ``null``
+        | Parse `date-min` and `date-max` according to
+          `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`__
+        | See
+          `datetime.fromisoformat() <https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat>`__
+          for details and examples.
 Note
     Despite its name, this option does **not** control how
     ``{date}`` metadata fields are formatted.
@@ -4138,6 +4145,16 @@ Description
     Your access token, necessary to fetch favorited notes.
 
 
+extractor.[misskey].date-min & .date-max
+----------------------------------------
+Type
+    |Date|_
+Default
+    ``null``
+Description
+    Retrieve only notes posted after/before this |Date|_
+
+
 extractor.[misskey].include
 ---------------------------
 Type
@@ -4178,6 +4195,16 @@ Default
     ``true``
 Description
     Fetch media from replies to other notes.
+
+
+extractor.[misskey].text-posts
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Also retrieve text-only notes without media content.
 
 
 extractor.[moebooru].pool.metadata
