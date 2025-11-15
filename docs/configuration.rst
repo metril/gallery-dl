@@ -976,8 +976,11 @@ Type
 Default
     ``false``
 Description
-    Evaluate each `keywords <extractor.*.keywords_>`__ ``string`` value
-    as a `Format String`_.
+    Evaluate each
+    `keywords <extractor.*.keywords_>`__
+    and
+    `keywords-global <extractor.*.keywords-global_>`__
+    ``string`` value as a `Format String`_.
 
 
 extractor.*.keywords-global
@@ -6405,12 +6408,12 @@ Type
 Default
     ``"user"``
 Example
-    ``"https://twitter.com/search?q=from:{legacy[screen_name]}"``
+    ``"https://twitter.com/search?q=from:{core[screen_name]}"``
 Description
     | Basic format string for user URLs generated from
       ``following`` and ``list-members`` queries,
     | whose replacement field values come from Twitter ``user`` objects
-      (`Example <https://gist.githubusercontent.com/mikf/99d2719b3845023326c7a4b6fb88dd04/raw/275b4f0541a2c7dc0a86d3998f7d253e8f10a588/github.json>`_)
+      (`Example <https://gist.githubusercontent.com/mikf/99d2719b3845023326c7a4b6fb88dd04/raw/01b5324cf2367bcd437730186ec0f36d5c8c683c/github.json>`_)
 Special Values
     ``"user"``
         ``https://twitter.com/i/user/{rest_id}``
@@ -9653,6 +9656,7 @@ Reference
 .. |open()| replace:: the built-in ``open()`` function
 .. |json.dump()| replace:: ``json.dump()``
 .. |ISO 639-1| replace:: `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language
+.. |ISO 8601| replace:: `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`__ language
 
 .. _directory: `extractor.*.directory`_
 .. _base-directory: `extractor.*.base-directory`_
