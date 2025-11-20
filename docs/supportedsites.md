@@ -727,6 +727,12 @@ Consider all listed sites to potentially be NSFW.
     <td>individual Images, Models</td>
     <td></td>
 </tr>
+<tr id="okporn" title="okporn">
+    <td>OK.PORN</td>
+    <td>https://ok.porn/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
 <tr id="patreon" title="patreon">
     <td>Patreon</td>
     <td>https://www.patreon.com/</td>
@@ -833,6 +839,12 @@ Consider all listed sites to potentially be NSFW.
     <td>PornPics.com</td>
     <td>https://www.pornpics.com/</td>
     <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr id="pornstarstube" title="pornstarstube">
+    <td>PORNSTARS.TUBE</td>
+    <td>https://pornstars.tube/</td>
+    <td>Galleries</td>
     <td></td>
 </tr>
 <tr id="rule34vault" title="rule34vault">
@@ -1008,6 +1020,12 @@ Consider all listed sites to potentially be NSFW.
     <td>https://www.subscribestar.com/</td>
     <td>Posts, User Profiles</td>
     <td>Supported</td>
+</tr>
+<tr id="sxypix" title="sxypix">
+    <td>Sxypix</td>
+    <td>https://sxypix.com/</td>
+    <td>Galleries</td>
+    <td></td>
 </tr>
 <tr id="tapas" title="tapas">
     <td>Tapas</td>
@@ -1282,25 +1300,25 @@ Consider all listed sites to potentially be NSFW.
 <tr id="danbooru" title="danbooru">
     <td>Danbooru</td>
     <td>https://danbooru.donmai.us/</td>
-    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Random Posts, Tag Searches</td>
+    <td>Artists, Artist Searches, Favorite Groups, Media Assets, Pools, Popular Images, Posts, Random Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 <tr id="atfbooru" title="atfbooru">
     <td>ATFBooru</td>
     <td>https://booru.allthefallen.moe/</td>
-    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Random Posts, Tag Searches</td>
+    <td>Artists, Artist Searches, Favorite Groups, Media Assets, Pools, Popular Images, Posts, Random Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 <tr id="aibooru" title="aibooru">
     <td>AIBooru</td>
     <td>https://aibooru.online/</td>
-    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Random Posts, Tag Searches</td>
+    <td>Artists, Artist Searches, Favorite Groups, Media Assets, Pools, Popular Images, Posts, Random Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 <tr id="booruvar" title="booruvar">
     <td>Booruvar</td>
     <td>https://booru.borvar.art/</td>
-    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Random Posts, Tag Searches</td>
+    <td>Artists, Artist Searches, Favorite Groups, Media Assets, Pools, Popular Images, Posts, Random Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 
