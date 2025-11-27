@@ -21,20 +21,71 @@ class SimpcityExtractor(Extractor):
     cookies_domain = "simpcity.cr"
     cookies_names = ("ogaddgmetaprof_user",)
     root = "https://simpcity.cr"
+    directory_fmt = ("{category}", "{thread[section]}",
+                     "{thread[title]} ({thread[id]})")
+    filename_fmt = "{post[id]}_{num:>02}_{id}_{filename}.{extension}"
+    archive_fmt = "{post[id]}/{type[0]}{id}_{filename}"
 
     def items(self):
         self.login()
 
         extract_urls = text.re(
-            r'<(?:a [^>]*?href|iframe [^>]*?src)="([^"]+)').findall
+            r'(?s)(?:'
+            r'<video (.*?\ssrc="[^"]+".*?)</video>'
+            r'|<a [^>]*?href="'
+            r'(?:https://[^"]+)?(/attachments/[^"]+".*?)</a>'
+            r'|<div [^>]*?data-src="'
+            r'(?:https://[^"]+)?(/attachments/[^"]+".*?)/>'
+            r'|(?:<a [^>]*?href="|<iframe [^>]*?src="|'
+            r'''onclick="loadMedia\(this, ')([^"']+)'''
+            r')'
+        ).findall
 
         for post in self.posts():
             urls = extract_urls(post["content"])
+            if post["attachments"]:
+                urls.extend(extract_urls(post["attachments"]))
+
             data = {"post": post}
             post["count"] = data["count"] = len(urls)
             yield Message.Directory, data
-            for data["num"], url in enumerate(urls, 1):
-                yield Message.Queue, url, data
+
+            data["num"] = data["num_internal"] = data["num_external"] = 0
+            for video, inl1, inl2, ext in urls:
+                if ext:
+                    data["num"] += 1
+                    data["num_external"] += 1
+                    data["type"] = "external"
+                    if ext.startswith("//"):
+                        ext = "https:" + ext
+                    yield Message.Queue, ext, data
+
+                elif video:
+                    data["num"] += 1
+                    data["num_internal"] += 1
+                    data["type"] = "video"
+                    url = text.extr(video, 'src="', '"')
+                    text.nameext_from_url(url, data)
+                    data["id"] = text.parse_int(
+                        data["filename"].partition("-")[0])
+                    yield Message.Url, url, data
+
+                elif (inline := inl1 or inl2):
+                    data["num"] += 1
+                    data["num_internal"] += 1
+                    data["type"] = "inline"
+                    path = inline[:inline.find('"')]
+                    name, _, id = path[path.rfind("/", 0, -1):].strip(
+                        "/").rpartition(".")
+                    data["id"] = text.parse_int(id)
+                    if alt := text.extr(inline, 'alt="', '"'):
+                        text.nameext_from_name(alt, data)
+                        if not data["extension"]:
+                            data["extension"] = name.rpartition("-")[2]
+                    else:
+                        data["filename"], _, data["extension"] = \
+                            name.rpartition("-")
+                    yield Message.Url, self.root + path, data
 
     def request_page(self, url):
         try:
@@ -102,7 +153,7 @@ class SimpcityExtractor(Extractor):
     def _pagination_reverse(self, base, pnum=None):
         base = f"{self.root}{base}"
 
-        url = f"{base}/page-9999"  # force redirect to last page
+        url = f"{base}/page-{'9999' if pnum is None else pnum}"
         with self.request_page(url) as response:
             url = response.url
             if url[-1] == "/":
@@ -161,8 +212,13 @@ class SimpcityExtractor(Extractor):
             "id": extr('data-content="post-', '"'),
             "author_url": extr('itemprop="url" content="', '"'),
             "date": self.parse_datetime_iso(extr('datetime="', '"')),
-            "content": extr('<div itemprop="text">',
-                            '<div class="js-selectToQuote').strip(),
+            "content": (
+                extr('<div itemprop="text">',
+                     '<div class="js-selectToQuote') or
+                extr('<div >',
+                     '<div class="js-selectToQuote')).strip(),
+            "attachments": extr('<section class="message-attachments">',
+                                '</section>'),
         }
 
         url_a = post["author_url"]
@@ -184,7 +240,7 @@ class SimpcityPostExtractor(SimpcityExtractor):
         pos = page.find(f'data-content="post-{post_id}"')
         if pos < 0:
             raise exception.NotFoundError("post")
-        html = text.extract(page, "<article ", "</article>", pos-200)[0]
+        html = text.extract(page, "<article ", "<footer", pos-200)[0]
 
         self.kwdict["thread"] = self._parse_thread(page)
         return (self._parse_post(html),)
@@ -207,7 +263,7 @@ class SimpcityThreadExtractor(SimpcityExtractor):
         for page in pages:
             if "thread" not in self.kwdict:
                 self.kwdict["thread"] = self._parse_thread(page)
-            posts = text.extract_iter(page, "<article ", "</article>")
+            posts = text.extract_iter(page, "<article ", "<footer")
             if reverse:
                 posts = list(posts)
                 posts.reverse()
