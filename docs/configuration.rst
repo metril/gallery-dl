@@ -6294,6 +6294,18 @@ Note
     <extractor.*.image-filter_>`__.
 
 
+extractor.twitter.retries-api
+-----------------------------
+Type
+    ``integer``
+Default
+    ``4``
+Description
+    Maximum number of retries
+    for API requests when encountering server ``errors``,
+    or ``-1`` for infinite retries.
+
+
 extractor.twitter.retweets
 --------------------------
 Type
@@ -6331,6 +6343,20 @@ Description
     ``"max_id"`` | ``"maxid"`` | ``"id"``
         Update the ``max_id`` search query parameter
         to the Tweet ID value of the last retrieved Tweet.
+
+
+extractor.twitter.search-results
+--------------------------------
+Type
+    ``string``
+Default
+    ``"latest"``
+Description
+    Determines the target of search results.
+Supported Values
+    * ``"top"``
+    * ``"media"``
+    * ``"latest"`` | ``"live"``
 
 
 extractor.twitter.search-stop
@@ -7992,6 +8018,17 @@ Description
     to have it call ``setsid()``.
 
 
+exec.verbose
+------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include `command <exec.command_>`__
+    arguments in logging messages.
+
+
 hash.chunk-size
 ---------------
 Type
@@ -9411,7 +9448,8 @@ Example
             "format"     : "{asctime} {name}: {message}",
             "format-date": "%H:%M:%S",
             "path"       : "~/log.txt",
-            "encoding"   : "ascii"
+            "encoding"   : "ascii",
+            "defer"      : true
         }
 
     .. code:: json
@@ -9460,9 +9498,15 @@ Description
     * encoding
         * File encoding
         * Default: ``"utf-8"``
+    * defer
+        * Defer file opening/creation until writing the first logging message
+        * Default:
+          ``true`` for `errorfile <output.errorfile_>`__,
+          ``false`` otherwise
 Note
-    path, mode, and encoding are only applied when configuring
-    logging output to a file.
+    path, mode, encoding, and defer
+    are only applied when configuring logging output to a file.
+    (See `logging.FileHandler <https://docs.python.org/3/library/logging.handlers.html#filehandler>`__)
 
 
 Postprocessor Configuration

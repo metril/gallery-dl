@@ -1450,23 +1450,36 @@ class TwitterAPI():
             endpoint, variables, ("bookmark_timeline_v2", "timeline"),
             stop_tweets=128)
 
-    def search_timeline(self, query, product="Latest"):
+    def search_timeline(self, query, product=None):
+        cfg = self.extractor.config
+
+        if product is None:
+            if product := cfg("search-results"):
+                product = {
+                    "top"  : "Top",
+                    "live" : "Latest",
+                    "user" : "People",
+                    "media": "Media",
+                    "list" : "Lists",
+                }.get(product.lower(), product).capitalize()
+            else:
+                product = "Latest"
+
         endpoint = "/graphql/4fpceYZ6-YQCx_JSl_Cn_A/SearchTimeline"
         variables = {
             "rawQuery": query,
-            "count": self.extractor.config("search-limit", 20),
+            "count": cfg("search-limit", 20),
             "querySource": "typed_query",
             "product": product,
             "withGrokTranslatedBio": False,
         }
 
-        if self.extractor.config("search-pagination") in (
-                "max_id", "maxid", "id"):
+        if cfg("search-pagination") in ("max_id", "maxid", "id"):
             update_variables = self._update_variables_search
         else:
             update_variables = None
 
-        stop_tweets = self.extractor.config("search-stop")
+        stop_tweets = cfg("search-stop")
         if stop_tweets is None or stop_tweets == "auto":
             stop_tweets = 3 if update_variables is None else 0
 
@@ -1653,10 +1666,8 @@ class TwitterAPI():
             self.extractor._assign_user(user)
             return user["rest_id"]
         except KeyError:
-            if "unavailable_message" in user:
-                raise exception.NotFoundError(
-                    f"{user['unavailable_message'].get('text')} "
-                    f"({user.get('reason')})", False)
+            if user and user.get("__typename") == "UserUnavailable":
+                raise exception.NotFoundError(user["message"], False)
             else:
                 raise exception.NotFoundError("user")
 
@@ -1878,6 +1889,7 @@ class TwitterAPI():
         original_retweets = (extr.retweets == "original")
         pinned_tweet = extr.pinned
         stop_tweets_max = stop_tweets
+        api_retries = None
 
         params = {"variables": None}
         if cursor := extr._init_cursor():
@@ -1891,14 +1903,14 @@ class TwitterAPI():
 
         while True:
             params["variables"] = self._json_dumps(variables)
-            data = self._call(endpoint, params)["data"]
+            data = self._call(endpoint, params)
 
             try:
                 if path is None:
-                    instructions = (data["user"]["result"]["timeline"]
+                    instructions = (data["data"]["user"]["result"]["timeline"]
                                     ["timeline"]["instructions"])
                 else:
-                    instructions = data
+                    instructions = data["data"]
                     for key in path:
                         instructions = instructions[key]
                     instructions = instructions["instructions"]
@@ -1929,6 +1941,26 @@ class TwitterAPI():
             except LookupError:
                 extr.log.debug(data)
 
+                if errors := data.get("errors"):
+                    if api_retries is None:
+                        api_tries = 1
+                        api_retries = extr.config("retries-api", 4)
+                        if api_retries < 0:
+                            api_retries = float("inf")
+
+                    err = []
+                    srv = False
+                    for e in errors:
+                        err.append(f"- '{e.get('message') or e.get('name')}'")
+                        if e.get("source") == "Server":
+                            srv = True
+
+                    self.log.warning("API errors (%s/%s):\n%s",
+                                     api_tries, api_retries+1, "\n".join(err))
+                    if srv and api_tries <= api_retries:
+                        api_tries += 1
+                        continue
+
                 if user := extr._user_obj:
                     user = user["legacy"]
                     if user.get("blocked_by"):
@@ -1950,6 +1982,7 @@ class TwitterAPI():
 
             tweets = []
             tweet = None
+            api_tries = 1
 
             if pinned_tweet:
                 if isinstance(pinned_tweet, dict):
