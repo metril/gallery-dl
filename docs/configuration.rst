@@ -821,7 +821,8 @@ Default
         ``artstation`` |
         ``behance``    |
         ``fanbox``     |
-        ``twitter``
+        ``twitter``    |
+        ``vsco``
     ``null``
         otherwise
 Example
@@ -937,8 +938,7 @@ Type
 Default
     ``false``
         ``artstation`` |
-        ``behance``    |
-        ``vsco``
+        ``behance``
     ``true``
         otherwise
 Description
@@ -2090,12 +2090,18 @@ Type
 Default
     ``false``
 Example
-    * ``"generation,post,version"``
+    * ``"generation,tags,post,version"``
     * ``["version", "generation"]``
 Description
-    Extract additional ``generation``, ``version``, and ``post`` metadata.
+    Extract additional metadata.
+Supported Values
+    * ``generation``
+    * ``post``
+    * ``tags``
+    * ``version``
 Note
-    This requires 1 or more additional API requests per image or video.
+    This requires 1 additional API request
+    for each selected value per image or video.
 
 
 extractor.civitai.nsfw
@@ -6299,7 +6305,7 @@ extractor.twitter.retries-api
 Type
     ``integer``
 Default
-    ``4``
+    ``9``
 Description
     Maximum number of retries
     for API requests when encountering server ``errors``,
