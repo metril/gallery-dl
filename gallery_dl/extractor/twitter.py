@@ -438,6 +438,8 @@ class TwitterExtractor(Extractor):
         txt, _, tco = content.rpartition(" ")
         tdata["content"] = txt if tco.startswith("https://t.co/") else content
 
+        if "pinned" in tweet:
+            tdata["pinned"] = True
         if "birdwatch_pivot" in tweet:
             try:
                 tdata["birdwatch"] = \
@@ -1368,7 +1370,7 @@ class TwitterAPI():
         endpoint = "/graphql/E8Wq-_jFSaU7hxVcuOPR9g/UserTweets"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
             "withQuickPromoteEligibilityTweetFields": False,
             "withVoice": True,
@@ -1383,7 +1385,7 @@ class TwitterAPI():
         endpoint = "/graphql/-O3QOHrVn1aOm_cF5wyTCQ/UserTweetsAndReplies"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
             "withCommunity": True,
             "withVoice": True,
@@ -1398,7 +1400,7 @@ class TwitterAPI():
         endpoint = "/graphql/gmHw9geMTncZ7jeLLUUNOw/UserHighlightsTweets"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
             "withVoice": True,
         }
@@ -1412,7 +1414,7 @@ class TwitterAPI():
         endpoint = "/graphql/jCRhbOzdgOHp6u9H4g2tEg/UserMedia"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
             "withClientEventToken": False,
             "withBirdwatchNotes": False,
@@ -1428,7 +1430,7 @@ class TwitterAPI():
         endpoint = "/graphql/TGEKkJG_meudeaFcqaxM-Q/Likes"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
             "withClientEventToken": False,
             "withBirdwatchNotes": False,
@@ -1443,7 +1445,7 @@ class TwitterAPI():
     def user_bookmarks(self):
         endpoint = "/graphql/pLtjrO4ubNh996M_Cubwsg/Bookmarks"
         variables = {
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
         }
         return self._pagination_tweets(
@@ -1506,7 +1508,7 @@ class TwitterAPI():
         endpoint = "/graphql/Nyt-88UX4-pPCImZNUl9RQ/CommunityTweetsTimeline"
         variables = {
             "communityId": community_id,
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "displayLocation": "Community",
             "rankingMode": "Recency",
             "withCommunity": True,
@@ -1520,7 +1522,7 @@ class TwitterAPI():
         endpoint = "/graphql/ZniZ7AAK_VVu1xtSx1V-gQ/CommunityMediaTimeline"
         variables = {
             "communityId": community_id,
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "withCommunity": True,
         }
         return self._pagination_tweets(
@@ -1532,7 +1534,7 @@ class TwitterAPI():
         endpoint = ("/graphql/p048a9n3hTPppQyK7FQTFw"
                     "/CommunitiesMainPageTimeline")
         variables = {
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "withCommunity": True,
         }
         return self._pagination_tweets(
@@ -1542,7 +1544,7 @@ class TwitterAPI():
     def home_timeline(self):
         endpoint = "/graphql/DXmgQYmIft1oLP6vMkJixw/HomeTimeline"
         variables = {
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
             "latestControlAvailable": True,
             "withCommunity": True,
@@ -1553,7 +1555,7 @@ class TwitterAPI():
     def home_latest_timeline(self):
         endpoint = "/graphql/SFxmNKWfN9ySJcXG_tjX8g/HomeLatestTimeline"
         variables = {
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
             "latestControlAvailable": True,
         }
@@ -1580,7 +1582,7 @@ class TwitterAPI():
         endpoint = "/graphql/06JtmwM8k_1cthpFZITVVA/ListLatestTweetsTimeline"
         variables = {
             "listId": list_id,
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
         }
         return self._pagination_tweets(
             endpoint, variables, ("list", "tweets_timeline", "timeline"))
@@ -1710,7 +1712,7 @@ class TwitterAPI():
             self.client_transaction.generate_transaction_id(method, path)
 
     def _call(self, endpoint, params, method="GET", auth=True, root=None):
-        url = (root or self.root) + endpoint
+        url = (self.root if root is None else root) + endpoint
 
         while True:
             if auth:
@@ -1887,9 +1889,17 @@ class TwitterAPI():
                            features=None, field_toggles=None):
         extr = self.extractor
         original_retweets = (extr.retweets == "original")
-        pinned_tweet = extr.pinned
+        pinned_tweet = True if extr.pinned else None
         stop_tweets_max = stop_tweets
         api_retries = None
+
+        if isinstance(count := variables.get("count"), list):
+            count = count.copy()
+            count.reverse()
+            self.log.debug("Using 'count: %s'", count[-1])
+            variables["count"] = count.pop()
+        else:
+            count = False
 
         params = {"variables": None}
         if cursor := extr._init_cursor():
@@ -1927,7 +1937,7 @@ class TwitterAPI():
                     elif instr_type == "TimelineAddToModule":
                         entries = instr["moduleItems"]
                     elif instr_type == "TimelinePinEntry":
-                        if pinned_tweet:
+                        if pinned_tweet is not None:
                             pinned_tweet = instr["entry"]
                     elif instr_type == "TimelineReplaceEntry":
                         entry = instr["entry"]
@@ -1984,12 +1994,10 @@ class TwitterAPI():
             tweet = None
             api_tries = 1
 
-            if pinned_tweet:
-                if isinstance(pinned_tweet, dict):
-                    tweets.append(pinned_tweet)
-                elif instructions[-1]["type"] == "TimelinePinEntry":
-                    tweets.append(instructions[-1]["entry"])
-                pinned_tweet = False
+            if pinned_tweet is not None and isinstance(pinned_tweet, dict):
+                pinned_tweet["pinned"] = True
+                tweets.append(pinned_tweet)
+                pinned_tweet = None
 
             for entry in entries:
                 esw = entry["entryId"].startswith
@@ -2019,6 +2027,26 @@ class TwitterAPI():
                         # keep going even if there are no tweets
                         tweet = True
                     cursor = cursor.get("value")
+
+            if pinned_tweet is not None:
+                if pinned := extr._user_obj["legacy"].get(
+                        "pinned_tweet_ids_str"):
+                    pinned = f"-tweet-{pinned[0]}"
+                    for idx, entry in enumerate(tweets):
+                        if entry["entryId"].endswith(pinned):
+                            # mark as pinned / set 'pinned = True'
+                            pinned_tweet = (
+                                (entry.get("content") or entry["item"])
+                                ["itemContent"]["tweet_results"]["result"])
+                            if "tweet" in pinned_tweet:
+                                pinned_tweet = pinned_tweet["tweet"]
+                            pinned_tweet["pinned"] = True
+                            # move to front of 'tweets'
+                            del tweets[idx]
+                            tweets.insert(0, entry)
+                            break
+                del pinned
+                pinned_tweet = None
 
             for entry in tweets:
                 try:
@@ -2106,15 +2134,19 @@ class TwitterAPI():
             if tweet:
                 stop_tweets = stop_tweets_max
                 last_tweet = tweet
-            else:
-                if stop_tweets <= 0:
+            elif stop_tweets <= 0:
+                if not count:
                     return extr._update_cursor(None)
+                self.log.debug("Switching to 'count: %s'", count[-1])
+                variables["count"] = count.pop()
+            else:
                 self.log.debug(
                     "No Tweet results (%s/%s)",
                     stop_tweets_max - stop_tweets + 1, stop_tweets_max)
                 stop_tweets -= 1
 
             if not cursor or cursor == variables.get("cursor"):
+                self.log.debug("No continuation cursor")
                 return extr._update_cursor(None)
 
             if update_variables is None:
@@ -2201,7 +2233,7 @@ class TwitterAPI():
             else:
                 variables["rawQuery"] = f"{query} {max_id}"
 
-            if prefix := self.extractor._cursor_prefix:
+            if prefix := getattr(self.extractor, "_cursor_prefix", None):
                 self.extractor._cursor_prefix = \
                     f"{prefix.partition('_')[0]}_{tweet_id}/"
             variables["cursor"] = None
