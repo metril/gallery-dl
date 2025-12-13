@@ -48,6 +48,8 @@ class AudiochanExtractor(Extractor):
             post["_http_headers"] = self.headers_dl
             post["date"] = self.parse_datetime_iso(file["created_at"])
             post["date_updated"] = self.parse_datetime_iso(file["updated_at"])
+            post["description"] = self._extract_description(
+                post["description"])
 
             tags = []
             for tag in post["tags"]:
@@ -86,10 +88,22 @@ class AudiochanExtractor(Extractor):
                 break
             params["page"] += 1
 
+    def _extract_description(self, description, asd=None):
+        if asd is None:
+            asd = []
+
+        if "text" in description:
+            asd.append(description["text"])
+        elif "content" in description:
+            for desc in description["content"]:
+                self._extract_description(desc, asd)
+
+        return asd
+
 
 class AudiochanAudioExtractor(AudiochanExtractor):
     subcategory = "audio"
-    pattern = rf"{BASE_PATTERN}/a/(\w+)"
+    pattern = rf"{BASE_PATTERN}/a/([^/?#]+)"
     example = "https://audiochan.com/a/SLUG"
 
     def posts(self):
@@ -100,7 +114,7 @@ class AudiochanAudioExtractor(AudiochanExtractor):
 
 class AudiochanUserExtractor(AudiochanExtractor):
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/u/(\w+)"
+    pattern = rf"{BASE_PATTERN}/u/([^/?#]+)"
     example = "https://audiochan.com/u/USER"
 
     def posts(self):
@@ -116,7 +130,7 @@ class AudiochanUserExtractor(AudiochanExtractor):
 
 class AudiochanCollectionExtractor(AudiochanExtractor):
     subcategory = "collection"
-    pattern = rf"{BASE_PATTERN}/c/(\w+)"
+    pattern = rf"{BASE_PATTERN}/c/([^/?#]+)"
     example = "https://audiochan.com/c/SLUG"
 
     def posts(self):
