@@ -4252,6 +4252,21 @@ Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.[misskey].order-posts
+-------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which posts are processed.
+
+    ``"asc"`` | ``"reverse"``
+        Ascending order (oldest first)
+    ``"desc"``
+        Descending order (newest first)
+
+
 extractor.[misskey].renotes
 ---------------------------
 Type
@@ -6490,18 +6505,6 @@ Default
     ``true``
 Description
     Ignore previously seen Tweets.
-
-
-extractor.twitter.username-alt
-------------------------------
-Type
-    ``string``
-Description
-    Alternate Identifier (username, email, phone number)
-    when `logging in <extractor.*.username & .password_>`__.
-
-    When not specified and asked for by Twitter,
-    this identifier will need to be entered in an interactive prompt.
 
 
 extractor.twitter.users

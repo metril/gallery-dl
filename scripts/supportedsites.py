@@ -43,6 +43,7 @@ CATEGORY_MAP = {
     "cfake"          : "Celebrity Fakes",
     "cien"           : "Ci-en",
     "cohost"         : "cohost!",
+    "comedywildlifephoto": "Comedy Wildlife Photography Awards",
     "comicvine"      : "Comic Vine",
     "cyberfile"      : "CyberFile",
     "dankefuerslesen": "Danke fürs Lesen",
@@ -339,6 +340,9 @@ SUBCATEGORY_MAP = {
         "discord"       : "Discord Servers",
         "discord-server": "",
         "posts"         : "",
+    },
+    "koofr": {
+        "shared": "Shared Links",
     },
     "leakgallery": {
         "trending" : "Trending Medias",

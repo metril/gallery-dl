@@ -19,12 +19,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Boards, Threads</td>
     <td></td>
 </tr>
-<tr id="2chen" title="2chen">
-    <td>2chen</td>
-    <td>https://sturdychan.help/</td>
-    <td>Boards, Threads</td>
-    <td></td>
-</tr>
 <tr id="35photo" title="35photo">
     <td>35PHOTO</td>
     <td>https://35photo.pro/</td>
@@ -209,6 +203,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Civitai</td>
     <td>https://www.civitai.com/</td>
     <td>Collections, Generated Files, individual Images, Image Listings, Models, Model Listings, Posts, Post Listings, Image Searches, Model Searches, Tag Searches, User Profiles, User Collections, User Images, Image Reactions, User Models, User Posts, User Videos, Video Reactions, Video Listings</td>
+    <td></td>
+</tr>
+<tr id="comedywildlifephoto" title="comedywildlifephoto">
+    <td>Comedy Wildlife Photography Awards</td>
+    <td>https://www.comedywildlifephoto.com/</td>
+    <td>Galleries</td>
     <td></td>
 </tr>
 <tr id="comicvine" title="comicvine">
@@ -581,6 +581,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Komikcast</td>
     <td>https://komikcast.li/</td>
     <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr id="koofr" title="koofr">
+    <td>Koofr</td>
+    <td>https://koofr.net/</td>
+    <td>Shared Links</td>
     <td></td>
 </tr>
 <tr id="leakgallery" title="leakgallery">
@@ -1271,6 +1277,22 @@ Consider all listed sites to potentially be NSFW.
     <td>もえぴりあ</td>
     <td>https://vanilla-rock.com/</td>
     <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+
+<tr id="2chen" title="2chen">
+    <td colspan="4"><strong>2chen Instances</strong></td>
+</tr>
+<tr id="sturdychan" title="sturdychan">
+    <td>Sturdychan</td>
+    <td>https://sturdychan.help/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr id="schan" title="schan">
+    <td>Schan</td>
+    <td>https://schan.help/</td>
+    <td>Boards, Threads</td>
     <td></td>
 </tr>
 
