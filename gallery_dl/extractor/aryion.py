@@ -77,20 +77,20 @@ class AryionExtractor(Extractor):
     def metadata(self):
         """Return general metadata"""
 
-    def _pagination_params(self, url, params=None, needle=None):
+    def _pagination_params(self, url, params=None, needle=None, quote="'"):
         if params is None:
             params = {"p": 1}
         else:
             params["p"] = text.parse_int(params.get("p"), 1)
 
         if needle is None:
-            needle = "class='gallery-item' id='"
+            needle = "class='gallery-item' id=" + quote
 
         while True:
             page = self.request(url, params=params).text
 
             cnt = 0
-            for post_id in text.extract_iter(page, needle, "'"):
+            for post_id in text.extract_iter(page, needle, quote):
                 cnt += 1
                 yield post_id
 
@@ -107,6 +107,37 @@ class AryionExtractor(Extractor):
             if pos < 0:
                 return
             url = self.root + text.rextr(page, "href='", "'", pos)
+
+    def _pagination_folders(self, url, folder=None):
+        if folder is None:
+            self.kwdict["folder"] = ""
+        else:
+            url = f"{url}/{folder}"
+            self.kwdict["folder"] = folder = text.unquote(folder)
+            self.log.debug("Descending into folder '%s'", folder)
+
+        params = {"p": 1}
+        while True:
+            page = self.request(url, params=params).text
+
+            cnt = 0
+            for item in text.extract_iter(
+                    page, "<li class='gallery-item", "</li>"):
+                cnt += 1
+                if text.extr(item, 'data-item-type="', '"') == "Folders":
+                    folder = text.extr(item, "href='", "'").rpartition("/")[2]
+                    if self.recursive:
+                        yield from self._pagination(url, folder)
+                    else:
+                        self.log.debug("Skipping folder '%s'", folder)
+                else:
+                    yield text.extr(item, "data-item-id='", "'")
+
+            if cnt < 40 and ">Next &gt;&gt;<" not in page:
+                break
+            params["p"] += 1
+
+        self.kwdict["folder"] = ""
 
     def _parse_post(self, post_id):
         url = f"{self.root}/g4/data.php?id={post_id}"
@@ -153,6 +184,8 @@ class AryionExtractor(Extractor):
             "user"  : self.user or artist,
             "title" : title,
             "artist": artist,
+            "description": text.unescape(extr(
+                'property="og:description" content="', '"')),
             "path"  : text.split_html(extr(
                 "cookiecrumb'>", '</span'))[4:-1:2],
             "date"  : dt.datetime(*parsedate_tz(lmod)[:6]),
@@ -163,8 +196,6 @@ class AryionExtractor(Extractor):
             "comments" : text.parse_int(extr("Comments</b>:", "<")),
             "favorites": text.parse_int(extr("Favorites</b>:", "<")),
             "tags"     : text.split_html(extr("class='taglist'>", "</span>")),
-            "description": text.unescape(text.remove_html(extr(
-                "<p>", "</p>"), "", "")),
             "filename" : fname,
             "extension": ext,
             "_http_lastmodified": lmod,
@@ -178,11 +209,8 @@ class AryionGalleryExtractor(AryionExtractor):
     pattern = rf"{BASE_PATTERN}/(?:gallery/|user/|latest.php\?name=)([^/?#]+)"
     example = "https://aryion.com/g4/gallery/USER"
 
-    def __init__(self, match):
-        AryionExtractor.__init__(self, match)
-        self.offset = 0
-
     def _init(self):
+        self.offset = 0
         self.recursive = self.config("recursive", True)
 
     def skip(self, num):
@@ -203,15 +231,34 @@ class AryionGalleryExtractor(AryionExtractor):
 class AryionFavoriteExtractor(AryionExtractor):
     """Extractor for a user's favorites gallery"""
     subcategory = "favorite"
-    directory_fmt = ("{category}", "{user!l}", "favorites")
+    directory_fmt = ("{category}", "{user!l}", "favorites", "{folder}")
     archive_fmt = "f_{user}_{id}"
-    categorytransfer = True
-    pattern = rf"{BASE_PATTERN}/favorites/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/favorites/([^/?#]+)(?:/([^?#]+))?"
     example = "https://aryion.com/g4/favorites/USER"
+
+    def _init(self):
+        self.recursive = self.config("recursive", True)
 
     def posts(self):
         url = f"{self.root}/g4/favorites/{self.user}"
-        return self._pagination_params(url, None, "data-item-id='")
+        return self._pagination_folders(url, self.groups[1])
+
+
+class AryionWatchExtractor(AryionExtractor):
+    """Extractor for your watched users and tags"""
+    subcategory = "watch"
+    directory_fmt = ("{category}", "{user!l}",)
+    pattern = rf"{BASE_PATTERN}/messagepage\.php()"
+    example = "https://aryion.com/g4/messagepage.php"
+
+    def posts(self):
+        if not self.cookies_check(self.cookies_names):
+            raise exception.AuthRequired(
+                ("username & password", "authenticated cookies"),
+                "watched Submissions")
+        self.cookies.set("g4p_msgpage_style", "plain", domain="aryion.com")
+        url = self.root + "/g4/messagepage.php"
+        return self._pagination_params(url, None, 'data-item-id="', '"')
 
 
 class AryionTagExtractor(AryionExtractor):

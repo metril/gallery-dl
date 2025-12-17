@@ -286,7 +286,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="aryion" title="aryion">
     <td>Eka's Portal</td>
     <td>https://aryion.com/</td>
-    <td>Favorites, Galleries, Posts, Search Results, Tag Searches</td>
+    <td>Favorites, Galleries, Posts, Search Results, Tag Searches, Watches</td>
     <td>Supported</td>
 </tr>
 <tr id="eporner" title="eporner">
@@ -785,6 +785,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Picarto</td>
     <td>https://picarto.tv/</td>
     <td>Galleries</td>
+    <td></td>
+</tr>
+<tr id="picazor" title="picazor">
+    <td>Picazor</td>
+    <td>https://picazor.com/</td>
+    <td>User Profiles</td>
     <td></td>
 </tr>
 <tr id="pictoa" title="pictoa">
