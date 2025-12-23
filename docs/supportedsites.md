@@ -268,7 +268,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="discord" title="discord">
     <td>Discord</td>
     <td>https://discord.com/</td>
-    <td>Channels, DMs, Messages, Servers</td>
+    <td>Channels, DMs, Messages, Servers, Server Assets</td>
     <td></td>
 </tr>
 <tr id="dynastyscans" title="dynastyscans">
@@ -1042,7 +1042,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="subscribestar" title="subscribestar">
     <td>SubscribeStar</td>
     <td>https://www.subscribestar.com/</td>
-    <td>Posts, User Profiles</td>
+    <td>Posts, User Profiles, User Tags</td>
     <td>Supported</td>
 </tr>
 <tr id="sxypix" title="sxypix">

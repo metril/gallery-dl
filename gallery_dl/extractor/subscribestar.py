@@ -27,12 +27,12 @@ class SubscribestarExtractor(Extractor):
     _warning = True
 
     def __init__(self, match):
-        tld, self.item = match.groups()
-        if tld == "adult":
+        if match[1] == "adult":
             self.root = "https://subscribestar.adult"
             self.cookies_domain = ".subscribestar.adult"
             self.subcategory += "-adult"
         Extractor.__init__(self, match)
+        self.item = match[2]
 
     def items(self):
         self.login()
@@ -58,7 +58,7 @@ class SubscribestarExtractor(Extractor):
                     text.nameext_from_url(url, item)
 
                 if url[0] == "/":
-                    url = f"{self.root}{url}"
+                    url = self.root + url
                 yield Message.Url, url, item
 
     def posts(self):
@@ -72,7 +72,7 @@ class SubscribestarExtractor(Extractor):
                     "/verify_subscriber" in response.url or
                     "/age_confirmation_warning" in response.url):
                 raise exception.AbortExtraction(
-                    f"HTTP redirect to {response.url}")
+                    "HTTP redirect to " + response.url)
 
             content = response.content
             if len(content) < 250 and b">redirected<" in content:
@@ -148,6 +148,21 @@ class SubscribestarExtractor(Extractor):
             for cookie in response.cookies
         }
 
+    def _pagination(self, url, params=None):
+        needle_next_page = 'data-role="infinite_scroll-next_page" href="'
+        page = self.request(url, params=params).text
+
+        while True:
+            posts = page.split('<div class="post ')[1:]
+            if not posts:
+                return
+            yield from posts
+
+            url = text.extr(posts[-1], needle_next_page, '"')
+            if not url:
+                return
+            page = self.request_json(self.root + text.unescape(url))["html"]
+
     def _media_from_post(self, html):
         media = []
 
@@ -218,32 +233,34 @@ class SubscribestarExtractor(Extractor):
         self._warn_preview = util.noop
 
 
+class SubscribestarUserTagExtractor(SubscribestarExtractor):
+    """Extractor for a subscribestar user's tagged posts"""
+    subcategory = "user-tag"
+    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)\?tag=([^#]+)"
+    example = "https://www.subscribestar.com/USER?tag=TAG"
+
+    def posts(self):
+        _, user, tag = self.groups
+        self.kwdict["search_tags"] = tag = text.unquote(tag)
+        url = f"{self.root}/{user}"
+        params = {"tag": tag}
+        return self._pagination(url, params)
+
+
 class SubscribestarUserExtractor(SubscribestarExtractor):
     """Extractor for media from a subscribestar user"""
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/(?!posts/)([^/?#]+)"
+    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
     example = "https://www.subscribestar.com/USER"
 
     def posts(self):
-        needle_next_page = 'data-role="infinite_scroll-next_page" href="'
-        page = self.request(f"{self.root}/{self.item}").text
-
-        while True:
-            posts = page.split('<div class="post ')[1:]
-            if not posts:
-                return
-            yield from posts
-
-            url = text.extr(posts[-1], needle_next_page, '"')
-            if not url:
-                return
-            page = self.request_json(self.root + text.unescape(url))["html"]
+        return self._pagination(f"{self.root}/{self.item}")
 
 
 class SubscribestarPostExtractor(SubscribestarExtractor):
     """Extractor for media from a single subscribestar post"""
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/posts/(\d+)"
+    pattern = BASE_PATTERN + r"/posts/(\d+)"
     example = "https://www.subscribestar.com/posts/12345"
 
     def posts(self):

@@ -464,6 +464,18 @@ Description
     Number of seconds to sleep before each download.
 
 
+extractor.*.sleep-skip
+----------------------
+Type
+    |Duration|_
+Default
+    ``0``
+Description
+    Number of seconds to sleep after
+    `skipping <extractor.*.skip_>`__
+    a file download.
+
+
 extractor.*.sleep-extractor
 ---------------------------
 Type
@@ -3007,6 +3019,16 @@ Supported Values
     * ``albums``
 Note
     It is possible to use ``"all"`` instead of listing all values separately.
+
+
+extractor.facebook.loop
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Continue when detecting a jump to a set's beginning.
 
 
 extractor.facebook.videos
