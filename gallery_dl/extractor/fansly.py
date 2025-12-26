@@ -25,11 +25,12 @@ class FanslyExtractor(Extractor):
 
     def _init(self):
         self.api = FanslyAPI(self)
+        self.previews = self.config("previews", True)
 
         if fmts := self.config("formats"):
             self.formats = set(fmts)
         else:
-            self.formats = {1, 2, 3, 4, 302, 303}
+            self.formats = None
 
     def items(self):
         for post in self.posts():
@@ -88,23 +89,29 @@ class FanslyExtractor(Extractor):
                     exc.__class__.__name__, exc)
         return files
 
-    def _extract_attachment(self, files, post, attachment):
-        media = attachment["media"]
+    def _extract_attachment(self, files, post, attachment, preview=False):
+        media = attachment["preview" if preview else "media"]
 
         variants = media.pop("variants") or []
         if media.get("locations"):
             variants.append(media)
 
+        fmts = self.formats
         formats = [
             (variant["width"], (type-500 if type > 256 else type), variant)
             for variant in variants
             if variant.get("locations") and
-            (type := variant["type"]) in self.formats
+            (type := variant["type"]) and
+            (fmts is None or type in fmts)
         ]
 
         try:
             variant = max(formats)[-1]
         except Exception:
+            if self.previews and "preview" in attachment and not preview:
+                self.log.info("%s/%s: Downloading Preview",
+                              post["id"], attachment["id"])
+                return self._extract_attachment(files, post, attachment, True)
             return self.log.warning("%s/%s: No format available",
                                     post["id"], attachment["id"])
 
@@ -118,6 +125,7 @@ class FanslyExtractor(Extractor):
 
         file = {
             **variant,
+            "preview": preview,
             "format": variant["type"],
             "date": self.parse_timestamp(media["createdAt"]),
             "date_updated": self.parse_timestamp(media["updatedAt"]),
