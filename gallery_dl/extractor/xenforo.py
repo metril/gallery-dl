@@ -41,6 +41,7 @@ class XenforoExtractor(BaseExtractor):
             r')'
         ).findall
 
+        root_media = self.config_instance("root-media") or self.root
         for post in self.posts():
             urls = extract_urls(post["content"])
             if post["attachments"]:
@@ -74,6 +75,8 @@ class XenforoExtractor(BaseExtractor):
                     text.nameext_from_url(url, data)
                     data["id"] = text.parse_int(
                         data["filename"].partition("-")[0])
+                    if url[0] == "/":
+                        url = root_media + url
                     yield Message.Url, url, data
 
                 elif (inline := inl1 or inl2):
@@ -274,6 +277,7 @@ BASE_PATTERN = XenforoExtractor.update({
     },
     "atfforum": {
         "root": "https://allthefallen.moe/forum",
+        "root-media": "https://allthefallen.moe",
         "pattern": r"(?:www\.)?allthefallen\.moe/forum",
         "cookies": ("xf_user",),
     },
@@ -283,7 +287,7 @@ BASE_PATTERN = XenforoExtractor.update({
 class XenforoPostExtractor(XenforoExtractor):
     subcategory = "post"
     pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?threads"
-               r"/[^/?#]+/post-|/posts/)(\d+)")
+               r"/[^/?#]+/#?post-|/posts/)(\d+)")
     example = "https://simpcity.cr/threads/TITLE.12345/post-54321"
 
     def posts(self):
