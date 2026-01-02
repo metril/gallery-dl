@@ -4064,6 +4064,16 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
+extractor.koofr.zip
+-------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download shared `/links/` with multiple files as a single `.zip` file.
+
+
 extractor.lolisafe.domain
 -------------------------
 Type
@@ -4787,6 +4797,7 @@ Supported Values
     * ``favorite``
     * ``novel-user``
     * ``novel-bookmark``
+    * ``sketch``
 Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
