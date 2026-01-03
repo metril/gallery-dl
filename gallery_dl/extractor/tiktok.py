@@ -22,8 +22,8 @@ class TiktokExtractor(Extractor):
     category = "tiktok"
     directory_fmt = ("{category}", "{user}")
     filename_fmt = (
-        "{id}{num:?_//>02} {title[b:150]}{img_id|audio_id:? [/]/}.{extension}")
-    archive_fmt = "{id}_{num}_{img_id}"
+        "{id}{num:?_//>02} {title[b:150]}{file_id:? [/]/}.{extension}")
+    archive_fmt = "{id}_{num}_{file_id}"
     root = "https://www.tiktok.com"
     cookies_domain = ".tiktok.com"
     rehydration_data_cache = {}
@@ -74,7 +74,7 @@ class TiktokExtractor(Extractor):
                             "image" : img,
                             "title" : title,
                             "num"   : i,
-                            "img_id": post["filename"].partition("~")[0],
+                            "file_id": post["filename"].partition("~")[0],
                             "width" : img["imageWidth"],
                             "height": img["imageHeight"],
                         })
@@ -107,7 +107,7 @@ class TiktokExtractor(Extractor):
                     "extension" : "mp3" if ytdl_media == "audio" else "mp4",
                     "title"     : title,
                     "num"       : 0,
-                    "img_id"    : "",
+                    "file_id"   : "",
                     "width"     : 0,
                     "height"    : 0,
                 })
@@ -182,31 +182,32 @@ class TiktokExtractor(Extractor):
                     "https://www.tiktok.com/", ["webapp.app-context"])
 
     def _extract_sec_uid(self, profile_url, user_name):
-        SEC_UID_PATTERN = r"MS4wLjABAAAA[\w-]{64}"
-        sec_uid = self._extract_id(profile_url, user_name, SEC_UID_PATTERN,
-                                   "secUid")
-        if not text.re(SEC_UID_PATTERN).fullmatch(sec_uid):
-            raise exception.ExtractionError("%s: unable to extract secondary "
-                                            "user ID", user_name)
+        sec_uid = self._extract_id(
+            profile_url, user_name, r"MS4wLjABAAAA[\w-]{64}", "secUid")
+        if sec_uid is None:
+            raise exception.AbortExtraction(
+                f"{user_name}: unable to extract secondary user ID")
         return sec_uid
 
     def _extract_author_id(self, profile_url, user_name):
-        AUTHOR_ID_PATTERN = r"[0-9]+"
-        author_id = self._extract_id(profile_url, user_name, AUTHOR_ID_PATTERN,
-                                     "id")
-        if not text.re(AUTHOR_ID_PATTERN).fullmatch(author_id):
-            raise exception.ExtractionError("%s: unable to extract user ID",
-                                            user_name)
+        author_id = self._extract_id(
+            profile_url, user_name, r"[0-9]+", "id")
+        if author_id is None:
+            raise exception.AbortExtraction(
+                f"{user_name}: unable to extract user ID")
         return author_id
 
     def _extract_id(self, profile_url, user_name, regex, id_key):
-        if text.re(regex).fullmatch(user_name):
+        match = text.re(regex).fullmatch
+
+        if match(user_name) is not None:
             # If it was provided in the URL, then we can skip extracting it
             # from the rehydration data.
             return user_name
-        else:
-            return self._extract_rehydration_data_user(
-                profile_url, ["userInfo", "user", id_key])
+
+        id = self._extract_rehydration_data_user(
+            profile_url, ("userInfo", "user", id_key))
+        return None if match(id) is None else id
 
     def _extract_video(self, post):
         video = post["video"]
@@ -222,8 +223,7 @@ class TiktokExtractor(Extractor):
             "title"    : post["desc"] or f"TikTok video #{post['id']}",
             "duration" : video.get("duration"),
             "num"      : 0,
-            "img_id"   : "",
-            "audio_id" : "",
+            "file_id"  : video.get("id"),
             "width"    : video.get("width"),
             "height"   : video.get("height"),
         })
@@ -241,8 +241,7 @@ class TiktokExtractor(Extractor):
             "title"    : post["desc"] or f"TikTok audio #{post['id']}",
             "duration" : audio.get("duration"),
             "num"      : 0,
-            "img_id"   : "",
-            "audio_id" : audio.get("id"),
+            "file_id"  : audio.get("id"),
             "width"    : 0,
             "height"   : 0,
         })
@@ -267,8 +266,7 @@ class TiktokExtractor(Extractor):
             "title"    : post["desc"] or f"TikTok {type} cover #{post['id']}",
             "duration" : media.get("duration"),
             "num"      : 0,
-            "img_id"   : "",
-            "cover_id" : cover_id,
+            "file_id"  : cover_id,
             "width"    : 0,
             "height"   : 0,
         })
@@ -391,7 +389,7 @@ class TiktokAvatarExtractor(TiktokExtractor):
             "type"   : "avatar",
             "title"  : "@" + data["user"],
             "id"     : data["id"],
-            "img_id" : avatar["filename"].partition("~")[0],
+            "file_id": avatar["filename"].partition("~")[0],
             "num"    : 0,
         })
 
@@ -543,9 +541,8 @@ class TiktokRepostsExtractor(TiktokExtractor):
         user_name = self.groups[0]
         profile_url = f"{self.root}/@{user_name}"
 
-        sec_uid = self._extract_sec_uid(profile_url, user_name)
         query_parameters = {
-            "secUid": sec_uid,
+            "secUid": self._extract_sec_uid(profile_url, user_name),
             "post_item_list_request_type": "0",
             "needPinnedItemIds": "false",
             "count": "15",
@@ -565,9 +562,8 @@ class TiktokStoriesExtractor(TiktokExtractor):
         user_name = self.groups[0]
         profile_url = f"{self.root}/@{user_name}"
 
-        author_id = self._extract_author_id(profile_url, user_name)
         query_parameters = {
-            "authorId": author_id,
+            "authorId": self._extract_author_id(profile_url, user_name),
             "loadBackward": "false",
             "count": "5",
         }
@@ -586,9 +582,8 @@ class TiktokLikesExtractor(TiktokExtractor):
         user_name = self.groups[0]
         profile_url = f"{self.root}/@{user_name}"
 
-        sec_uid = self._extract_sec_uid(profile_url, user_name)
         query_parameters = {
-            "secUid": sec_uid,
+            "secUid": self._extract_sec_uid(profile_url, user_name),
             "post_item_list_request_type": "0",
             "needPinnedItemIds": "false",
             "count": "15",
@@ -608,9 +603,8 @@ class TiktokSavedExtractor(TiktokExtractor):
         user_name = self.groups[0]
         profile_url = f"{self.root}/@{user_name}"
 
-        sec_uid = self._extract_sec_uid(profile_url, user_name)
         query_parameters = {
-            "secUid": sec_uid,
+            "secUid": self._extract_sec_uid(profile_url, user_name),
             "post_item_list_request_type": "0",
             "needPinnedItemIds": "false",
             "count": "15",
