@@ -4073,14 +4073,18 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
-extractor.koofr.zip
--------------------
+extractor.koofr.recursive
+-------------------------
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
-    Download shared `/links/` with multiple files as a single `.zip` file.
+    ``true``
+        Recursively descent into subfolders
+        while downloading individual files.
+    ``false``
+        Download shared `/links/` with multiple files as a single `.zip` file.
 
 
 extractor.lolisafe.domain
@@ -6829,13 +6833,20 @@ Note
 extractor.webtoons.bgm
 ----------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
+Example
+    ``"aac"``
 Description
     Download an episode's `background music` if available.
+
+    If this is a ``string``, remux the downloaded `background music` file
+    into the given format.
 Note
-    Requires |ytdl|
+    Requires |ytdl| for downloads
+    and |ffmpeg| for remuxing
 
 
 extractor.webtoons.quality
@@ -6973,6 +6984,16 @@ Default
     ``true``
 Description
     Download video files.
+
+
+extractor.weibo.album.subalbums
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract subalbum media.
 
 
 extractor.wikimedia.format
