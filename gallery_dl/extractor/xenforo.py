@@ -32,8 +32,8 @@ class XenforoExtractor(BaseExtractor):
         extract_urls = text.re(
             r'(?s)(?:'
             r'<video (.*?\ssrc="[^"]+".*?)</video>'
-            r'|<a [^>]*?href="[^"]*?'
-            r'(/(?:index\.php\?)?attachments/[^"]+".*?)</a>'
+            r'|<a [^>]*?'
+            r'href="([^"]*?/(?:index\.php\?)?attachments/[^"]+".*?)</a>'
             r'|<div class="bb(?:Image|Media)Wrapper[^>]*?'
             r'data-src="([^"]+".*?) />'
             r'|(?:<a [^>]*?href="|<iframe [^>]*?src="|'
@@ -41,7 +41,8 @@ class XenforoExtractor(BaseExtractor):
             r')'
         ).findall
 
-        root_media = self.config_instance("root-media") or self.root
+        root = self.root
+        base = root if (pos := root.find("/", 8)) < 0 else root[:pos]
         for post in self.posts():
             urls = extract_urls(post["content"])
             if post["attachments"]:
@@ -76,12 +77,12 @@ class XenforoExtractor(BaseExtractor):
                     data["id"] = text.parse_int(
                         data["filename"].partition("-")[0])
                     if url[0] == "/":
-                        url = root_media + url
+                        url = base + url
                     yield Message.Url, url, data
 
                 elif (inline := bb or inl):
-                    path = inline[:inline.find('"')]
-                    name, _, id = path[path.rfind("/", 0, -1):].strip(
+                    url = inline[:inline.find('"')]
+                    name, _, id = url[url.rfind("/", 0, -1):].strip(
                         "/").rpartition(".")
                     data["id"] = id = text.parse_int(id)
                     if id:
@@ -100,13 +101,11 @@ class XenforoExtractor(BaseExtractor):
                     data["num"] += 1
                     data["num_internal"] += 1
                     data["type"] = "inline"
-
-                    url = self.root + path if path[0] == "/" else path
+                    if url[0] == "/":
+                        url = base + url
                     yield Message.Url, url, data
 
     def items_media(self, path, pnum):
-        self.root_media = self.config_instance("root-media") or self.root
-
         if (order := self.config("order-posts")) and \
                 order[0] in ("d", "r"):
             pages = self._pagination_reverse(path, pnum)
@@ -115,13 +114,15 @@ class XenforoExtractor(BaseExtractor):
             pages = self._pagination(path, pnum)
             reverse = False
 
-        if meta := self.config("metadata"):
+        if self.config("metadata"):
             extr_media = self._extract_media_ex
             meta = True
         else:
             extr_media = self._extract_media
             meta = False
 
+        root = self.root
+        base = root if (pos := root.find("/", 8)) < 0 else root[:pos]
         for page in pages:
             posts = page.split(
                 '<div class="itemList-item js-inlineModContainer')
@@ -134,8 +135,8 @@ class XenforoExtractor(BaseExtractor):
                 href, pos = text.extract(html, 'href="', '"')
                 name, pos = text.extract(html, "alt='", "'", pos)
 
-                href = href[:-1]
-                url, media = extr_media(href, href.rpartition("/")[2])
+                url, media = extr_media(
+                    base + href, href[href.rfind("/", 0, -1)+1:-1])
                 if not meta and name:
                     text.nameext_from_name(text.unescape(name), media)
 
@@ -244,7 +245,6 @@ class XenforoExtractor(BaseExtractor):
         author = schema["author"]
         stats = schema["interactionStatistic"]
         url_t = schema.get("url") or schema.get("@id") or ""
-        url_a = author.get("url") or ""
 
         thread = {
             "id"   : url_t[url_t.rfind(".")+1:-1],
@@ -253,12 +253,18 @@ class XenforoExtractor(BaseExtractor):
             "date" : self.parse_datetime_iso(schema["datePublished"]),
             "tags" : (schema["keywords"].split(", ")
                       if "keywords" in schema else ()),
-            "section"   : schema["articleSection"],
-            "author"    : author.get("name") or "",
-            "author_id" : (url_a[url_a.rfind(".")+1:-1] if url_a else
-                           (author.get("name") or "")[15:]),
-            "author_url": url_a,
+            "section": schema["articleSection"],
+            "author" : author.get("name") or "",
         }
+
+        if url_a := author.get("url"):
+            thread["author_url"] = url_a
+            thread["author_slug"], _, thread["author_id"] = \
+                url_a[url_a.rfind("/", 0, -1)+1:-1].rpartition(".")
+        else:
+            thread["author_url"] = ""
+            thread["author_slug"] = text.slugify(thread["author"][:15])
+            thread["author_id"] = thread["author"][15:]
 
         if isinstance(stats, list):
             thread["views"] = stats[0]["userInteractionCount"]
@@ -285,7 +291,8 @@ class XenforoExtractor(BaseExtractor):
         }
 
         url_a = post["author_url"]
-        post["author_id"] = url_a[url_a.rfind(".")+1:-1]
+        post["author_slug"], _, post["author_id"] = \
+            url_a[url_a.rfind("/", 0, -1)+1:-1].rpartition(".")
 
         con = post["content"]
         if (pos := con.find('<div class="bbWrapper')) >= 0:
@@ -294,19 +301,18 @@ class XenforoExtractor(BaseExtractor):
 
         return post
 
-    def _extract_media(self, path, file):
+    def _extract_media(self, url, file):
         media = {}
         name, _, media["id"] = file.rpartition(".")
         media["filename"], _, media["extension"] = name.rpartition("-")
-        return f"{self.root_media}{path}/full", media
+        return url + "full", media
 
-    def _extract_media_ex(self, path, file):
-        page = self.request(f"{self.root_media}{path}/").text
+    def _extract_media_ex(self, url, file):
+        page = self.request(url).text
 
         schema = self._extract_jsonld(page)
         main = schema["mainEntity"]
         author = main["author"]
-        url_a = author.get("url") or ""
         stats = main["interactionStatistic"]
 
         media = text.nameext_from_name(main["name"], {
@@ -319,19 +325,25 @@ class XenforoExtractor(BaseExtractor):
                 w["name"].partition(" ")[0]) or 0,
             "height": (h := main.get("height")) and text.parse_int(
                 h["name"].partition(" ")[0]) or 0,
-            "author"    : author.get("name") or "",
-            "author_id" : (url_a[url_a.rfind(".")+1:-1] if url_a else
-                           (author.get("name") or "")[15:]),
-            "author_url": url_a,
+            "author": author.get("name") or "",
         })
+
+        if url_a := author.get("url"):
+            media["author_url"] = url_a
+            media["author_slug"], _, media["author_id"] = \
+                url_a[url_a.rfind("/", 0, -1)+1:-1].rpartition(".")
+        else:
+            media["author_url"] = ""
+            media["author_slug"] = text.slugify(media["author"][15:])
+            media["author_id"] = media["author"][15:]
 
         if ext := main.get("encodingFormat"):
             media["extension"] = ext
 
         if isinstance(stats, list):
-            media["likes"] = stats[1]["userInteractionCount"]
             media["views"] = stats[0]["userInteractionCount"]
-            media["comments"] = stats[0]["userInteractionCount"]
+            media["likes"] = stats[1]["userInteractionCount"]
+            media["comments"] = stats[2]["userInteractionCount"]
 
         return main["contentUrl"], media
 
@@ -359,7 +371,6 @@ BASE_PATTERN = XenforoExtractor.update({
     },
     "atfforum": {
         "root": "https://allthefallen.moe/forum",
-        "root-media": "https://allthefallen.moe",
         "pattern": r"(?:www\.)?allthefallen\.moe/forum",
         "cookies": ("xf_user",),
     },
@@ -485,8 +496,8 @@ class XenforoMediaItemExtractor(XenforoExtractor):
     example = "https://simpcity.cr/media/NAME.123/"
 
     def items(self):
-        self.root_media = self.root
+        url = f"{self.root}{self.groups[-2]}/"
         url, media = (self._extract_media_ex if self.config("metadata") else
-                      self._extract_media)(self.groups[-2], self.groups[-1])
+                      self._extract_media)(url, self.groups[-1])
         yield Message.Directory, "", media
         yield Message.Url, url, media
