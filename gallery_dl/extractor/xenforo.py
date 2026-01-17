@@ -447,7 +447,7 @@ class XenforoForumExtractor(XenforoExtractor):
 
 class XenforoMediaUserExtractor(XenforoExtractor):
     subcategory = "media-user"
-    directory_fmt = ("{category}", "Media", "{author}")
+    directory_fmt = ("{category}", "Media", "{author_slug}")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{id}"
     pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?)me(?:"
@@ -466,7 +466,7 @@ class XenforoMediaUserExtractor(XenforoExtractor):
             pnum = groups[-2]
 
         if not self.config("metadata"):
-            self.kwdict["author"], _, self.kwdict["author_id"] = \
+            self.kwdict["author_slug"], _, self.kwdict["author_id"] = \
                 user.rpartition(".")
 
         return self.items_media(f"{groups[-4]}media/users/{user}", pnum)
@@ -489,7 +489,7 @@ class XenforoMediaCategoryExtractor(XenforoExtractor):
 
 class XenforoMediaItemExtractor(XenforoExtractor):
     subcategory = "media-item"
-    directory_fmt = ("{category}", "Media", "{author|''}")
+    directory_fmt = ("{category}", "Media", "{author_slug|''}")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"(/(?:index\.php\?)?media/((?:[^/?#]+\.)\d+))"
