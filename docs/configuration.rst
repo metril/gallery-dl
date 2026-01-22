@@ -251,6 +251,25 @@ Description
         }
 
 
+extractor.*.parent-session
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+        ``[chevereto]`` |
+        ``[imagehost]``
+    ``false``
+        otherwise
+Description
+    Share a parent's
+    `session <https://requests.readthedocs.io/en/latest/user/advanced/#session-objects>`__
+    with its child extractors, including
+    `cookies <extractor.*.cookies_>`__,
+    `headers <extractor.*.headers_>`__,
+    and other networking settings.
+
+
 extractor.*.parent-skip
 -----------------------
 Type
@@ -514,6 +533,7 @@ Default
         ``hdoujin``         |
         ``itaku``           |
         ``newgrounds``      |
+        ``[nitter]``        |
         ``[philomena]``     |
         ``pixiv-novel``     |
         ``plurk``           |
@@ -802,6 +822,7 @@ Default
     ``"gallery-dl/VERSION"``
         * ``[Danbooru]``
         * ``mangadex``
+        * ``[nitter]``
         * ``weasyl``
         * ``[wikimedia]``
         * ``zerochan``
@@ -830,7 +851,11 @@ Description
       will use the latest ``User-Agent`` header of this preset target,
       e.g. ``"+ff"``.
     | (Supported values:
-      ``firefox`` | ``ff`` | ``chrome`` | ``cr`` | ``gallery-dl`` | ``gdl``)
+      ``firefox`` | ``ff`` |
+      ``chrome`` | ``cr`` |
+      ``gallery-dl`` | ``gdl`` |
+      ``google-bot`` | ``bot``
+      )
 
     | Starting this value with an ``@``
      will try to automatically detect and use the ``User-Agent`` header
@@ -1734,28 +1759,6 @@ Description
     ``false``
         Get posts from "Latest Updates" pages
 
-
-extractor.batoto.domain
------------------------
-Type
-    ``string``
-Default
-    ``"auto"``
-Example
-    ``"mangatoto.org"``
-Description
-    Specifies the domain used by ``batoto`` extractors.
-
-    ``"auto"`` | ``"url"``
-        Use the input URL's domain
-    ``"nolegacy"``
-        Use the input URL's domain
-        - replace legacy domains with ``"xbato.org"``
-    ``"nowarn"``
-        Use the input URL's domain
-        - do not warn about legacy domains
-    any ``string``
-        Use this domain
 
 
 extractor.bbc.width
@@ -4483,8 +4486,8 @@ Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
-extractor.nitter.quoted
------------------------
+extractor.[nitter].quoted
+-------------------------
 Type
     ``bool``
 Default
@@ -4493,8 +4496,8 @@ Description
     Fetch media from quoted Tweets.
 
 
-extractor.nitter.retweets
--------------------------
+extractor.[nitter].retweets
+---------------------------
 Type
     ``bool``
 Default
@@ -4503,8 +4506,8 @@ Description
     Fetch media from Retweets.
 
 
-extractor.nitter.videos
------------------------
+extractor.[nitter].videos
+-------------------------
 Type
     * ``bool``
     * ``string``
