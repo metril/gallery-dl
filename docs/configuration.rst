@@ -6472,6 +6472,9 @@ Description
 
     ``"abort"``
         Raise an error and stop extraction
+    ``"abort:N"``
+        Raise an error and stop extraction
+        after waiting ``N`` times until rate limit reset
     ``"wait"``
         Wait until rate limit reset
     ``"wait:N"``
@@ -6934,6 +6937,16 @@ Description
     Download the active episode's ``thumbnail``.
 
     Useful for creating CBZ archives with actual source thumbnails.
+
+
+extractor.weebdex.data-saver
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Enable `Data Saver` mode and download lower quality versions of chapters.
 
 
 extractor.weibo.gifs

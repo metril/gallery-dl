@@ -113,6 +113,7 @@ CATEGORY_MAP = {
     "itchio"         : "itch.io",
     "jpgfish"        : "JPG Fish",
     "kabeuchi"       : "かべうち",
+    "kaliscan"       : "KaliScan",
     "mangafire"      : "MangaFire",
     "mangareader"    : "MangaReader",
     "mangataro"      : "MangaTaro",
@@ -475,6 +476,7 @@ SUBCATEGORY_MAP = {
         "media-user": "User Media",
         "media-item": "Media Files",
         "media-category": "Media Categories",
+        "media-album"   : "Albums",
     },
 }
 
