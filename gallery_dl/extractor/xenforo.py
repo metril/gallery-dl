@@ -23,7 +23,7 @@ class XenforoExtractor(BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.cookies_domain = "." + self.root.split("/")[2]
+        self.cookies_domain = self.root.split("/")[2]
         self.cookies_names = self.config_instance("cookies") or ("xf_user",)
 
     def items(self):
@@ -154,7 +154,8 @@ class XenforoExtractor(BaseExtractor):
             raise
 
     def login(self):
-        if self.cookies_names and self.cookies_check(self.cookies_names):
+        if self.cookies_names and self.cookies_check(
+                self.cookies_names, subdomains=True):
             return
 
         username, password = self._get_auth_info()
@@ -178,7 +179,8 @@ class XenforoExtractor(BaseExtractor):
 
         if not response.history:
             err = self._extract_error(response.text)
-            raise exception.AuthenticationError(f'"{err}"')
+            err = f'"{err}"' if err else None
+            raise exception.AuthenticationError(err)
 
         return {
             cookie.name: cookie.value
@@ -237,8 +239,9 @@ class XenforoExtractor(BaseExtractor):
             page = self.request_page(url).text
 
     def _extract_error(self, html):
-        return text.unescape(text.extr(
-            html, "blockMessage--error", "</").rpartition(">")[2].strip())
+        if msg := (text.extr(html, "blockMessage--error", "</") or
+                   text.extr(html, '"blockMessage"', "</div>")):
+            return text.unescape(msg[msg.find(">")+1:].strip())
 
     def _parse_post(self, html):
         extr = text.extract_from(html)
