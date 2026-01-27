@@ -10,6 +10,8 @@ from .common import Extractor, Message, Dispatch
 from .. import text, util, ytdl, exception
 import functools
 import itertools
+import binascii
+import hashlib
 import random
 import time
 
@@ -36,7 +38,7 @@ class TiktokExtractor(Extractor):
         self.cover = self.config("covers", False)
 
         self.range = self.config("tiktok-range") or ""
-        self.range_predicate = util.predicate_range(self.range)
+        self.range_predicate = util.predicate_range_parse(self.range)
 
     def items(self):
         for tiktok_url in self.posts():
@@ -121,6 +123,8 @@ class TiktokExtractor(Extractor):
     def _extract_rehydration_data(self, url, additional_keys=[], *,
                                   has_keys=[]):
         tries = 0
+        html = None
+        challenge_attempt = False
         while True:
             try:
                 response = self.request(url)
@@ -141,15 +145,31 @@ class TiktokExtractor(Extractor):
                 return data
             except (ValueError, KeyError):
                 # We failed to retrieve rehydration data. This happens
-                # relatively frequently when making many requests, so
-                # retry.
+                # relatively frequently when making many requests, so retry.
                 if tries >= self._retries:
                     raise
                 tries += 1
                 self.log.warning("%s: Failed to retrieve rehydration data "
                                  "(%s/%s)", url.rpartition("/")[2], tries,
                                  self._retries)
-                self.sleep(self._timeout, "retry")
+                if challenge_attempt:
+                    self.sleep(self._timeout, "retry")
+                    challenge_attempt = False
+                else:
+                    self.log.info("Solving JavaScript challenge")
+                    try:
+                        self._solve_challenge(html)
+                    except Exception as exc:
+                        self.log.traceback(exc)
+                        self.log.warning(
+                            "%s: Failed to solve JavaScript challenge. If you "
+                            "keep encountering this issue, please try again "
+                            "with the --write-pages option and include the "
+                            "resulting page in your bug report",
+                            url.rpartition("/")[2])
+                        self.sleep(self._timeout, "retry")
+                    html = None
+                    challenge_attempt = True
 
     def _extract_rehydration_data_user(self, profile_url, additional_keys=()):
         if profile_url in self.rehydration_data_cache:
@@ -182,6 +202,35 @@ class TiktokExtractor(Extractor):
             self.rehydration_data_app_context_cache = \
                 self._extract_rehydration_data(
                     "https://www.tiktok.com/", ["webapp.app-context"])
+
+    def _solve_challenge(self, html):
+        cs = text.extr(text.extr(html, 'id="cs"', '>'), 'class="', '"')
+        c = util.json_loads(binascii.a2b_base64(cs + "==").decode())
+
+        # find index of expected digest
+        expected = binascii.a2b_base64(c["v"]["c"] + "==")
+        base = hashlib.sha256(binascii.a2b_base64(c["v"]["a"] + "=="))
+        for idx in range(1_000_000):
+            test = base.copy()
+            test.update(str(idx).encode())
+            if test.digest() == expected:
+                break
+        else:
+            raise exception.ExtractionError("failed to find matching digest")
+
+        # extract cookie names
+        wci = text.extr(text.extr(html, 'id="wci"', '>'), 'class="', '"')
+        rci = text.extr(text.extr(html, 'id="rci"', '>'), 'class="', '"')
+        rs = text.extr(text.extr(html, 'id="rs"', '>'), 'class="', '"')
+
+        # set cookie values
+        domain = self.cookies_domain
+        expires = int(time.time()) + 5
+        c["d"] = binascii.b2a_base64(str(idx).encode(), newline=False).decode()
+        v = binascii.b2a_base64(util.json_dumps(c).encode(), newline=False)
+        self.cookies.set(wci, v.decode(), domain=domain, expires=expires)
+        if rs:
+            self.cookies.set(rci, rs, domain=domain, expires=expires)
 
     def _extract_sec_uid(self, profile_url, user_name):
         sec_uid = self._extract_id(
@@ -863,11 +912,11 @@ class TiktokItemCursor(TiktokPaginationCursor):
         # We should offset the cursor by the number of items in the response.
         # Sometimes less items are returned than what was requested in the
         # count parameter! We could fall back onto the count query parameter
-        # but we could miss out on some posts, and truth is if the expected
-        # item list isn't in the response, the extraction was going to fail
-        # anyway.
-        self.cursor += len(data[self.list_key])
-        return not data.get("hasMore", False)
+        # but we could miss out on some posts.
+        self.cursor += len(data.get(self.list_key, ()))
+        if "hasMore" in data:
+            return not data["hasMore"]
+        return not data.get("HasMoreAfter", False)
 
 
 class TiktokPaginationRequest:
@@ -1137,14 +1186,11 @@ class TiktokItemListRequest(TiktokPaginationRequest):
                                   url, self.type_of_items)
             return True
         if not self.range_predicate:
-            # No range predicate given.
-            return False
-        if len(self.range_predicate.ranges) == 0:
-            # No range predicates given in the predicate object.
+            # No range predicates given.
             return False
         # If our current selection of items can't satisfy the upper bound of
         # the predicate, we must continue extracting them until we can.
-        return len(self.items) > self.range_predicate.upper
+        return len(self.items) > max(r.stop for r in self.range_predicate) - 1
 
     def generate_urls(self, profile_url, video, photo, audio):
         urls = []
@@ -1168,8 +1214,8 @@ class TiktokItemListRequest(TiktokPaginationRequest):
         # First, check if this index falls within any of our configured ranges.
         # If it doesn't, we filter it out.
         if self.range_predicate:
-            range_match = len(self.range_predicate.ranges) == 0
-            for range in self.range_predicate.ranges:
+            range_match = False
+            for range in self.range_predicate:
                 if index in range:
                     range_match = True
                     break
