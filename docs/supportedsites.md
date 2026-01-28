@@ -619,6 +619,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries</td>
     <td></td>
 </tr>
+<tr id="listal" title="listal">
+    <td>Listal</td>
+    <td>https://listal.com</td>
+    <td>individual Images, People</td>
+    <td></td>
+</tr>
 <tr id="livedoor" title="livedoor">
     <td>livedoor Blog</td>
     <td>http://blog.livedoor.jp/</td>
@@ -1948,6 +1954,12 @@ Consider all listed sites to potentially be NSFW.
 <tr id="celebforum" title="celebforum">
     <td>celebforum</td>
     <td>https://celebforum.to/</td>
+    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
+    <td></td>
+</tr>
+<tr id="titsintops" title="titsintops">
+    <td>Tits In Tops Forum</td>
+    <td>https://titsintops.com/phpBB2/</td>
     <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
     <td></td>
 </tr>
