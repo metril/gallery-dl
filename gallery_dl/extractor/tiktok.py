@@ -36,86 +36,123 @@ class TiktokExtractor(Extractor):
         self.audio = self.config("audio", True)
         self.video = self.config("videos", True)
         self.cover = self.config("covers", False)
+        self.subtitles = self.config("subtitles", False)
 
         self.range = self.config("tiktok-range") or ""
         self.range_predicate = util.predicate_range_parse(self.range)
 
+        # If one of these fields is None, the filter for it is disabled.
+        # Therefore, if both fields are none, all subtitles are extracted.
+        self.subtitle_sources = None
+        self.subtitle_langs = None
+
+        if self.subtitles and self.subtitles != "all":
+            if self.subtitles is True or not isinstance(self.subtitles, str):
+                self.subtitles = "ASR"
+
+            known_sources = {"ASR", "MT", "LC"}
+            filters = set(self.subtitles.split(","))
+            self.subtitle_sources = known_sources.intersection(filters) or None
+            self.subtitle_langs = filters.difference(known_sources) or None
+
     def items(self):
         for tiktok_url in self.posts():
-            tiktok_url = self._sanitize_url(tiktok_url)
-            data = self._extract_rehydration_data(tiktok_url)
-            if "webapp.video-detail" not in data:
-                # Only /video/ links result in the video-detail dict we need.
-                # Try again using that form of link.
-                tiktok_url = self._sanitize_url(
-                    data["seo.abtest"]["canonical"])
+            try:
+                tiktok_url = self._sanitize_url(tiktok_url)
+
                 data = self._extract_rehydration_data(tiktok_url)
-            video_detail = data["webapp.video-detail"]
+                if "webapp.video-detail" not in data:
+                    # Only /video/ links result in the video-detail dict we
+                    # need. Try again using that form of link.
+                    tiktok_url = self._sanitize_url(
+                        data["seo.abtest"]["canonical"])
+                    data = self._extract_rehydration_data(tiktok_url)
+                video_detail = data["webapp.video-detail"]
+                if not self._check_status_code(
+                        video_detail, tiktok_url, "post"):
+                    continue
+                post = video_detail["itemInfo"]["itemStruct"]
 
-            if not self._check_status_code(video_detail, tiktok_url, "post"):
-                continue
+                post["user"] = \
+                    (a := post.get("author")) and a["uniqueId"] or ""
+                post["date"] = self.parse_timestamp(post["createTime"])
+                post["post_type"] = "image" if "imagePost" in post else "video"
+                original_title = title = post["desc"]
 
-            post = video_detail["itemInfo"]["itemStruct"]
-            post["user"] = (a := post.get("author")) and a["uniqueId"] or ""
-            post["date"] = self.parse_timestamp(post["createTime"])
-            post["post_type"] = "image" if "imagePost" in post else "video"
-            original_title = title = post["desc"]
+                yield Message.Directory, "", post
+                ytdl_media = False
 
-            yield Message.Directory, "", post
-            ytdl_media = False
+                if "imagePost" in post:
+                    if self.photo:
+                        if not original_title:
+                            title = f"TikTok photo #{post['id']}"
+                        img_list = post["imagePost"]["images"]
+                        for i, img in enumerate(img_list, 1):
+                            url = img["imageURL"]["urlList"][0]
+                            text.nameext_from_url(url, post)
+                            post.update({
+                                "type"   : "image",
+                                "image"  : img,
+                                "title"  : title,
+                                "num"    : i,
+                                "file_id": post["filename"].partition("~")[0],
+                                "width"  : img["imageWidth"],
+                                "height" : img["imageHeight"],
+                            })
+                            yield Message.Url, url, post
 
-            if "imagePost" in post:
-                if self.photo:
+                    if self.audio and "music" in post:
+                        if self.audio == "ytdl":
+                            ytdl_media = "audio"
+                        elif url := self._extract_audio(post):
+                            yield Message.Url, url, post
+
+                elif "video" in post:
+                    if self.video == "ytdl":
+                        ytdl_media = "video"
+                    elif self.video and (url := self._extract_video(post)):
+                        yield Message.Url, url, post
+                        del post["_fallback"]
+
+                    if self.cover:
+                        for url in self._extract_covers(post, "video"):
+                            yield Message.Url, url, post
+                            if self.cover != "all":
+                                break
+
+                    if self.subtitles:
+                        for url in self._extract_subtitles(post, "video"):
+                            yield Message.Url, url, post
+
+                        # remove the subtitle related fields for the next item
+                        post.pop("subtitle_lang_id", None)
+                        post.pop("subtitle_lang_codename", None)
+                        post.pop("subtitle_format", None)
+                        post.pop("subtitle_version", None)
+                        post.pop("subtitle_source", None)
+                else:
+                    self.log.info("%s: Skipping post", tiktok_url)
+
+                if ytdl_media:
                     if not original_title:
-                        title = f"TikTok photo #{post['id']}"
-                    img_list = post["imagePost"]["images"]
-                    for i, img in enumerate(img_list, 1):
-                        url = img["imageURL"]["urlList"][0]
-                        text.nameext_from_url(url, post)
-                        post.update({
-                            "type"  : "image",
-                            "image" : img,
-                            "title" : title,
-                            "num"   : i,
-                            "file_id": post["filename"].partition("~")[0],
-                            "width" : img["imageWidth"],
-                            "height": img["imageHeight"],
-                        })
-                        yield Message.Url, url, post
-
-                if self.audio and "music" in post:
-                    if self.audio == "ytdl":
-                        ytdl_media = "audio"
-                    elif url := self._extract_audio(post):
-                        yield Message.Url, url, post
-
-            elif "video" in post:
-                if self.video == "ytdl":
-                    ytdl_media = "video"
-                elif self.video and (url := self._extract_video(post)):
-                    yield Message.Url, url, post
-                    del post["_fallback"]
-                if self.cover and (url := self._extract_cover(post, "video")):
-                    yield Message.Url, url, post
-
-            else:
-                self.log.info("%s: Skipping post", tiktok_url)
-
-            if ytdl_media:
-                if not original_title:
-                    title = f"TikTok {ytdl_media} #{post['id']}"
-                post.update({
-                    "type"      : ytdl_media,
-                    "image"     : None,
-                    "filename"  : "",
-                    "extension" : "mp3" if ytdl_media == "audio" else "mp4",
-                    "title"     : title,
-                    "num"       : 0,
-                    "file_id"   : "",
-                    "width"     : 0,
-                    "height"    : 0,
-                })
-                yield Message.Url, "ytdl:" + tiktok_url, post
+                        title = f"TikTok {ytdl_media} #{post['id']}"
+                    post.update({
+                        "type"      : ytdl_media,
+                        "image"     : None,
+                        "filename"  : "",
+                        "extension" :
+                        "mp3" if ytdl_media == "audio" else "mp4",
+                        "title"     : title,
+                        "num"       : 0,
+                        "file_id"   : "",
+                        "width"     : 0,
+                        "height"    : 0,
+                    })
+                    yield Message.Url, "ytdl:" + tiktok_url, post
+            except Exception as exc:
+                self.log.traceback(exc)
+                self.log.error("%s: Failed to extract post (%s: %s)",
+                               tiktok_url, exc.__class__.__name__, exc)
 
     def _sanitize_url(self, url):
         return text.ensure_http_scheme(url.replace("/photo/", "/video/", 1))
@@ -277,7 +314,7 @@ class TiktokExtractor(Extractor):
             "title"    : post["desc"] or f"TikTok video #{post['id']}",
             "duration" : video.get("duration"),
             "num"      : 0,
-            "file_id"  : video.get("id"),
+            "file_id"  : "",
             "width"    : video.get("width"),
             "height"   : video.get("height"),
         })
@@ -334,28 +371,85 @@ class TiktokExtractor(Extractor):
             post["extension"] = "mp3"
         return url
 
-    def _extract_cover(self, post, type):
+    def _extract_covers(self, post, type):
         media = post[type]
 
         for cover_id in ("thumbnail", "cover", "originCover", "dynamicCover"):
             if url := media.get(cover_id):
-                break
-        else:
-            return
+                text.nameext_from_url(url, post)
+                post.update({
+                    "type"     : "cover",
+                    "extension": "jpg",
+                    "image"    : url,
+                    "title"    : post["desc"] or
+                                 f"TikTok {type} cover #{post['id']}",
+                    "duration" : media.get("duration"),
+                    "num"      : 0,
+                    "file_id"  : cover_id,
+                    "width"    : 0,
+                    "height"   : 0,
+                })
+                yield url
 
-        text.nameext_from_url(url, post)
-        post.update({
-            "type"     : "cover",
-            "extension": "jpg",
-            "image"    : url,
-            "title"    : post["desc"] or f"TikTok {type} cover #{post['id']}",
-            "duration" : media.get("duration"),
-            "num"      : 0,
-            "file_id"  : cover_id,
-            "width"    : 0,
-            "height"   : 0,
-        })
-        return url
+    def _extract_subtitles(self, post, type):
+        media = post[type]
+        sources_filtered = self.subtitle_sources is not None
+        langs_filtered = self.subtitle_langs is not None
+
+        for subtitle in media.get("subtitleInfos", ()):
+            sub_lang_id = subtitle.get("LanguageID")
+            sub_lang_codename = subtitle.get("LanguageCodeName")
+            sub_format = subtitle.get("Format")
+            sub_version = subtitle.get("Version")
+            sub_source = subtitle.get("Source")
+
+            # guard the iterable access
+            sources_match = sources_filtered and \
+                sub_source in self.subtitle_sources
+            langs_match = langs_filtered and \
+                sub_lang_codename in self.subtitle_langs
+
+            # Subtitles will be extracted when either filter matches.
+            if not sources_match and not langs_match and \
+                    (sources_filtered or langs_filtered):
+                continue
+
+            if url := subtitle.get("Url"):
+                text.nameext_from_url(url, post)
+
+                # subtitle urls may not specify a filename,
+                # so the metadata can be used to build one.
+                if not post["filename"]:
+                    post["filename"] = (f"{post['id']}_{sub_lang_codename}_"
+                                        f"{sub_version}_{sub_source}")
+                    post["extension"] = sub_format.lower()
+
+                    # replace extensions for known formats
+                    if post["extension"] == "webvtt":
+                        post["extension"] = "vtt"
+                    elif post["extension"] == "creator_caption":
+                        post["extension"] = "json"
+
+                post.update({
+                    "type"                  : "subtitle",
+                    "image"                 : None,
+                    "title"                 :
+                        post["desc"] or
+                        f"TikTok {type} subtitle #{post['id']}",
+                    "duration"              : media.get("duration"),
+                    "num"                   : 0,
+                    "file_id"               :
+                        f"{sub_lang_id}_{sub_lang_codename}_{sub_source}_"
+                        f"{sub_version}_{sub_format}",
+                    "subtitle_lang_id"      : sub_lang_id,
+                    "subtitle_lang_codename": sub_lang_codename,
+                    "subtitle_format"       : sub_format,
+                    "subtitle_version"      : sub_version,
+                    "subtitle_source"       : sub_source,
+                    "width"                 : 0,
+                    "height"                : 0,
+                })
+                yield url
 
     def _check_status_code(self, detail, url, type_of_url):
         status = detail.get("statusCode")
@@ -414,7 +508,7 @@ class TiktokPostExtractor(TiktokExtractor):
     def posts(self):
         user, post_id = self.groups
         url = f"{self.root}/@{user or ''}/video/{post_id}"
-        return (url,)
+        return {url: None}
 
 
 class TiktokVmpostExtractor(TiktokExtractor):
@@ -709,13 +803,13 @@ class TiktokSavedExtractor(TiktokExtractor):
                                      self.audio)
 
 
-class TiktokFollowingExtractor(TiktokUserExtractor):
+class TiktokFollowingExtractor(TiktokExtractor):
     """Extract all of the stories of all of the users you follow"""
     subcategory = "following"
     pattern = rf"{BASE_PATTERN}/following"
     example = "https://www.tiktok.com/following"
 
-    def items(self):
+    def posts(self):
         """Attempt to extract all of the stories of all of the accounts
         the user follows"""
 
@@ -732,7 +826,7 @@ class TiktokFollowingExtractor(TiktokUserExtractor):
             self.log.warning("%s: No followers with stories could be "
                              "extracted", self.url)
 
-        entries = []
+        entries = {}
         # Batch all of the users up into groups of at most ten and use the
         # batch endpoint to improve performance. The response to the story user
         # list request may also include the user themselves, so skip them if
@@ -769,13 +863,11 @@ class TiktokFollowingExtractor(TiktokUserExtractor):
             request.execute(self, f"Batch {batch_number}", query_parameters)
             # We technically don't need to have the correct user name in the
             # URL and it's easier to just ignore it here.
-            entries += request.generate_urls("https://www.tiktok.com/@_",
-                                             self.video, self.photo,
-                                             self.audio)
+            entries.update(request.generate_urls("https://www.tiktok.com/@_",
+                                                 self.video, self.photo,
+                                                 self.audio))
 
-        for video in entries:
-            data = {"_extractor": TiktokPostExtractor}
-            yield Message.Queue, video, data
+        return entries
 
     def _is_current_user(self, user_id):
         self._ensure_rehydration_data_app_context_cache_is_populated()
@@ -1084,9 +1176,10 @@ class TiktokPaginationRequest:
 
         Returns
         -------
-        list
-            Ideally one URL for each item, although subclasses are
-            permitted to return a list of any format they wish.
+        dict
+            Ideally one URL for each item, that points to a video detail
+            object, although subclasses are permitted to return a list
+            or dict of any format they wish.
         """
 
         return []
@@ -1193,7 +1286,7 @@ class TiktokItemListRequest(TiktokPaginationRequest):
         return len(self.items) > max(r.stop for r in self.range_predicate) - 1
 
     def generate_urls(self, profile_url, video, photo, audio):
-        urls = []
+        urls = {}
         for index, id in enumerate(self.items.keys()):
             if not self._matches_filters(self.items.get(id), index + 1, video,
                                          photo, audio):
@@ -1207,7 +1300,7 @@ class TiktokItemListRequest(TiktokPaginationRequest):
             except KeyError:
                 # Use the given profile URL as a back up.
                 url = f"{profile_url}/video/{id}"
-            urls.append(url)
+            urls[url] = self.items.get(id)
         return urls
 
     def _matches_filters(self, item, index, video, photo, audio):
