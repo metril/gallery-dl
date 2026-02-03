@@ -270,30 +270,39 @@ class Job():
 
     def _init(self):
         self.extractor.initialize()
-        self.pred_url = self._prepare_predicates("image", True)
-        self.pred_post = self._prepare_predicates("post", False)
-        self.pred_queue = self._prepare_predicates("chapter", False)
+        self.pred_url = self._prepare_predicates(
+            "file", "image", True)
+        self.pred_post = self._prepare_predicates(
+            "post", None, False)
+        self.pred_queue = self._prepare_predicates(
+            "child", "chapter", False)
 
-    def _prepare_predicates(self, target, skip):
+        init = self.extractor.config("init", False)
+        if init and init != "lazy":
+            self.initialize()
+
+    def _prepare_predicates(self, target, alt=None, skip=None):
         predicates = []
         extr = self.extractor
 
-        if extr.config(target + "-unique"):
+        if extr.config(target + "-unique") or \
+                alt is not None and extr.config(alt + "-unique"):
             predicates.append(util.predicate_unique())
 
-        if pfilter := extr.config(target + "-filter"):
+        if (pfilter := extr.config(target + "-filter")) or \
+                alt is not None and (pfilter := extr.config(alt + "-filter")):
             try:
                 predicates.append(util.predicate_filter(pfilter, target))
             except (SyntaxError, ValueError, TypeError) as exc:
                 extr.log.warning(exc)
 
-        if prange := extr.config(target + "-range"):
+        if (prange := extr.config(target + "-range")) or \
+                alt is not None and (prange := extr.config(alt + "-range")):
             try:
                 skip = extr.skip if skip and not pfilter else None
                 predicates.append(util.predicate_range(prange, skip))
             except ValueError as exc:
-                extr.log.warning(
-                    "invalid %s range: %s", target, exc)
+                extr.log.warning("invalid %s range: %s", target, exc)
 
         return util.predicate_build(predicates)
 
@@ -427,6 +436,12 @@ class DownloadJob(Job):
             return
         self.visited.add(url)
 
+        if "child" in self.hooks:
+            pathfmt = self.pathfmt
+            pathfmt.kwdict = kwdict
+            for callback in self.hooks["child"]:
+                callback(pathfmt)
+
         if cls := kwdict.get("_extractor"):
             extr = cls.from_url(url)
         else:
@@ -497,6 +512,12 @@ class DownloadJob(Job):
 
         else:
             self._write_unsupported(url)
+
+        if "child-after" in self.hooks:
+            pathfmt = self.pathfmt
+            pathfmt.kwdict = kwdict
+            for callback in self.hooks["child-after"]:
+                callback(pathfmt)
 
     def handle_finalize(self):
         if self.archive:

@@ -98,7 +98,7 @@ class ScrolllerExtractor(Extractor):
             "Sec-Fetch-Site": "same-site",
         }
         data = {
-            "query"        : QUERIES[opname],
+            "query"        : self.utils("graphql", opname),
             "variables"    : variables,
             "authorization": self.auth_token,
         }
@@ -170,6 +170,32 @@ class ScrolllerSubredditExtractor(ScrolllerExtractor):
             "SubredditChildrenQuery", variables, subreddit["children"])
 
 
+class ScrolllerUserExtractor(ScrolllerExtractor):
+    """Extractor for media from a scrolller Reddit user"""
+    subcategory = "user"
+    directory_fmt = ("{category}", "User", "{posted_by}")
+    pattern = BASE_PATTERN + r"/reddit-user/([^/?#]+)(?:/?\?([^#]+))?"
+    example = "https://scrolller.com/reddit-user/USER"
+
+    def posts(self):
+        query = "UserPostsQuery"
+        variables = {
+            "username": text.unquote(self.groups[0]),
+            "iterator": None,
+            "limit"   : 40,
+            "filter"  : None,
+            "sortBy"  : "RANDOM",
+            "isNsfw"  : True,
+        }
+
+        posts = self._request_graphql(query, variables)["getUserPosts"]
+        if not posts.get("items"):
+            posts = None
+            variables["isNsfw"] = False
+
+        return self._pagination(query, variables, posts)
+
+
 class ScrolllerFollowingExtractor(ScrolllerExtractor):
     """Extractor for followed scrolller subreddits"""
     subcategory = "following"
@@ -206,144 +232,3 @@ class ScrolllerPostExtractor(ScrolllerExtractor):
         variables = {"url": "/" + self.groups[0]}
         data = self._request_graphql("SubredditPostQuery", variables)
         return (data["getPost"],)
-
-
-QUERIES = {
-
-    "SubredditPostQuery": """\
-query SubredditPostQuery(
-    $url: String!
-) {
-    getPost(
-        data: { url: $url }
-    ) {
-        __typename id url title subredditId subredditTitle subredditUrl
-        redditPath isNsfw hasAudio fullLengthSource gfycatSource redgifsSource
-        ownerAvatar username displayName favoriteCount isPaid tags
-        commentsCount commentsRepliesCount isFavorite
-        albumContent { mediaSources { url width height isOptimized } }
-        mediaSources { url width height isOptimized }
-        blurredMediaSources { url width height isOptimized }
-    }
-}
-""",
-
-    "SubredditQuery": """\
-query SubredditQuery(
-    $url: String!
-    $iterator: String
-    $sortBy: GallerySortBy
-    $filter: GalleryFilter
-    $limit: Int!
-) {
-    getSubreddit(
-        data: {
-            url: $url,
-            iterator: $iterator,
-            filter: $filter,
-            limit: $limit,
-            sortBy: $sortBy
-        }
-    ) {
-        __typename id url title secondaryTitle description createdAt isNsfw
-        subscribers isComplete itemCount videoCount pictureCount albumCount
-        isPaid username tags isFollowing
-        banner { url width height isOptimized }
-        children {
-            iterator items {
-                __typename id url title subredditId subredditTitle subredditUrl
-                redditPath isNsfw hasAudio fullLengthSource gfycatSource
-                redgifsSource ownerAvatar username displayName favoriteCount
-                isPaid tags commentsCount commentsRepliesCount isFavorite
-                albumContent { mediaSources { url width height isOptimized } }
-                mediaSources { url width height isOptimized }
-                blurredMediaSources { url width height isOptimized }
-            }
-        }
-    }
-}
-""",
-
-    "SubredditChildrenQuery": """\
-query SubredditChildrenQuery(
-    $subredditId: Int!
-    $iterator: String
-    $filter: GalleryFilter
-    $sortBy: GallerySortBy
-    $limit: Int!
-    $isNsfw: Boolean
-) {
-    getSubredditChildren(
-        data: {
-            subredditId: $subredditId,
-            iterator: $iterator,
-            filter: $filter,
-            sortBy: $sortBy,
-            limit: $limit,
-            isNsfw: $isNsfw
-        },
-    ) {
-        iterator items {
-            __typename id url title subredditId subredditTitle subredditUrl
-            redditPath isNsfw hasAudio fullLengthSource gfycatSource
-            redgifsSource ownerAvatar username displayName favoriteCount isPaid
-            tags commentsCount commentsRepliesCount isFavorite
-            albumContent { mediaSources { url width height isOptimized } }
-            mediaSources { url width height isOptimized }
-            blurredMediaSources { url width height isOptimized }
-        }
-    }
-}
-""",
-
-    "GetFollowingSubreddits": """\
-query GetFollowingSubreddits(
-    $iterator: String,
-    $limit: Int!,
-    $filter: GalleryFilter,
-    $isNsfw: Boolean,
-    $sortBy: GallerySortBy
-) {
-    getFollowingSubreddits(
-        data: {
-            isNsfw: $isNsfw
-            limit: $limit
-            filter: $filter
-            iterator: $iterator
-            sortBy: $sortBy
-        }
-    ) {
-        iterator items {
-            __typename id url title secondaryTitle description createdAt isNsfw
-            subscribers isComplete itemCount videoCount pictureCount albumCount
-            isFollowing
-        }
-    }
-}
-""",
-
-    "LoginQuery": """\
-query LoginQuery(
-    $username: String!,
-    $password: String!
-) {
-    login(
-        username: $username,
-        password: $password
-    ) {
-        username token expiresAt isAdmin status isPremium
-    }
-}
-""",
-
-    "ItemTypeQuery": """\
-query ItemTypeQuery(
-    $url: String!
-) {
-    getItemType(
-        url: $url
-    )
-}
-""",
-
-}

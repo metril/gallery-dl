@@ -988,7 +988,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="scrolller" title="scrolller">
     <td>Scrolller</td>
     <td>https://scrolller.com/</td>
-    <td>Followed Subreddits, Posts, Subreddits</td>
+    <td>Followed Subreddits, Posts, Subreddits, Reddit Users</td>
     <td>Supported</td>
 </tr>
 <tr id="senmanga" title="senmanga">
@@ -1122,12 +1122,6 @@ Consider all listed sites to potentially be NSFW.
     <td>https://toyhou.se/</td>
     <td>Art, individual Images</td>
     <td></td>
-</tr>
-<tr id="tsumino" title="tsumino">
-    <td>Tsumino</td>
-    <td>https://www.tsumino.com/</td>
-    <td>Galleries, Search Results</td>
-    <td>Supported</td>
 </tr>
 <tr id="tumblr" title="tumblr">
     <td>Tumblr</td>

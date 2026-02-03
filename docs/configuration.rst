@@ -245,9 +245,9 @@ Description
     base-directory_ for any spawned child extractors.
 
 
+.. _extractor.*.metadata-parent:
+
 extractor.*.parent-metadata
----------------------------
-extractor.*.metadata-parent
 ---------------------------
 Type
     * ``bool``
@@ -640,7 +640,6 @@ Description
     * ``simpcity``
     * ``subscribestar``
     * ``tapas``
-    * ``tsumino``
     * ``vipergirls``
     * ``zerochan``
 
@@ -664,6 +663,28 @@ Note
     supplying authenticated
     `cookies <extractor.*.cookies_>`__
     is *required*
+
+
+extractor.*.init
+----------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``false``
+Description
+    | Controls when to initialize extractor internals.
+    | (
+      `postprocessors <extractor.*.postprocessors_>`_,
+      `archives <extractor.*.archive_>`_,
+      `path-*` options, etc
+      )
+
+    ``true``
+        Initialize everything immediately upon extractor start
+    ``false`` | ``"lazy"``
+        Initialize data structures when processing the first ``post``
+        or not at all when an extractor never yields a ``post``.
 
 
 extractor.*.input
@@ -1062,9 +1083,9 @@ Note
     with the same name.
 
 
+.. _extractor.*.url-metadata:
+
 extractor.*.metadata-url
-------------------------
-extractor.*.url-metadata
 ------------------------
 Type
     ``string``
@@ -1078,9 +1099,9 @@ Description
     with a ``metadata`` post processor, etc.
 
 
+.. _extractor.*.path-metadata:
+
 extractor.*.metadata-path
--------------------------
-extractor.*.path-metadata
 -------------------------
 Type
     ``string``
@@ -1093,9 +1114,9 @@ Description
     to access the current file's filename as ``"{gdl_path.filename}"``.
 
 
+.. _extractor.*.extractor-metadata:
+
 extractor.*.metadata-extractor
-------------------------------
-extractor.*.extractor-metadata
 ------------------------------
 Type
     ``string``
@@ -1105,9 +1126,9 @@ Description
     object into metadata dictionaries as the given name.
 
 
+.. _extractor.*.http-metadata:
+
 extractor.*.metadata-http
--------------------------
-extractor.*.http-metadata
 -------------------------
 Type
     ``string``
@@ -1121,9 +1142,9 @@ Description
     and its parsed form as ``"{gdl_http[date]}"``.
 
 
+.. _extractor.*.version-metadata:
+
 extractor.*.metadata-version
-----------------------------
-extractor.*.version-metadata
 ----------------------------
 Type
     ``string``
@@ -1494,8 +1515,10 @@ Description
     Use fallback download URLs when a download fails.
 
 
-extractor.*.image-range
------------------------
+.. _extractor.*.image-range:
+
+extractor.*.file-range
+----------------------
 Type
     * ``string``
     * ``list`` of ``strings``
@@ -1525,21 +1548,25 @@ extractor.*.post-range
 Type
     ``string``
 Description
-    Like `image-range <extractor.*.image-range_>`__,
+    Like `file-range <extractor.*.file-range_>`__,
     but for posts.
 
 
-extractor.*.chapter-range
--------------------------
+.. _extractor.*.chapter-range:
+
+extractor.*.child-range
+-----------------------
 Type
     ``string``
 Description
-    Like `image-range <extractor.*.image-range_>`__,
+    Like `file-range <extractor.*.file-range_>`__,
     but for child extractors handling manga chapters, external URLs, etc.
 
 
-extractor.*.image-filter
-------------------------
+.. _extractor.*.image-filter:
+
+extractor.*.file-filter
+-----------------------
 Type
     * Condition_
     * ``list`` of Conditions_
@@ -1563,12 +1590,16 @@ Example
     * ``"post['id'] > 12345"``
     * ``["date >= datetime(2025, 5, 1)", "print(post_id)"]``
 Description
-    Like `image-filter <extractor.*.image-filter_>`__,
+    Like `file-filter <extractor.*.file-filter_>`__,
     but for posts.
 
+    Available values are the directory-specific ones listed by ``-K`` or ``-j``.
 
-extractor.*.chapter-filter
---------------------------
+
+.. _extractor.*.chapter-filter:
+
+extractor.*.child-filter
+------------------------
 Type
     * Condition_
     * ``list`` of Conditions_
@@ -1576,29 +1607,33 @@ Example
     * ``"lang == 'en'"``
     * ``["language == 'French'", "10 <= chapter < 20"]``
 Description
-    Like `image-filter <extractor.*.image-filter_>`__,
+    Like `file-filter <extractor.*.file-filter_>`__,
     but for child extractors handling manga chapters, external URLs, etc.
 
 
-extractor.*.image-unique
+.. _extractor.*.image-unique:
+
+extractor.*.file-unique
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Ignore file URLs that have been encountered before during the
+    current extractor run.
+
+
+.. _extractor.*.chapter-unique:
+
+extractor.*.child-unique
 ------------------------
 Type
     ``bool``
 Default
     ``false``
 Description
-    Ignore image URLs that have been encountered before during the
-    current extractor run.
-
-
-extractor.*.chapter-unique
---------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Like `image-unique <extractor.*.image-unique_>`__,
+    Like `file-unique <extractor.*.file-unique_>`__,
     but applies to delegated URLs like manga chapters, etc.
 
 
@@ -5982,7 +6017,7 @@ Note
     It is not possible to filter all subtitles of a specific source type,
     while also filtering for additional languages of another source type.
     (e.g. any ASR subtitle + fra-FR of any source type)
-    For this, refer to `extractor.*.image-filter`_.
+    For this, refer to `extractor.*.file-filter`_.
 
 
 extractor.tiktok.videos
@@ -6580,8 +6615,8 @@ Note
     use the ``/with_replies`` timeline while logged in. For example,
     media from Tweets which the user replied to will also be downloaded.
 
-    It is possible to exclude unwanted Tweets using `image-filter
-    <extractor.*.image-filter_>`__.
+    It is possible to exclude unwanted Tweets using `file-filter
+    <extractor.*.file-filter_>`__.
 
 
 extractor.twitter.retries-api
@@ -6642,6 +6677,9 @@ Description
     ``"max_id"`` | ``"maxid"`` | ``"id"``
         Update the ``max_id`` search query parameter
         to the Tweet ID value of the last retrieved Tweet.
+    ``"until"`` | ``"date"`` | ``"datetime"`` | ``"dt"``
+        Update the ``until`` search query parameter
+        to the date value of the last retrieved Tweet.
 
 
 extractor.twitter.search-results
@@ -8651,6 +8689,10 @@ Description
         e.g. a Tweet on Twitter or a post on Patreon.
     ``post-after``
         After downloading all files of a `post`
+    ``child``
+        When spawning a new `child` extractor
+    ``child-after``
+        After a `child` extractor ran
 
 
 metadata.include
@@ -9067,10 +9109,10 @@ Description
     Additional |ffmpeg| command-line arguments.
 
 
+.. _ugoira.ffmpeg-demuxer:
+
 ugoira.mode
 -----------
-ugoira.ffmpeg-demuxer
----------------------
 Type
     ``string``
 Default
@@ -9948,7 +9990,7 @@ Description
     post-processor type, as well as any of its `options <Postprocessor Options_>`__.
 
     It is possible to set a ``"filter"`` Condition_ similar to
-    `image-filter <extractor.*.image-filter_>`_
+    `file-filter <extractor.*.file-filter_>`_
     to only run a post-processor conditionally.
 
     It is also possible set a ``"whitelist"`` or ``"blacklist"`` to
