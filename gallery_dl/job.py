@@ -69,12 +69,16 @@ class Job():
         extr.log = self._wrap_logger(extr.log)
         extr.log.debug("Using %s for '%s'", extr.__class__.__name__, extr.url)
 
-        self.metadata_url = extr.config2("metadata-url", "url-metadata")
-        self.metadata_http = extr.config2("metadata-http", "http-metadata")
-        metadata_path = extr.config2("metadata-path", "path-metadata")
-        metadata_version = extr.config2("metadata-version", "version-metadata")
+        self.metadata_url = extr.config2(
+            "metadata-url", "url-metadata", "_url")
+        self.metadata_http = extr.config2(
+            "metadata-http", "http-metadata")
+        metadata_path = extr.config2(
+            "metadata-path", "path-metadata", "_path")
+        metadata_version = extr.config2(
+            "metadata-version", "version-metadata")
         metadata_extractor = extr.config2(
-            "metadata-extractor", "extractor-metadata")
+            "metadata-extractor", "extractor-metadata", "_extr")
 
         if metadata_path:
             self.kwdict[metadata_path] = path_proxy
@@ -268,6 +272,9 @@ class Job():
             for key, valuegen in self.kwdict_eval:
                 kwdict[key] = valuegen(kwdict)
 
+    def initialize(self):
+        pass
+
     def _init(self):
         self.extractor.initialize()
         self.pred_url = self._prepare_predicates(
@@ -300,7 +307,8 @@ class Job():
                 alt is not None and (prange := extr.config(alt + "-range")):
             try:
                 skip = extr.skip if skip and not pfilter else None
-                predicates.append(util.predicate_range(prange, skip))
+                flag = target if alt is not None else None
+                predicates.append(util.predicate_range(prange, skip, flag))
             except ValueError as exc:
                 extr.log.warning("invalid %s range: %s", target, exc)
 
@@ -463,7 +471,7 @@ class DownloadJob(Job):
                 extr._parentdir = pextr._parentdir
 
             if pmeta := pextr.config2(
-                    "parent-metadata", "metadata-parent", parent):
+                    "parent-metadata", "metadata-parent", parent or "_parent"):
                 if isinstance(pmeta, str):
                     data = self.kwdict.copy()
                     if kwdict:
@@ -595,7 +603,7 @@ class DownloadJob(Job):
         return instance
 
     def initialize(self, kwdict=None):
-        """Delayed initialization of PathFormat, etc."""
+        """initialize PathFormat, postprocessors, archive, options, etc"""
         extr = self.extractor
         cfg = extr.config
 

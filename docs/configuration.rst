@@ -253,7 +253,10 @@ Type
     * ``bool``
     * ``string``
 Default
-    `extractor.parent <extractor.*.parent_>`__
+    ``true``
+        `extractor.parent <extractor.*.parent_>`__
+    ``"_parent"``
+        otherwise
 Description
     Forward a parent's metadata to its child extractors.
 
@@ -1089,6 +1092,8 @@ extractor.*.metadata-url
 ------------------------
 Type
     ``string``
+Default
+    ``"_url"``
 Description
     Insert a file's download URL into its metadata dictionary as the given name.
 
@@ -1105,6 +1110,8 @@ extractor.*.metadata-path
 -------------------------
 Type
     ``string``
+Default
+    ``"_path"``
 Description
     Insert a reference to the current
     `PathFormat <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/path.py#L27>`__
@@ -1120,6 +1127,8 @@ extractor.*.metadata-extractor
 ------------------------------
 Type
     ``string``
+Default
+    ``"_extr"``
 Description
     Insert a reference to the current
     `Extractor <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/extractor/common.py#L28>`__
@@ -1132,6 +1141,8 @@ extractor.*.metadata-http
 -------------------------
 Type
     ``string``
+Default
+    ``null``
 Description
     Insert an ``object`` containing a file's HTTP headers and
     ``filename``, ``extension``, and ``date`` parsed from them
@@ -1148,6 +1159,8 @@ extractor.*.metadata-version
 ----------------------------
 Type
     ``string``
+Default
+    ``null``
 Description
     Insert an ``object`` containing gallery-dl's version info into
     metadata dictionaries as the given name.
@@ -3068,7 +3081,7 @@ extractor.exhentai.tags
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
     Group ``tags`` by type and
     provide them as ``tags_<type>`` metadata fields,
@@ -3491,7 +3504,7 @@ extractor.gofile.recursive
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
     Recursively download files from subfolders.
 
@@ -4862,7 +4875,7 @@ extractor.pixeldrain.recursive
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
     Recursively download files from subfolders.
 
@@ -5564,7 +5577,7 @@ extractor.schalenetwork.tags
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
     Group ``tags`` by type and
     provide them as ``tags_<type>`` metadata fields,
@@ -6539,6 +6552,23 @@ Default
     ``false``
 Description
     Logout and retry as guest when access to another user's Tweets is blocked.
+
+
+extractor.twitter.metadata-user
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional metadata for user accounts (``author``, ``user``)
+
+    * ``based_in``
+    * ``location_accurate``
+    * ``name_changes``
+    * ``source``
+Note
+    This requires 1 additional HTTP request per user.
 
 
 extractor.twitter.pinned
@@ -9979,6 +10009,13 @@ Example
     .. code:: json
 
         {
+            "name"  : "metadata/print@prepare",
+            "format": "{id}: {date}"
+        }
+
+    .. code:: json
+
+        {
             "name"       : "zip",
             "compression": "store",
             "extension"  : "cbz",
@@ -9989,13 +10026,21 @@ Description
     An ``object`` containing a ``"name"`` attribute specifying the
     post-processor type, as well as any of its `options <Postprocessor Options_>`__.
 
-    It is possible to set a ``"filter"`` Condition_ similar to
-    `file-filter <extractor.*.file-filter_>`_
-    to only run a post-processor conditionally.
+    * It is possible to set a ``"filter"`` Condition_ similar to
+      `file-filter <extractor.*.file-filter_>`_
+      to only run a post-processor conditionally.
 
-    It is also possible set a ``"whitelist"`` or ``"blacklist"`` to
-    only enable or disable a post-processor for the specified
-    extractor categories.
+    * It is possible set a ``"whitelist"`` or ``"blacklist"`` to
+      only enable or disable a post-processor for the specified
+      extractor categories.
+
+    * It is possible to specify a post-processor's ``mode`` & ``event``
+      as part of its ``name`` by adding ``/MODE`` & ``@EVENT``.
+      For example
+
+        * ``"name": "metadata/jsonl@post"``
+        * ``"name": "ugoira/archive"``
+        * ``"name": "exec@error"``
 
     The available post-processor types are
 
