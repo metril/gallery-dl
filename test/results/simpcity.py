@@ -241,6 +241,24 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://simpcity.cr/threads/arianaskyeshelby-itsarianaskyebaby-busty.1237895/post-40205575",
+    "#comment" : "tiktok s9e media embed iframe (#8994)",
+    "#category": ("xenforo", "simpcity", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
+    "#auth"    : True,
+    "#results" : "https://www.tiktok.com/@/video/7556556034794425631",
+},
+
+{
+    "#url"     : "https://simpcity.cr/threads/alrightsierra.70601/post-571509",
+    "#comment" : "reddit s9e media embed iframe (#8996)",
+    "#category": ("xenforo", "simpcity", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
+    "#auth"    : True,
+    "#results" : "https://embed.reddit.com/r/TikTokFeet/comments/rtzwnz#theme=auto",
+},
+
+{
     "#url"     : "https://simpcity.cr/threads/alua-tatakai.89490/",
     "#category": ("xenforo", "simpcity", "thread"),
     "#class"   : xenforo.XenforoThreadExtractor,
@@ -282,6 +300,19 @@ __tests__ = (
     "#url"     : "https://simpcity.su/threads/angel-chan-wlep-wlop-menruinyanko_.12948/",
     "#category": ("xenforo", "simpcity", "thread"),
     "#class"   : xenforo.XenforoThreadExtractor,
+},
+
+{
+    "#url"     : "https://simpcity.cr/threads/ririkana-rr_loveit.10731/",
+    "#comment" : "post order by reaction score (#8997)",
+    "#category": ("xenforo", "simpcity", "thread"),
+    "#class"   : xenforo.XenforoThreadExtractor,
+    "#auth"    : True,
+    "#options" : {
+        "post-range" : 1,
+        "order-posts": "reaction",
+    },
+    "#results" : "https://bunkr.cr/v/BKLYkkr9KK6dg",
 },
 
 {

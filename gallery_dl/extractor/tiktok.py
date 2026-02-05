@@ -181,21 +181,16 @@ class TiktokExtractor(Extractor):
                         raise KeyError(assert_key)
                 return data
             except (ValueError, KeyError):
-                # We failed to retrieve rehydration data. This happens
-                # relatively frequently when making many requests, so retry.
-                if tries >= self._retries:
-                    raise
-                tries += 1
-                self.log.warning("%s: Failed to retrieve rehydration data "
-                                 "(%s/%s)", url.rpartition("/")[2], tries,
-                                 self._retries)
-                if challenge_attempt:
-                    self.sleep(self._timeout, "retry")
-                    challenge_attempt = False
-                else:
+                # Even if the retries option has been set to 0, we should
+                # always at least try to solve the JS challenge and go again
+                # immediately.
+                if not challenge_attempt:
+                    challenge_attempt = True
                     self.log.info("Solving JavaScript challenge")
                     try:
                         self._solve_challenge(html)
+                        html = None
+                        continue
                     except Exception as exc:
                         self.log.traceback(exc)
                         self.log.warning(
@@ -204,9 +199,19 @@ class TiktokExtractor(Extractor):
                             "with the --write-pages option and include the "
                             "resulting page in your bug report",
                             url.rpartition("/")[2])
-                        self.sleep(self._timeout, "retry")
-                    html = None
-                    challenge_attempt = True
+
+                # We've already tried resolving the challenge, and either
+                # resolving it failed, or resolving it didn't get us the
+                # rehydration data, so fail this attempt.
+                self.log.warning("%s: Failed to retrieve rehydration data "
+                                 "(%s/%s)", url.rpartition("/")[2], tries + 1,
+                                 self._retries)
+                if tries >= self._retries:
+                    raise
+                tries += 1
+                self.sleep(self._timeout, "retry")
+                challenge_attempt = False
+                html = None
 
     def _extract_rehydration_data_user(self, profile_url, additional_keys=()):
         if profile_url in self.rehydration_data_cache:
@@ -914,19 +919,22 @@ class TiktokPaginationCursor:
 
 
 class TiktokTimeCursor(TiktokPaginationCursor):
-    def __init__(self, *, reverse=True):
+    def __init__(self, *, reverse=True, has_more_attribute="hasMore",
+                 cursor_attribute="cursor"):
         super().__init__()
         self.cursor = 0
         # If we expect the cursor to go up or down as we go to the next page.
         # True for down, False for up.
         self.reverse = reverse
+        self.has_more_key = has_more_attribute
+        self.cursor_key = cursor_attribute
 
     def current_page(self):
         return self.cursor
 
     def next_page(self, data, query_parameters):
         skip_fallback_logic = self.cursor == 0
-        new_cursor = int(data.get("cursor", 0))
+        new_cursor = int(data.get(self.cursor_key, 0))
         no_cursor = not new_cursor
         if not skip_fallback_logic:
             # If the new cursor doesn't go in the direction we expect, use the
@@ -938,7 +946,7 @@ class TiktokTimeCursor(TiktokPaginationCursor):
         elif no_cursor:
             raise exception.ExtractionError("Could not extract next cursor")
         self.cursor = new_cursor
-        return not data.get("hasMore", False)
+        return not data.get(self.has_more_key, False)
 
     def fallback_cursor(self, data):
         try:
@@ -966,6 +974,12 @@ class TiktokPopularTimeCursor(TiktokTimeCursor):
         # for the popular item feed goes down and it does not appear to be
         # based on item list timestamps at all.
         return -50_000
+
+
+class TiktokStoryTimeCursor(TiktokTimeCursor):
+    def __init__(self):
+        super().__init__(reverse=False, has_more_attribute="HasMoreAfter",
+                         cursor_attribute="MaxCursor")
 
 
 class TiktokLegacyTimeCursor(TiktokPaginationCursor):
@@ -1472,7 +1486,7 @@ class TiktokStoryItemListRequest(TiktokItemListRequest):
         assert query_parameters["loadBackward"] in ["true", "false"]
 
     def cursor_type(self, query_parameters):
-        return TiktokItemCursor
+        return TiktokStoryTimeCursor
 
 
 class TiktokStoryBatchItemListRequest(TiktokItemListRequest):

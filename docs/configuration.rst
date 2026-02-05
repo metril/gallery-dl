@@ -970,6 +970,29 @@ Description
     instead of the extractor's ``root`` domain.
 
 
+extractor.*.geo-bypass
+----------------------
+Type
+    * ``string``
+    * ``list`` of ``string``
+Default
+    ``"auto"``
+Example
+    * ``"JP"``
+    * ``"105.48.0.0/12"``
+    * ``"JP,CN,105.48.0.0/12"``
+    * ``["JP", "CN", "105.48.0.0/12"]``
+Description
+    Use a random IP as fake
+    `X-Forwarded-For <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For>`__
+    header to try bypassing geographic restrictions.
+
+    | Can be either
+      `ISO 3166-2 <https://en.wikipedia.org/wiki/ISO_3166-2>`__
+      country codes
+    | or IP blocks in CIDR notation.
+
+
 extractor.*.headers
 -------------------
 Type
@@ -7247,6 +7270,26 @@ Description
     For ``Category:`` pages, recursively descent into subcategories.
 
 
+extractor.[xenforo].attachments
+-------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Extract forum post attachments.
+
+
+extractor.[xenforo].embeds
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Extract URLs of forum post embeds.
+
+
 extractor.[xenforo].metadata
 ----------------------------
 Type
@@ -7264,15 +7307,20 @@ extractor.[xenforo].order-posts
 Type
     ``string``
 Default
-    ``"desc"``
+    ``thread``
+        ``"desc"``
+    otherwise
+        ``"asc"``
 Description
     Controls the order in which
-    posts of a ``thread`` are processed.
+    posts of a ``thread`` or `media` files are processed.
 
     ``"asc"``
         Ascending order (oldest first)
     ``"desc"`` | ``"reverse"``
         Descending order (newest first)
+    ``"reaction"`` | ``"score"``
+        Reaction Score order (``threads`` only)
 
 
 extractor.ytdl.cmdline-args

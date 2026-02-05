@@ -9,7 +9,7 @@
 """Extractors for XenForo forums"""
 
 from .common import BaseExtractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
 import binascii
 
@@ -42,14 +42,17 @@ class XenforoExtractor(BaseExtractor):
             r')'
         ).findall
 
+        embeds = self.config("embeds", True)
+        attachments = self.config("attachments", True)
+
         root = self.root
         base = root if (pos := root.find("/", 8)) < 0 else root[:pos]
         for post in self.posts():
             urls = extract_urls(post["content"])
-            if post["attachments"]:
-                for att in text.extract_iter(
-                        post["attachments"], "<li", "</li>"):
-                    urls.append((None, att[att.find('href="')+6:], None, None))
+            if embeds and "data-s9e-mediaembed-iframe=" in post["content"]:
+                self._extract_embeds(urls, post)
+            if attachments and post["attachments"]:
+                self._extract_attachments(urls, post)
 
             data = {"post": post}
             post["count"] = data["count"] = len(urls)
@@ -195,14 +198,14 @@ class XenforoExtractor(BaseExtractor):
             if cookie.domain.endswith(self.cookies_domain)
         }
 
-    def _pagination(self, base, pnum=None, callback=None):
+    def _pagination(self, base, pnum=None, callback=None, params=""):
         base = self.root + base
 
         if pnum is None:
-            url = base + "/"
+            url = f"{base}/{params}"
             pnum = 1
         else:
-            url = f"{base}/page-{pnum}"
+            url = f"{base}/page-{pnum}{params}"
             pnum = None
 
         page = self.request_page(url).text
@@ -214,7 +217,7 @@ class XenforoExtractor(BaseExtractor):
             if pnum is None or "pageNav-jump--next" not in page:
                 return
             pnum += 1
-            page = self.request_page(f"{base}/page-{pnum}").text
+            page = self.request_page(f"{base}/page-{pnum}{params}").text
 
     def _pagination_reverse(self, base, pnum=None, callback=None):
         base = self.root + base
@@ -340,6 +343,39 @@ class XenforoExtractor(BaseExtractor):
             data["author_id"] = data["author"][15:]
         return data
 
+    def _extract_attachments(self, urls, post):
+        for att in text.extract_iter(post["attachments"], "<li", "</li>"):
+            urls.append((None, att[att.find('href="')+6:], None, None))
+
+    def _extract_embeds(self, urls, post):
+        for embed in text.extract_iter(
+                post["content"], "data-s9e-mediaembed-iframe='", "'"):
+            data = {}
+            key = None
+            for value in util.json_loads(embed):
+                if key is None:
+                    key = value
+                else:
+                    data[key] = value
+                    key = None
+
+            src = data.get("src")
+            if not src:
+                self.log.debug(data)
+                continue
+
+            type = data.get("data-s9e-mediaembed")
+            frag = src[src.find("#")+1:]
+            if type == "tiktok":
+                url = "https://www.tiktok.com/@/video/" + frag
+            elif type == "reddit":
+                url = "https://embed.reddit.com/r/" + frag
+            else:
+                self.log.warning("%s: Unsupported media embed type '%s'",
+                                 post["id"], type)
+                continue
+            urls.append((None, None, None, url))
+
     def _extract_media(self, url, file):
         media = {}
         name, _, media["id"] = file.rpartition(".")
@@ -449,7 +485,12 @@ class XenforoThreadExtractor(XenforoExtractor):
 
         if (order := self.config("order-posts")) and \
                 order[0] not in ("d", "r"):
-            pages = self._pagination(path, pnum)
+            params = "?order=reaction_score" if order[0] == "s" else ""
+            pages = self._pagination(path, pnum, params=params)
+            reverse = False
+        elif order == "reaction":
+            pages = self._pagination(
+                path, pnum, params="?order=reaction_score")
             reverse = False
         else:
             pages = self._pagination_reverse(path, pnum)
