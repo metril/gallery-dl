@@ -91,6 +91,22 @@ class TestDownloadJob(TestJob):
         self.assertFalse(tjob.archive)
         self.assertFalse(tjob.hooks)
 
+    def test_parent_metadata_extractor(self):
+        config.set((), "parent-metadata", True)
+
+        config.set(("output",), "mode", False)
+        config.set((), "download", False)
+
+        config.set((), "postprocessors", [{
+            "name"  : "metadata/print@init",
+            "format": "{num}",
+        }])
+
+        extr = TestExtractorParent.from_url("test:parent:3")
+        out = self._capture_stdout(extr)
+        # no output if '_extractor' is overwritten (#8958)
+        self.assertEqual(out, "11\n")
+
 
 class TestKeywordJob(TestJob):
     jobclass = job.KeywordJob
@@ -432,6 +448,38 @@ class TestDataJob(TestJob):
         tjob = self.jobclass(extr)
         tjob._init()
 
+    def test_resolve(self):
+        extr = TestExtractorParent.from_url("test:parent:3")
+        tjob = self.jobclass(extr, file=None, resolve=0)
+        tjob.run()
+        self.assertEqual(len(tjob.data_urls), 3)
+        for url in tjob.data_urls:
+            self.assertEqual(url, "test:parent:2")
+
+        extr = TestExtractorParent.from_url("test:parent:3")
+        tjob = self.jobclass(extr, file=None, resolve=1)
+        tjob.run()
+        self.assertEqual(len(tjob.data_urls), 9)
+        for url in tjob.data_urls:
+            self.assertEqual(url, "test:parent:1")
+
+        extr = TestExtractorParent.from_url("test:parent")
+        tjob = self.jobclass(extr, file=None, resolve=64)
+        tjob.run()
+        self.assertEqual(len(tjob.data_urls), 9)
+        for url in tjob.data_urls:
+            self.assertRegex(url, r"^https://example.org/\d\.jpg$")
+
+        extr = TestExtractorParent.from_url("test:parent:1")
+        tjob = self.jobclass(extr, file=None, resolve=64)
+        tjob.run()
+        self.assertEqual(len(tjob.data_urls), 27)
+
+        extr = TestExtractorParent.from_url("test:parent:2")
+        tjob = self.jobclass(extr, file=None, resolve=64)
+        tjob.run()
+        self.assertEqual(len(tjob.data_urls), 81)
+
 
 class TestExtractor(Extractor):
     category = "test_category"
@@ -469,16 +517,22 @@ class TestExtractor(Extractor):
 class TestExtractorParent(Extractor):
     category = "test_category"
     subcategory = "test_subcategory_parent"
-    pattern = r"test:parent"
+    pattern = r"test:parent(:\d+)?"
 
     def items(self):
-        url = "test:child"
+        level = self.groups[0]
+        if level in {None, ":0"}:
+            url = "test:child"
+            extr = TestExtractor
+        else:
+            url = f"test:parent:{int(level[1:])-1}"
+            extr = TestExtractorParent
 
         for i in range(11, 14):
             yield Message.Queue, url, {
                 "num" : i,
                 "tags": ["abc", "def"],
-                "_extractor": TestExtractor,
+                "_extractor": extr,
             }
 
 
