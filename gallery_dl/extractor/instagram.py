@@ -570,7 +570,7 @@ class InstagramTaggedExtractor(InstagramExtractor):
             user = self.api.user_by_id(self.user_id)
         else:
             self.user_id = self.api.user_id(self.item)
-            user = self.api.user_by_name(self.item)
+            user = self.api.user_by_screen_name(self.item)
 
         return {
             "tagged_owner_id" : user["id"],
@@ -757,7 +757,7 @@ class InstagramInfoExtractor(InstagramExtractor):
         if screen_name.startswith("id:"):
             user = self.api.user_by_id(screen_name[3:])
         else:
-            user = self.api.user_by_name(screen_name)
+            user = self.api.user_by_screen_name(screen_name)
 
         return iter(((Message.Directory, "", user),))
 
@@ -779,7 +779,7 @@ class InstagramAvatarExtractor(InstagramExtractor):
             if user.startswith("id:"):
                 user = self.api.user_by_id(user[3:])
             else:
-                user = self.api.user_by_name(user)
+                user = self.api.user_by_screen_name(user)
                 user["pk"] = user["id"]
             url = user.get("profile_pic_url_hd") or user["profile_pic_url"]
             avatar = {"url": url, "width": 0, "height": 0}
@@ -870,30 +870,22 @@ class InstagramRestAPI():
         return self._pagination_sections(endpoint, data)
 
     @cache(maxage=36500*86400, keyarg=1)
-    def user_by_name(self, screen_name):
-        endpoint = "/v1/users/web_profile_info/"
-        params = {"username": screen_name}
-        try:
-            return self._call(
-                endpoint, params=params, notfound="user")["data"]["user"]
-        except KeyError:
-            raise exception.NotFoundError("user")
-
-    @cache(maxage=36500*86400, keyarg=1)
-    def user_by_search(self, screen_name):
-        url = "https://www.instagram.com/web/search/topsearch/"
-        params = {"query": screen_name}
-
-        name = screen_name.lower()
-        for result in self._call(url, params=params)["users"]:
-            user = result["user"]
-            if user["username"].lower() == name:
-                return user
-
-    @cache(maxage=36500*86400, keyarg=1)
     def user_by_id(self, user_id):
         endpoint = f"/v1/users/{user_id}/info/"
         return self._call(endpoint)["user"]
+
+    def user_by_screen_name(self, screen_name):
+        user = user_by_search(self, screen_name)
+        if user is None:
+            user_by_search.invalidate(screen_name)
+            self.extractor.log.warning(
+                "Failed to find profile '%s' via search. "
+                "Trying 'web_profile_info' fallback", screen_name)
+            user = user_by_name(self, screen_name)
+            if user is None:
+                user_by_name.invalidate(screen_name)
+                raise exception.NotFoundError("user")
+        return user
 
     def user_id(self, screen_name, check_private=True):
         if screen_name.startswith("id:"):
@@ -901,21 +893,12 @@ class InstagramRestAPI():
                 self.extractor._user = self.user_by_id(screen_name[3:])
             return screen_name[3:]
 
-        user = self.user_by_search(screen_name)
-        if user is None:
-            self.user_by_search.invalidate(screen_name)
-            self.log.warning("Failed to find profile '%s' via search. "
-                             "Trying 'web_profile_info' fallback", screen_name)
-            user = self.user_by_name(screen_name)
-            if user is None:
-                self.user_by_name.invalidate(screen_name)
-                raise exception.AuthorizationError(
-                    "Login required to access this profile")
-            if check_private and user["is_private"] and \
-                    not user.get("followed_by_viewer", True):
-                name = user["username"]
-                s = "" if name.endswith("s") else "s"
-                self.extractor.log.warning("%s'%s posts are private", name, s)
+        user = self.user_by_screen_name(screen_name)
+        if check_private and user.get("is_private") and \
+                not user.get("followed_by_viewer", True):
+            name = user["username"]
+            s = "" if name.endswith("s") else "s"
+            self.extractor.log.warning("%s'%s posts are private", name, s)
 
         self.extractor._assign_user(user)
         return user["id"]
@@ -1070,7 +1053,7 @@ class InstagramGraphqlAPI():
         self._json_dumps = util.json_dumps
 
         api = InstagramRestAPI(extractor)
-        self.user_by_name = api.user_by_name
+        self.user_by_screen_name = api.user_by_screen_name
         self.user_by_id = api.user_by_id
         self.user_id = api.user_id
 
@@ -1174,6 +1157,29 @@ def _login_impl(extr, username, password):
     extr.log.error("Login with username & password is no longer supported. "
                    "Use browser cookies instead.")
     return {}
+
+
+@cache(maxage=36500*86400, keyarg=1)
+def user_by_name(self, screen_name):
+    endpoint = "/v1/users/web_profile_info/"
+    params = {"username": screen_name}
+    try:
+        return self._call(
+            endpoint, params=params, notfound="user")["data"]["user"]
+    except KeyError:
+        raise exception.NotFoundError("user")
+
+
+@cache(maxage=36500*86400, keyarg=1)
+def user_by_search(self, screen_name):
+    url = "https://www.instagram.com/web/search/topsearch/"
+    params = {"query": screen_name}
+
+    name = screen_name.lower()
+    for result in self._call(url, params=params)["users"]:
+        user = result["user"]
+        if user["username"].lower() == name:
+            return user
 
 
 def id_from_shortcode(shortcode):
