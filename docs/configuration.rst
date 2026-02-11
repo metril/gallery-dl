@@ -3865,6 +3865,38 @@ Description
     Download video previews.
 
 
+extractor.instagram.user-cache
+------------------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``"disk"``
+Description
+    Selects how to cache user profile data.
+
+    ``true`` | ``"disk"``
+        Cache user data on disk
+    ``false`` | ``"memory"``
+        Cache user data in memory
+
+
+extractor.instagram.user-strategy
+---------------------------------
+Type
+    ``string``
+Default
+    ``"topsearch"``
+Description
+    Selects how to retrieve user profile data.
+
+    ``"topsearch"`` | ``"search"``
+        Use `topsearch` results
+    ``"web_profile_info"`` | ``"info"``
+        | Use `web_profile_info` results
+        | (high liklyhood of ``429 Too Many Requests`` errors)
+
+
 extractor.instagram.videos
 --------------------------
 Type

@@ -217,4 +217,16 @@ __tests__ = (
     "#count"   : 100,
 },
 
+{
+    "#url"     : "https://www.imagefap.com/profile/Tiffany_and_me",
+    "#comment" : "empty profile (#9034)",
+    "#class"   : imagefap.ImagefapUserExtractor,
+    "#count"   : 0,
+},
+
+{
+    "#url"     : "https://www.imagefap.com/profile/Tiffany_and_me/galleries?folderid=0",
+    "#class"   : imagefap.ImagefapUserExtractor,
+},
+
 )
