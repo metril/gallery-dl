@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2025 Mike Fährmann
+# Copyright 2017-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -215,7 +215,10 @@ class RedditExtractor(Extractor):
 
             if src := data.get("s"):
                 if url := src.get("u") or src.get("gif") or src.get("mp4"):
-                    yield url.partition("?")[0].replace("/preview.", "/i.", 1)
+                    if "//external" not in url:
+                        url = url.partition("?")[0].replace(
+                            "/preview.", "/i.", 1)
+                    yield url
                 else:
                     self.log.error(
                         "embed %s: unable to fetch download URL for item %s",
@@ -302,7 +305,7 @@ class RedditUserExtractor(RedditExtractor):
     subcategory = "user"
     directory_fmt = ("{category}", "Users", "{user[name]}")
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/u(?:ser)?/"
-               r"([^/?#]+)(/[a-z]+)?/?(?:\?([^#]*))?")
+               r"([^/?#]+)(/[a-z]+)?/?(?:\?([^#]*))?$")
     example = "https://www.reddit.com/user/USER/"
 
     def __init__(self, match):
@@ -484,7 +487,8 @@ class RedditAPI():
             data = self._call(endpoint, params)["json"]
             for thing in data["data"]["things"]:
                 if thing["kind"] == "more":
-                    children.extend(thing["data"]["children"])
+                    if more := thing["data"].get("children"):
+                        children.extend(more)
                 else:
                     yield thing["data"]
 

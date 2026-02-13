@@ -38,7 +38,7 @@ class XenforoExtractor(BaseExtractor):
             r'|<div class="bb(?:Image|Media)Wrapper[^>]*?'
             r'data-src="([^"]+".*?) />'
             r'|(?:<a [^>]*?href="|<iframe [^>]*?src="|'
-            r'''onclick="loadMedia\(this, ')([^"']+)'''
+            r'''onclick="loadMedia\(this, ')([^"']+[^<]*?<)'''
             r')'
         ).findall
 
@@ -68,12 +68,19 @@ class XenforoExtractor(BaseExtractor):
                         continue
                     if ext[0] == "/":
                         if ext[1] == "/":
+                            if "'" in ext:
+                                ext = ext[:ext.find("'")]
                             ext = "https:" + ext
                         elif ext.startswith("/goto/link-confirmation?"):
                             params = text.parse_query(text.unescape(ext[24:]))
                             ext = binascii.a2b_base64(params["url"]).decode()
+                        elif ext.startswith("/redirect/"):
+                            ext = text.unescape(text.extr(
+                                ext, ">", "<").strip())
                         else:
                             continue
+                    elif '"' in ext:
+                        ext = ext[:ext.find('"')]
                     data["num"] += 1
                     data["num_external"] += 1
                     data["type"] = "external"
@@ -119,7 +126,7 @@ class XenforoExtractor(BaseExtractor):
 
     def items_media(self, path, pnum, callback=None):
         if (order := self.config("order-posts")) and \
-                order[0] in ("d", "r"):
+                order[0] in {"d", "r"}:
             pages = self._pagination_reverse(path, pnum, callback)
             reverse = True
         else:
@@ -345,7 +352,7 @@ class XenforoExtractor(BaseExtractor):
 
     def _extract_attachments(self, urls, post):
         for att in text.extract_iter(post["attachments"], "<li", "</li>"):
-            urls.append((None, att[att.find('href="')+6:], None, None))
+            urls.append((None, att[att.find(' href="')+7:], None, None))
 
     def _extract_embeds(self, urls, post):
         for embed in text.extract_iter(
@@ -484,7 +491,7 @@ class XenforoThreadExtractor(XenforoExtractor):
         pnum = self.groups[-1]
 
         if (order := self.config("order-posts")) and \
-                order[0] not in ("d", "r"):
+                order[0] not in {"d", "r"}:
             params = "?order=reaction_score" if order[0] == "s" else ""
             pages = self._pagination(path, pnum, params=params)
             reverse = False
