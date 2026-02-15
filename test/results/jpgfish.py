@@ -10,8 +10,8 @@ from gallery_dl.extractor import chevereto
 __tests__ = (
 {
     "#url"     : "https://jpg7.cr/img/funnymeme.LecXGS",
-    "#category": ("chevereto", "jpgfish", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "jpgfish", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
     "#results"     : "https://simp3.selti-delivery.ru/images/funnymeme.jpg",
     "#sha1_content": "098e5e9b17ad634358426e0ffd1c93871474d13c",
 
@@ -22,14 +22,16 @@ __tests__ = (
     "extension": "jpg",
     "filename" : "funnymeme",
     "id"       : "LecXGS",
+    "title"    : "funnymeme",
+    "type"     : "article",
     "url"      : "https://simp3.selti-delivery.ru/images/funnymeme.jpg",
     "user"     : "exearco",
 },
 
 {
     "#url"     : "https://jpg4.su/img/funnymeme.LecXGS",
-    "#category": ("chevereto", "jpgfish", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "jpgfish", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
     "#results" : "https://simp3.selti-delivery.ru/images/funnymeme.jpg",
 
     "album"    : "",
@@ -44,8 +46,8 @@ __tests__ = (
 {
     "#url"     : "https://jpg6.su/img/LecXGS/",
     "#comment" : "image ID without name (#8307)",
-    "#category": ("chevereto", "jpgfish", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "jpgfish", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
     "#results"     : "https://simp3.selti-delivery.ru/images/funnymeme.jpg",
     "#sha1_content": "098e5e9b17ad634358426e0ffd1c93871474d13c",
 
@@ -60,8 +62,8 @@ __tests__ = (
 
 {
     "#url"     : "https://jpg.church/img/auCruA",
-    "#category": ("chevereto", "jpgfish", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "jpgfish", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
     "#results" : "https://simp2.selti-delivery.ru/hannahowo_00457.jpg",
 
     "album"     : "401-500",
@@ -73,44 +75,62 @@ __tests__ = (
 
 {
     "#url"     : "https://jpg1.su/img/funnymeme.LecXGS",
-    "#category": ("chevereto", "jpgfish", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "jpgfish", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
 },
 
 {
     "#url"     : "https://jpeg.pet/img/funnymeme.LecXGS",
-    "#category": ("chevereto", "jpgfish", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "jpgfish", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
 },
 
 {
     "#url"     : "https://jpg.pet/img/funnymeme.LecXGS",
-    "#category": ("chevereto", "jpgfish", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "jpgfish", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
 },
 
 {
     "#url"     : "https://jpg.fishing/img/funnymeme.LecXGS",
-    "#category": ("chevereto", "jpgfish", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "jpgfish", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
 },
 
 {
     "#url"     : "https://jpg.fish/img/funnymeme.LecXGS",
-    "#category": ("chevereto", "jpgfish", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "jpgfish", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
 },
 
 {
     "#url"     : "https://jpg.church/img/funnymeme.LecXGS",
-    "#category": ("chevereto", "jpgfish", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "jpgfish", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
 },
 
 {
     "#url"     : "https://www.jpg6.su/img/funnymeme.LecXGS",
-    "#category": ("chevereto", "jpgfish", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "jpgfish", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
+},
+
+{
+    "#url"     : "https://jpg6.su/img/test.NLqFQHc",
+    "#category": ("chevereto", "jpgfish", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
+    "#results" : "https://simp6.selti-delivery.ru/images3/test--2219f2531862b749d5.png",
+
+    "album"     : "",
+    "album_id"  : "",
+    "album_slug": "",
+    "date"      : "dt:2025-08-31 08:10:35",
+    "extension" : "png",
+    "filename"  : "test--2219f2531862b749d5",
+    "id"        : "NLqFQHc",
+    "title"     : """test テスト "&>""",
+    "url"       : "https://simp6.selti-delivery.ru/images3/test--2219f2531862b749d5.png",
+    "user"      : "gdldev",
 },
 
 {

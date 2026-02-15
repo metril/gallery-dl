@@ -126,16 +126,21 @@
                                 extraction for an input URL
     --sleep-request SECONDS     Number of seconds to wait between HTTP requests
                                 during data extraction
-    --sleep-429 [TYPE=]SECONDS  Number of seconds to wait when receiving a '429
-                                Too Many Requests' response. Can be prefixed
-                                with 'lin[:START[:MAX]]' or
+    --sleep-retries [TYPE=]SECONDS
+                                Number of seconds to wait before retrying an
+                                HTTP request. Can be prefixed with
+                                'lin[:START[:MAX]]' or
                                 'exp[:BASE[:START[:MAX]]]' for linear or
-                                exponential growth (e.g. '30', 'exp=40',
-                                'lin:20=30-60'
+                                exponential growth between consecutive retries
+                                (e.g. '30', 'exp=40', 'lin:20=30-60'
+    --sleep-429 [TYPE=]SECONDS  Number of seconds to wait when receiving a '429
+                                Too Many Requests' response
 
 ## Configuration Options:
     -o, --option KEY=VALUE      Additional options. Example: -o browser=firefox
-    -c, --config FILE           Additional configuration files in JSON format
+    -c, --config FILE           Additional configuration files in default
+                                format
+    --config-json FILE          Additional configuration files in JSON format
     --config-yaml FILE          Additional configuration files in YAML format
     --config-toml FILE          Additional configuration files in TOML format
     --config-type TYPE          Set filetype of default configuration files
@@ -213,8 +218,10 @@
                                 'vp8', 'vp9', 'vp9-lossless', 'copy', 'zip'.
     --exec CMD                  Execute CMD for each downloaded file. Supported
                                 replacement fields are {} or {_path},
-                                {_directory}, {_filename}. Example: --exec
-                                "convert {} {}.png && rm {}"
+                                {_temppath}, {_directory}, {_filename}. On
+                                Windows, use {_path_unc} or {_directory_unc}
+                                for UNC paths. Example: --exec "convert {}
+                                {}.png && rm {}"
     --exec-after CMD            Execute CMD after all files were downloaded.
                                 Example: --exec-after "cd {_directory} &&
                                 convert * ../doc.pdf"
