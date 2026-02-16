@@ -13,7 +13,7 @@ from .. import text
 class EpornerGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from eporner.com"""
     category = "eporner"
-    root = "https://eporner.com"
+    root = "https://www.eporner.com"
     pattern = (r"(?:https?://)?(?:www\.)?eporner\.com"
                r"/gallery/(\w+)(?:/([\w-]+))?")
     example = "https://www.eporner.com/gallery/GID/SLUG/"
@@ -23,6 +23,8 @@ class EpornerGalleryExtractor(GalleryExtractor):
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
+        if page.find("Age Verification<", 0, 240) >= 0:
+            raise self.exc.AuthRequired("Age Verification", "gallery")
         title = text.extr(page, "<title>", " - EPORNER</title>")
         if title.endswith(" Photo Gallery"):
             title = title[:-14]
