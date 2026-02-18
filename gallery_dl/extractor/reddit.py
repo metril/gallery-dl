@@ -319,8 +319,8 @@ class RedditUserExtractor(RedditExtractor):
         self.kwdict["user"] = user = self.api.user_about(username)
 
         submissions = self.api.submissions_user(
-            user["name"] + (sub or ""), text.parse_query(qs))
-        if self.config("only", True):
+            (user.get("name") or username) + (sub or ""), text.parse_query(qs))
+        if self.config("only", sub != "/saved"):
             submissions = self._only(submissions, user)
         return submissions
 
@@ -525,7 +525,7 @@ class RedditAPI():
 
         if response.status_code != 200:
             self.log.debug("Server response: %s", data)
-            raise self.exc.AuthenticationError(
+            raise self.extractor.exc.AuthenticationError(
                 f"\"{data.get('error')}: {data.get('message')}\"")
         return "Bearer " + data["access_token"]
 
@@ -555,16 +555,17 @@ class RedditAPI():
             try:
                 data = response.json()
             except ValueError:
-                raise self.exc.AbortExtraction(
+                raise self.extractor.exc.AbortExtraction(
                     text.remove_html(response.text))
 
             if "error" in data:
+                exc = self.extractor.exc
                 if data["error"] == 403:
-                    raise self.exc.AuthorizationError()
+                    raise exc.AuthorizationError()
                 if data["error"] == 404:
-                    raise self.exc.NotFoundError()
+                    raise exc.NotFoundError()
                 self.log.debug(data)
-                raise self.exc.AbortExtraction(data.get("message"))
+                raise exc.AbortExtraction(data.get("message"))
             return data
 
     def _pagination(self, endpoint, params):
@@ -592,7 +593,7 @@ class RedditAPI():
                         if post["num_comments"] and self.comments:
                             try:
                                 yield self.submission(post["id"])
-                            except self.exc.AuthorizationError:
+                            except self.extractor.exc.AuthorizationError:
                                 pass
                         else:
                             yield post, ()
