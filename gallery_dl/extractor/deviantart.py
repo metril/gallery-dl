@@ -102,7 +102,7 @@ class DeviantartExtractor(Extractor):
                 return response
             self.wait(seconds=300, reason="CloudFront block")
 
-    def skip(self, num):
+    def skip_files(self, num):
         self.offset += num
         return num
 
@@ -467,7 +467,9 @@ class DeviantartExtractor(Extractor):
             yield url, folder
 
     def _update_content_default(self, deviation, content):
-        if "premium_folder_data" in deviation or deviation.get("is_mature"):
+        if "premium_folder_data" in deviation or \
+                "tier_access" in deviation or \
+                deviation.get("is_mature"):
             public = False
         else:
             public = None
@@ -771,11 +773,10 @@ class DeviantartStashExtractor(DeviantartExtractor):
     """Extractor for sta.sh-ed deviations"""
     subcategory = "stash"
     archive_fmt = "{index}.{extension}"
+    skip_files = None
     pattern = (r"(?:https?://)?(?:(?:www\.)?deviantart\.com/stash|sta\.s(h))"
                r"/([a-z0-9]+)")
     example = "https://www.deviantart.com/stash/abcde"
-
-    skip = Extractor.skip
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
@@ -1002,14 +1003,13 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     """Extractor for single deviations"""
     subcategory = "deviation"
     archive_fmt = "g_{_username}_{index}.{extension}"
+    skip_files = None
     pattern = (BASE_PATTERN + r"/(art|journal)/(?:[^/?#]+-)?(\d+)"
                r"|(?:https?://)?(?:www\.)?(?:fx)?deviantart\.com/"
                r"(?:view/|deviation/|view(?:-full)?\.php/*\?(?:[^#]+&)?id=)"
                r"(\d+)"  # bare deviation ID without slug
                r"|(?:https?://)?fav\.me/d([0-9a-z]+)")  # base36
     example = "https://www.deviantart.com/UsER/art/TITLE-12345"
-
-    skip = Extractor.skip
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
@@ -1080,10 +1080,10 @@ class DeviantartSearchExtractor(DeviantartExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search_tags}")
     archive_fmt = "Q_{search_tags}_{index}.{extension}"
+    skip_files = None
     pattern = (r"(?:https?://)?www\.deviantart\.com"
                r"/search(?:/deviations)?/?\?([^#]+)")
     example = "https://www.deviantart.com/search?q=QUERY"
-    skip = Extractor.skip
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
@@ -1517,7 +1517,8 @@ class DeviantartOAuthAPI():
             error = data.get("error_description")
             if error == "User not found.":
                 raise self.exc.NotFoundError("user or group")
-            if error == "Deviation not downloadable.":
+            if error in {"Deviation not downloadable.",
+                         "Only subscribers may have access to this download."}:
                 raise self.exc.AuthorizationError()
 
             self.log.debug(response.text)

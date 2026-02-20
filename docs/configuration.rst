@@ -232,9 +232,10 @@ Type
     ``bool``
 Default
     ``true``
-        ``[chevereto]`` |
-        ``erome``       |
-        ``[imagehost]``
+        ``[chevereto]``  |
+        ``erome``        |
+        ``[imagehost]``  |
+        ``urlgalleries``
     ``false``
         otherwise
 Description
@@ -4366,6 +4367,16 @@ Example
     * ``["erotica", "suggestive"]``
 Description
     List of acceptable content ratings for returned chapters.
+
+
+extractor.mangadex.manga.covers
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download `manga` `cover` images.
 
 
 extractor.mangafire.manga.lang
