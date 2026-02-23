@@ -14,6 +14,7 @@ import ssl
 import time
 import netrc
 import queue
+import pickle
 import random
 import getpass
 import logging
@@ -117,21 +118,6 @@ class Extractor():
         if value is not sentinel:
             return value
         return self.config(key2, default)
-
-    def config_deprecated(self, key, deprecated, default=None,
-                          sentinel=util.SENTINEL, history=set()):
-        value = self.config(deprecated, sentinel)
-        if value is not sentinel:
-            if deprecated not in history:
-                history.add(deprecated)
-                self.log.warning("'%s' is deprecated. Use '%s' instead.",
-                                 deprecated, key)
-            default = value
-
-        value = self.config(key, sentinel)
-        if value is not sentinel:
-            return value
-        return default
 
     def config_accumulate(self, key):
         return config.accumulate(self._cfgpath, key)
@@ -372,6 +358,73 @@ class Extractor():
                 "utils." + module, globals(), None, module, 1)
         return res if name is None else getattr(res, name, None)
 
+    def cache(self, func, *args, _key=0, _exp=0, _mem=True):
+        if _key is None:
+            key = f"{func.__module__}.{func.__name__}"
+        else:
+            key = f"{func.__module__}.{func.__name__}-{args[_key]}"
+
+        try:
+            value, expires = CACHE_MEMORY[key]
+        except KeyError:
+            expires = 1
+
+        if not expires or expires > (now := int(time.time())):
+            return value
+
+        if not _mem and (db := cache.database()):
+            with db:
+                cursor = db.cursor()
+                try:
+                    cursor.execute("BEGIN EXCLUSIVE")
+                except Exception:
+                    pass  # swallow exception when already in a transaction
+                cursor.execute(
+                    "SELECT value, expires FROM data WHERE key=? LIMIT 1",
+                    (key,))
+
+                if (result := cursor.fetchone()) and (
+                        not (expires := result[1]) or expires > now):
+                    value, expires = result
+                    value = pickle.loads(value)
+                else:
+                    value = func(*args)
+                    expires = _exp and _exp+now
+                    cursor.execute(
+                        "INSERT OR REPLACE INTO data VALUES (?,?,?)",
+                        (key, pickle.dumps(value), expires))
+        else:
+            value = func(*args)
+            expires = _exp and _exp+now
+
+        CACHE_MEMORY[key] = value, expires
+        return value
+
+    def cache_update(self, func, key=None, value=None, _exp=0, _mem=False):
+        if key is None:
+            key = f"{func.__module__}.{func.__name__}"
+        else:
+            key = f"{func.__module__}.{func.__name__}-{key}"
+
+        if value is None:
+            # delete cached value
+            try:
+                del CACHE_MEMORY[key]
+            except KeyError:
+                pass
+            if not _mem and (db := cache.database()):
+                with db:
+                    db.execute("DELETE FROM data WHERE key=?", (key,))
+        else:
+            # replace cached value
+            expires = _exp and _exp+int(time.time())
+            CACHE_MEMORY[key] = value, expires
+            if not _mem and (db := cache.database()):
+                with db:
+                    db.execute(
+                        "INSERT OR REPLACE INTO data VALUES (?,?,?)",
+                        (key, pickle.dumps(value), expires))
+
     def input(self, prompt, echo=True):
         self._check_input_allowed(prompt)
 
@@ -521,9 +574,11 @@ class Extractor():
         if not custom_ua or custom_ua == "auto":
             pass
         elif custom_ua == "browser":
-            headers["User-Agent"] = _browser_useragent(None)
+            headers["User-Agent"] = self.cache(
+                _browser_useragent, None, _exp=86400, _mem=False)
         elif custom_ua[0] == "@":
-            headers["User-Agent"] = _browser_useragent(custom_ua[1:])
+            headers["User-Agent"] = self.cache(
+                _browser_useragent, custom_ua[1:], _exp=86400, _mem=False)
         elif custom_ua[0] == "+":
             custom_ua = custom_ua[1:].lower()
             if custom_ua in {"firefox", "ff"}:
@@ -755,13 +810,6 @@ class Extractor():
             text.extr(page, " id='__NEXT_DATA__' type='application/json'>",
                       "</script>"))
 
-    def _cache(self, func, maxage, keyarg=None):
-        #  return cache.DatabaseCacheDecorator(func, maxage, keyarg)
-        return cache.DatabaseCacheDecorator(func, keyarg, maxage)
-
-    def _cache_memory(self, func, maxage=None, keyarg=None):
-        return cache.Memcache()
-
     def _get_date_min_max(self, dmin=None, dmax=None):
         """Retrieve and parse 'date-min' and 'date-max' config values"""
         def get(key, default):
@@ -778,10 +826,6 @@ class Extractor():
             return ts
         fmt = self.config("date-format")
         return get("date-min", dmin), get("date-max", dmax)
-
-    @classmethod
-    def _dump(cls, obj):
-        util.dump_json(obj, ensure_ascii=False, indent=2)
 
     def _dump_response(self, response, history=True):
         """Write the response content to a .txt file in the current directory.
@@ -1132,7 +1176,6 @@ def _build_requests_adapter(
     return adapter
 
 
-@cache.cache(maxage=86400, keyarg=0)
 def _browser_useragent(browser):
     """Get User-Agent header from default browser"""
     import webbrowser
@@ -1177,6 +1220,7 @@ def _browser_useragent(browser):
 
 CACHE_ADAPTERS = {}
 CACHE_COOKIES = {}
+CACHE_MEMORY = {}
 CACHE_UTILS = {}
 CATEGORY_MAP = ()
 
