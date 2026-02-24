@@ -3914,6 +3914,18 @@ Description
     Download video previews.
 
 
+extractor.instagram.static-videos
+---------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download static story/highlight "videos" generated from a photo.
+
+    Disabling this option downloads the photo version instead.
+
+
 extractor.instagram.user-cache
 ------------------------------
 Type
@@ -3933,17 +3945,23 @@ Description
 extractor.instagram.user-strategy
 ---------------------------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``strings``
 Default
-    ``"topsearch"``
+    ``["search", "web"]``
+Example
+    * ``"web,info,search"``
+    * ``["web", "info", "search"]``
 Description
-    Selects how to retrieve user profile data.
+    Selects how to retrieve user IDs and profile data.
 
-    ``"topsearch"`` | ``"search"``
-        Use `topsearch` results
-    ``"web_profile_info"`` | ``"info"``
-        | Use `web_profile_info` results
+    ``"search"`` | ``"topsearch"``
+        Use `topsearch` API results
+    ``"info"`` | ``"web_profile_info"``
+        | Use `web_profile_info` API results
         | (high liklyhood of ``429 Too Many Requests`` errors)
+    ``"web"`` | ``"webpage"``
+        Extract minimal user information from profile webpage
 
 
 extractor.instagram.videos
@@ -4056,6 +4074,21 @@ Default
     ``true``
 Description
     Download video files.
+
+
+extractor.iwara.format
+----------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Example
+    * ``"Source"``
+    * ``"360,540,Source"``
+    * ``["360", "540", "Source"]``
+Description
+    Selects the preferred format for video downloads.
+
+    When more than one format is given, the first available one is selected.
 
 
 extractor.iwara.include
