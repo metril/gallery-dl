@@ -337,6 +337,9 @@ Special Values
     ``"windows"``
         | ``"\\\\|/<>:\"?*"``
         | (https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file)
+    ``"windows+"``
+        | ``{"\\": "⧹", "|" : "", "/" : "⧸", "<" : "＜", ">" : "＞", ":" : "：", "\"" : "＂", "?" : "？", "*" : "＊"}``
+        | (replace characters not allowed by Windows with Unicode alternatives)
     ``"ascii"``
         | ``"^0-9A-Za-z_."``
         | (only ASCII digits, letters, underscores, and dots)
@@ -1281,6 +1284,33 @@ Description
 Note
     Any ``blacklist`` setting will automatically include
     ``"oauth"``, ``"recursive"``, and ``"test"``.
+
+
+.. _extractor.*.blacklist-tags:
+.. _extractor.*.whitelist-tags:
+
+extractor.*.tags-blacklist & .tags-whitelist
+--------------------------------------------
+Type
+    * |Path|_
+    * ``string``
+    * ``list`` of ``strings``
+Example
+    * ``"/path/to/file.txt"``
+    * ``"1girl,long_hair,  highres,commentary_request"``
+    * ``["1girl", "long_hair", "highres", "commentary_request"]``
+Description
+    A list of tags to exclude/include for processed posts.
+
+    Posts containing a blacklisted tag or *not* containing any whitelisted tag
+    and all of their files will be ignored and not processed any further.
+
+    This can be
+
+    * The |Path|_ of a plaintext file
+      containing black-/whitelisted tag names separated by newlines
+    * A ``string`` with tag names separated by commas (``"tag1,tag2,tag3"``)
+    * A ``list`` of ``string`` tag names (``["tag1", "tag2", "tag3"]``)
 
 
 extractor.*.archive

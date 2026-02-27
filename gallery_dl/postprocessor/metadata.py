@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2025 Mike Fährmann
+# Copyright 2019-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -226,9 +226,7 @@ class MetadataPP(PostProcessor):
         fp.write(self._content_fmt(kwdict))
 
     def _write_tags(self, fp, kwdict):
-        tags = kwdict.get("tags") or kwdict.get("tag_string")
-
-        if not tags:
+        if not (tags := kwdict.get("tags") or kwdict.get("tag_string")):
             return
 
         if isinstance(tags, str):
@@ -236,19 +234,14 @@ class MetadataPP(PostProcessor):
             if len(taglist) < len(tags) / 16:
                 taglist = tags.split(" ")
             tags = taglist
-        elif isinstance(tags, dict):
-            taglists = tags.values()
-            tags = []
-            extend = tags.extend
-            for taglist in taglists:
-                extend(taglist)
-            tags.sort()
-        elif all(isinstance(e, dict) for e in tags):
-            taglists = tags
-            tags = []
-            extend = tags.extend
-            for tagdict in taglists:
-                extend([x for x in tagdict.values() if isinstance(x, str)])
+        elif isinstance(tags[0], dict):
+            # pixiv "tags": "original"
+            tags = [
+                tag
+                for tagdict in tags
+                for tag in tagdict.values()
+                if isinstance(tag, str)
+            ]
             tags.sort()
 
         fp.write("\n".join(tags) + "\n")
@@ -264,9 +257,8 @@ class MetadataPP(PostProcessor):
                 include = include.split(",")
             return lambda d: {k: d[k] for k in include if k in d}
 
-        exclude = options.get("exclude")
         private = options.get("private")
-        if exclude:
+        if exclude := options.get("exclude"):
             if isinstance(exclude, str):
                 exclude = exclude.split(",")
             exclude = set(exclude)
