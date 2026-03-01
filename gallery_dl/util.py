@@ -371,8 +371,6 @@ def expand_path(path):
     """Expand environment variables and tildes (~)"""
     if not path:
         return path
-    if not isinstance(path, str):
-        path = os.path.join(*path)
     return os.path.expandvars(os.path.expanduser(path))
 
 
@@ -1064,6 +1062,32 @@ def predicate_tags(blacklist, negate=False):
                          blacklist.replace(" ", "").lower().split(",")}
     else:
         blacklist = set(blacklist)
+    return _pred
+
+
+def predicate_date(before, after=None, skip=None):
+    if after is None:
+        if skip is not None and skip(before):
+            return true
+
+        def _pred(_, kwdict):
+            if (date := kwdict.get("date")) and date >= before:
+                return False
+            return True
+
+    elif before is None or after > before or skip is not None and skip(before):
+        def _pred(_, kwdict):
+            if (date := kwdict.get("date")) and date <= after:
+                raise exception.StopExtraction()
+            return True
+
+    else:
+        def _pred(_, kwdict):
+            if not (date := kwdict.get("date")):
+                return True
+            if date <= after:
+                raise exception.StopExtraction()
+            return date < before
     return _pred
 
 

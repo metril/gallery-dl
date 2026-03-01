@@ -75,12 +75,22 @@ __tests__ = (
 
 {
     "#url"     : "https://mikf123.tumblr.com/",
-    "#comment" : "date-min/-max/-format (#337)",
+    "#comment" : "date-min/-max (#337)",
     "#class"   : tumblr.TumblrUserExtractor,
     "#options" : {
-        "date-min"   : "201804",
-        "date-max"   : "201805",
-        "date-format": "%Y%m",
+        "date-min": "2018-04-01",
+        "date-max": "2018-05-01",
+    },
+    "#count"   : 4,
+},
+
+{
+    "#url"     : "https://mikf123.tumblr.com/",
+    "#comment" : "date-before/-after",
+    "#class"   : tumblr.TumblrUserExtractor,
+    "#options" : {
+        "date-before": "2018-05-01",
+        "date-after" : "2018-04-01",
     },
     "#count"   : 4,
 },
@@ -250,6 +260,16 @@ __tests__ = (
 {
     "#url"     : "https://tumblr.com/smarties-art/686047436641353728",
     "#class"   : tumblr.TumblrPostExtractor,
+},
+
+{
+    "#url"     : "https://www.tumblr.com/ominous-signs/809452804394663936/one-way-to-hell",
+    "#comment" : "'answer'/'asks' post (#4509)",
+    "#class"   : tumblr.TumblrPostExtractor,
+    "#auth"    : True,
+    "#results" : "https://64.media.tumblr.com/a68cf0e9287c4557f4c0950edafb836b/5cf90cb0eb792b63-a4/s99999x99999/139223e8f778e3005e5748099f684c7816b10b14.jpg",
+
+    "type"     : "answer",
 },
 
 {

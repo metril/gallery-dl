@@ -1752,30 +1752,35 @@ Description
     but applies to delegated URLs like manga chapters, etc.
 
 
-extractor.*.date-format
+extractor.*.date-before
 -----------------------
 Type
-    ``string``
+    |Date|_
+Default
+    ``null``
+Example
+    * ``"2025-10-31"``
+    * ``"2026-01-09 15:30:00"``
+    * ``"2026-01-09T15:30:00Z"``
+    * ``1767972600``
+Description
+    Process only posts created `before` this |Date|_.
+
+    Accepted values are |ISO 8601| dates and Unix timestamps.
+
+
+extractor.*.date-after
+----------------------
+Type
+    |Date|_
 Default
     ``null``
 Description
-    Format string used to parse ``string`` values of
-    `date-min` and `date-max`.
+    | Process only posts created `after` this |Date|_.
+    | Stop extraction when encountering
+      a post created before or equal to this |Date|_.
 
-    See |strptime|_ for a list of formatting directives.
-Special Values
-    ``null``
-        | Parse `date-min` and `date-max` according to
-          `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`__
-        | See
-          `datetime.fromisoformat() <https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat>`__
-          for details and examples.
-Note
-    Despite its name, this option does **not** control how
-    ``{date}`` metadata fields are formatted.
-    To use a different formatting for those values other than the default
-    ``%Y-%m-%d %H:%M:%S``, put |strptime|_ formatting directives
-    after a colon ``:``, for example ``{date:%Y%m%d}``.
+    Accepted values are |ISO 8601| dates and Unix timestamps.
 
 
 extractor.*.write-pages
@@ -9239,7 +9244,7 @@ Default
 Description
     Name of the metadata field whose value should be used.
 
-    This value must be either a UNIX timestamp or a
+    This value must be either a Unix timestamp or a
     |type-datetime|_ object.
 Note
     This option is ignored if `mtime.value`_ is set.
@@ -9257,7 +9262,7 @@ Example
 Description
     The `Format String`_ whose value should be used.
 
-    The resulting value must be either a UNIX timestamp or a
+    The resulting value must be either a Unix timestamp or a
     |type-datetime|_ object.
 Note:
     Unlike standard `Format Strings`_, replacement fields here
@@ -9431,6 +9436,18 @@ Description
     Location of the ``ffmpeg`` (or ``avconv``) executable to use.
 
 
+ugoira.mkvmerge-args
+--------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``null``
+Example
+    ``["--no-date", "--disable-lacing"]``
+Description
+    Additional ``mkvmerge`` command-line arguments.
+
+
 ugoira.mkvmerge-location
 ------------------------
 Type
@@ -9440,6 +9457,31 @@ Default
 Description
     Location of the ``mkvmerge`` executable for use with the
     `mkvmerge demuxer <ugoira.ffmpeg-demuxer_>`__.
+
+
+ugoira.mkvmerge-metadata
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Let ``mkvmerge`` write ``BPS``, ``DURATION``, ``NUMBER_OF_BYTES``,
+    and ``NUMBER_OF_FRAMES`` metadata tags.
+Implementation Detail
+    Disabling this option passes
+    ``--disable-track-statistics-tags`` to ``mkvmerge``
+
+
+ugoira.mkvmerge-mtime
+---------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Set the `date` segment information field
+    of files processed with ``mkvmerge``.
 
 
 ugoira.mkvmerge-output
@@ -9553,7 +9595,7 @@ Type
 Default
     ``true``
 Description
-    Set modification times of generated ugoira aniomations.
+    Set modification times of generated ugoira animations.
 
 
 ugoira.repeat-last-frame
@@ -10086,13 +10128,14 @@ Type
     * ``string``
     * ``integer``
 Example
-    * ``"2019-01-01T00:00:00"``
-    * ``"2019"`` with ``"%Y"`` as `date-format`_
+    * ``"2019-01-01"``
+    * ``"2019-01-01 03:00:00"``
+    * ``"2019-03-08T12:30:00Z"``
     * ``1546297200``
 Description
     A |Date|_ value represents a specific point in time.
 
-    * If given as ``string``, it is parsed according to `date-format`_.
+    * If given as ``string``, it is parsed according to |ISO 8601|.
     * If given as ``integer``, it is interpreted as UTC timestamp.
 
 
@@ -10123,7 +10166,7 @@ Type
     * |Duration|_
     * ``string``
 Example
-    ``"1.5-3.0"``
+    * ``"1.5-3.0"``
     * ``"lin=5"``
     * ``"lin:20=30-60"``
     * ``"exp:1.8=40"``
@@ -10165,16 +10208,15 @@ Description
 Path
 ----
 Type
-    * ``string``
-    * ``list`` of ``strings``
+    ``string``
 Example
     * ``"file.ext"``
     * ``"~/path/to/file.ext"``
     * ``"$HOME/path/to/file.ext"``
-    * ``["$HOME", "path", "to", "file.ext"]``
+    * ``"C:\\path\\to\\file.ext"``
 Description
-    A |Path|_ is a ``string`` representing the location of a file
-    or directory.
+    A |Path|_ is a ``string`` representing the location
+    of a file or directory.
 
     Simple `tilde expansion <https://docs.python.org/3/library/os.path.html#os.path.expanduser>`__
     and `environment variable expansion <https://docs.python.org/3/library/os.path.html#os.path.expandvars>`__
@@ -10498,11 +10540,10 @@ Reference
 .. |open()| replace:: the built-in ``open()`` function
 .. |json.dump()| replace:: ``json.dump()``
 .. |ISO 639-1| replace:: `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language
-.. |ISO 8601| replace:: `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`__ language
+.. |ISO 8601| replace:: `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`__
 
 .. _directory: `extractor.*.directory`_
 .. _base-directory: `extractor.*.base-directory`_
-.. _date-format: `extractor.*.date-format`_
 .. _deviantart.metadata: `extractor.deviantart.metadata`_
 .. _deviantart.comments: `extractor.deviantart.comments`_
 .. _postprocessors: `extractor.*.postprocessors`_

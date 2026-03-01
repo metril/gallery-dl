@@ -54,7 +54,7 @@ class Extractor():
     request_interval_min = 0.0
     request_interval_429 = 60.0
     request_timestamp = 0.0
-    finalize = skip_files = skip_posts = skip_children = None
+    finalize = skip_files = skip_posts = skip_children = skip_date = None
     exc = exception
 
     def __init__(self, match):
@@ -815,16 +815,14 @@ class Extractor():
         def get(key, default):
             ts = self.config(key, default)
             if isinstance(ts, str):
-                dt_obj = dt.parse_iso(ts) if fmt is None else dt.parse(ts, fmt)
+                dt_obj = dt.parse_iso(ts)
                 if dt_obj is dt.NONE:
-                    self.log.warning(
-                        "Unable to parse '%s': Invalid %s string '%s'",
-                        key, "isoformat" if fmt is None else "date", ts)
+                    self.log.warning("Unable to parse '%s': Invalid ISO 8601 "
+                                     "string '%s'", key, ts)
                     ts = default
                 else:
                     ts = int(dt.to_ts(dt_obj))
             return ts
-        fmt = self.config("date-format")
         return get("date-min", dmin), get("date-max", dmax)
 
     def _dump_response(self, response, history=True):
