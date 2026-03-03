@@ -919,7 +919,7 @@ Default
         * ``[E621]``
     ``"net.umanle.arca.android.playstore/0.9.75"``
         * ``arcalive``
-    ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``
+    ``"Patreon/126.9.0.15 (Android; Android 14; Scale/2.10)"``
         * ``patreon``
     ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/LATEST.0.0.0 Safari/537.36"``
         * ``instagram``
@@ -6707,7 +6707,7 @@ Supported Values
     * ``timeline``
     * ``tweets``
     * ``media``
-    * ``replies``
+    * ``with-replies``
     * ``highlights``
     * ``likes``
 Note
@@ -8354,7 +8354,8 @@ Description
 output.colors
 -------------
 Type
-    ``object`` (`key` → `ANSI color`)
+    * ``bool``
+    * ``object`` (`key` → `ANSI color`)
 Default
     .. code:: json
 
@@ -8369,20 +8370,27 @@ Default
 
 Description
     Controls the
-    `ANSI colors <https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#colors--graphics-mode>`__
+    `ANSI colors <https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#color-codes>`__
     used for various outputs.
 
-    Output for |mode: color|__
+    ``true``
+        Use default ANSI colors.
+    ``false``
+        Disable ANSI colors.
+    ``object``
+        Use custom ANSI colors.
 
-    * ``success``: successfully downloaded files
-    * ``skip``: skipped files
+        Keys for |mode: color|__
 
-    Logging Messages:
+        * ``success``: successfully downloaded files
+        * ``skip``: skipped files
 
-    * ``debug``: debug logging messages
-    * ``info``: info logging messages
-    * ``warning``: warning logging messages
-    * ``error``: error logging messages
+        Keys for Logging Messages
+
+        * ``debug``: debug logging messages
+        * ``info``: info logging messages
+        * ``warning``: warning logging messages
+        * ``error``: error logging messages
 
 .. __: `output.mode`_
 
@@ -8396,6 +8404,8 @@ Default
 Description
     | On Windows, enable ANSI escape sequences and colored output
     | by setting the ``ENABLE_VIRTUAL_TERMINAL_PROCESSING`` flag for stdout and stderr.
+Note
+    To disable colored output, set `output.colors`_ to ``false``.
 
 
 output.skip
@@ -10244,7 +10254,8 @@ Type
     * ``list`` of `Format Strings`_
 Example
     * ``"file.ext"``
-    * ``[":", "{category}", "{user}.sqlite3"]``
+    * ``[":b", "{category}", "{user}.sqlite3"]``
+    * ``[":HOME", "gdl", "{category}", "{user}.sqlite3"]``
     * ``["/opt", "archives", "{category}", "{user}.sqlite3"]``
     * ``["C:", "archives", "{category}", "{user}.sqlite3"]``
     * ``["\\\\server\\archives", "{category}", "{user}.sqlite3"]``
@@ -10254,8 +10265,16 @@ Description
     `Format String`_ expansion
     when given as a ``list`` of ``string`` values.
 
-    Use ``":"`` as first list element to prefix this path with
-    `base-directory <extractor.*.base-directory_>`__.
+    Use a string starting with ``:`` as first list element
+    to prefix the path with one of the following:
+
+    ``":"`` | ``":b"`` | ``":base"``
+        `base-directory <extractor.*.base-directory_>`__
+    ``":d"`` | ``":dir"``
+        `base-directory <extractor.*.base-directory_>`__ +
+        `directory <extractor.*.directory_>`__
+    ``":ENV_NAME"`` (i.e. name of an environment variable)
+        Value of this environment variable
 
     Use ``<drive-letter>:`` or ``\\`` on Windows
     or ``/`` on other platforms

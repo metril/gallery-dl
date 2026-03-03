@@ -818,11 +818,14 @@ class Extractor():
                 dt_obj = dt.parse_iso(ts)
                 if dt_obj is dt.NONE:
                     self.log.warning("Unable to parse '%s': Invalid ISO 8601 "
-                                     "string '%s'", key, ts)
+                                     "date/time value '%s'", key, ts)
                     ts = default
                 else:
                     ts = int(dt.to_ts(dt_obj))
             return ts
+        if self.config("date-format"):
+            self.log.error("'date-format' is no longer supported. "
+                           "Use ISO 8601 date/time values instead.")
         return get("date-min", dmin), get("date-max", dmax)
 
     def _dump_response(self, response, history=True):
@@ -1021,18 +1024,16 @@ class Dispatch():
             for data in extractor_data
         }
 
-        if alt is not None:
-            for sub, sub_alt, url in alt:
-                if url is None:
-                    extractors[sub_alt] = extractors[sub]
-                else:
-                    extractors[sub_alt] = (extractors[sub][0], url)
-
         include = self.config("include", default) or ()
         if include == "all":
             include = extractors
-        elif isinstance(include, str):
-            include = include.replace(" ", "").split(",")
+        else:
+            if isinstance(include, str):
+                include = include.replace(" ", "").split(",")
+            if alt is not None:
+                for sub, sub_alt, url in alt:
+                    extractors[sub_alt] = (extractors[sub] if url is None else
+                                           (extractors[sub][0], url))
 
         results = []
         for category in include:
