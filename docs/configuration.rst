@@ -961,6 +961,7 @@ Default
         ``artstation`` |
         ``behance``    |
         ``fanbox``     |
+        ``simplyhentai`` |
         ``twitter``    |
         ``vsco``
     ``null``
@@ -8552,6 +8553,30 @@ and `event <exec.event_>`__ field:
     }
 
 
+actions.action
+--------------
+Type
+    `Action(s)`_
+Description
+    The `Action(s)`_ to perform.
+Note
+    This option can also be set as ``mode``,
+    making it possible to use ``"name": "actions/<action>@<event>"``
+
+
+actions.event
+-------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"prepare"``
+Description
+    The event(s) for which `actions.action`_ is triggered.
+
+    See `metadata.event`_ for a list of available events.
+
+
 classify.mapping
 ----------------
 Type
@@ -8750,6 +8775,24 @@ Default
 Description
     Include `command <exec.command_>`__
     arguments in logging messages.
+
+
+exec.success
+------------
+Type
+    `Action(s)`_
+Description
+    Run these `Action(s)`_ when `command <exec.command_>`__
+    succeeds and returns with exit status `0`.
+
+
+exec.error
+----------
+Type
+    `Action(s)`_
+Description
+    Run these `Action(s)`_ when `command <exec.command_>`__
+    fails and returns with a non-zero exit status.
 
 
 hash.chunk-size
@@ -10420,8 +10463,10 @@ Description
         * ``"name": "ugoira/archive"``
         * ``"name": "exec@error"``
 
-    The available post-processor types are
+    Available postprocessor types are
 
+    ``actions``
+        Perform `Action(s)`_
     ``classify``
         Categorize files by filename extension
     ``compare``

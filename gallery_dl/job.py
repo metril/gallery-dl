@@ -445,24 +445,28 @@ class DownloadJob(Job):
             self.extractor.sleep(self.sleep(), "download")
 
         # download from URL
-        if not self.download(url):
+        failed = False
+        try:
+            if not self.download(url):
+                # use fallback URLs if available/enabled
+                fallback = kwdict.get("_fallback", ()) if self.fallback else ()
+                for num, url in enumerate(fallback, 1):
+                    util.remove_file(pathfmt.temppath)
+                    self.log.info("Trying fallback URL #%d", num)
+                    if self.download(url):
+                        break
+                else:
+                    failed = True
+        except exception.StopDownload:
+            failed = True
 
-            # use fallback URLs if available/enabled
-            fallback = kwdict.get("_fallback", ()) if self.fallback else ()
-            for num, url in enumerate(fallback, 1):
-                util.remove_file(pathfmt.temppath)
-                self.log.info("Trying fallback URL #%d", num)
-                if self.download(url):
-                    break
-            else:
-                # download failed
-                self.status |= 4
-                self.log.error("Failed to download %s",
-                               pathfmt.filename or url)
-                if "error" in hooks:
-                    for callback in hooks["error"]:
-                        callback(pathfmt)
-                return
+        if failed:
+            self.status |= 4
+            self.log.error("Failed to download %s", pathfmt.filename or url)
+            if "error" in hooks:
+                for callback in hooks["error"]:
+                    callback(pathfmt)
+            return
 
         if not pathfmt.temppath:
             if archive is not None and self._archive_write_skip:
@@ -470,10 +474,20 @@ class DownloadJob(Job):
             self.handle_skip()
             return
 
-        # run post processors
+        # run postprocessors
         if "file" in hooks:
             for callback in hooks["file"]:
                 callback(pathfmt)
+
+        # process download flag
+        if FLAGS.DOWNLOAD is not None:
+            FLAGS.DOWNLOAD = None
+            self.status |= 4
+            self.log.error("Failed to download %s", pathfmt.filename or url)
+            if "error" in hooks:
+                for callback in hooks["error"]:
+                    callback(pathfmt)
+            return
 
         # download succeeded
         pathfmt.finalize()
@@ -912,8 +926,8 @@ class KeywordJob(Job):
                 self.extractor.log.info(
                     "Try 'gallery-dl -K \"%s\"' instead.", url)
         else:
-            stdout_write("Keywords for --chapter-filter:\n"
-                         "------------------------------\n")
+            stdout_write("Keywords for --child-filter:\n"
+                         "----------------------------\n")
             self.print_kwdict(kwdict)
             if extr or self.extractor.categorytransfer:
                 stdout_write("\n")

@@ -38,6 +38,7 @@ class FakeJob():
         self.out = output.NullOutput()
         self.get_logger = logging.getLogger
         self.hooks = collections.defaultdict(list)
+        self.status = 0
 
     def register_hooks(self, hooks, options=None):
         for hook, callback in hooks.items():
@@ -51,6 +52,8 @@ class TestPostprocessorModule(unittest.TestCase):
 
     def test_find(self):
         for name in (postprocessor.modules):
+            if name == "fs":
+                name = "filesystem"
             cls = postprocessor.find(name)
             self.assertEqual(cls.__name__, f"{name.capitalize()}PP")
             self.assertIs(cls.__base__, PostProcessor)
@@ -89,6 +92,7 @@ class BasePostprocessorTest(unittest.TestCase):
 
     def tearDown(self):
         self.job.hooks.clear()
+        self.job.status = 0
 
     def _create(self, options=None, data=None):
         kwdict = {"category": "test", "filename": "file", "extension": "ext"}
@@ -109,6 +113,39 @@ class BasePostprocessorTest(unittest.TestCase):
         for event in (events or ("prepare", "file")):
             for callback in self.job.hooks[event]:
                 callback(self.pathfmt)
+
+    def _output(self, mock):
+        return "".join(
+            call[1][0]
+            for call in mock.mock_calls
+            if call[0].endswith("write")
+        )
+
+
+class ActionsTest(BasePostprocessorTest):
+
+    def test_raises(self):
+        self._create({"action": "raise AbortExtraction foobar"})
+
+        with self.assertRaises(exception.AbortExtraction) as cm:
+            self._trigger()
+
+        self.assertEqual(str(cm.exception), "foobar")
+
+    def test_print(self):
+        self._create({"action": "print Hello World"})
+
+        with patch("sys.stdout") as m:
+            self._trigger()
+
+        self.assertEqual(self._output(m), "Hello World\n")
+
+    def test_status(self):
+        self._create({"action": "status = 123"})
+
+        self.assertEqual(self.job.status, 0)
+        self._trigger()
+        self.assertEqual(self.job.status, 123)
 
 
 class ClassifyTest(BasePostprocessorTest):
@@ -412,6 +449,33 @@ class ExecTest(BasePostprocessorTest):
         self.assertEqual(log_info.output[0], msg)
         self.assertIn("'echo' returned with non-zero ", log_info.output[1])
 
+    def test_action_success(self):
+        self._create({
+            "command": "echo foo bar",
+            "success": "status = 11",
+        })
+
+        self.assertEqual(self.job.status, 0)
+        with patch("gallery_dl.util.Popen") as p:
+            p.return_value = i = Mock()
+            i.wait.return_value = 0
+            self._trigger(("after",))
+        self.assertEqual(self.job.status, 11)
+
+    def test_action_error(self):
+        self._create({
+            "command": "echo foo bar",
+            "success": "status = 11",
+            "error"  : "status = 23",
+        })
+
+        self.assertEqual(self.job.status, 0)
+        with patch("gallery_dl.util.Popen") as p:
+            p.return_value = i = Mock()
+            i.wait.return_value = 1  # non-zero exit status
+            self._trigger(("after",))
+        self.assertEqual(self.job.status, 23)
+
 
 class HashTest(BasePostprocessorTest):
 
@@ -614,7 +678,7 @@ class MetadataTest(BasePostprocessorTest):
             {"foo": "bar"},
         )
 
-        with patch("sys.stdout", Mock()) as m:
+        with patch("sys.stdout") as m:
             self._trigger()
 
         self.assertEqual(self._output(m), "bar\nNone\n")
@@ -737,7 +801,7 @@ class MetadataTest(BasePostprocessorTest):
     def test_metadata_stdout(self):
         self._create({"filename": "-", "indent": None, "sort": True})
 
-        with patch("sys.stdout", Mock()) as m:
+        with patch("sys.stdout") as m:
             self._trigger()
 
         self.assertEqual(self._output(m), """\
@@ -901,13 +965,6 @@ class MetadataTest(BasePostprocessorTest):
 
         m_aa.assert_called_once_with(self.pathfmt.kwdict)
         m_ac.assert_called_once()
-
-    def _output(self, mock):
-        return "".join(
-            call[1][0]
-            for call in mock.mock_calls
-            if call[0].endswith("write")
-        )
 
 
 class MtimeTest(BasePostprocessorTest):
