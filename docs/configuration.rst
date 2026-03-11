@@ -21,6 +21,8 @@ Contents
 5) `Postprocessor Options`_
 6) `Miscellaneous Options`_
 7) `API Tokens & IDs`_
+8) `Custom Types`_
+
 
 
 Extractor Options
@@ -7537,6 +7539,16 @@ Description
         Reaction Score order (``threads`` only)
 
 
+extractor.[xenforo].quoted
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract files from quoted content.
+
+
 extractor.ytdl.cmdline-args
 ---------------------------
 Type
@@ -8744,6 +8756,16 @@ Description
     The event(s) for which `exec.command`_ is run.
 
     See `metadata.event`_ for a list of available events.
+
+
+exec.output
+-----------
+Type
+    ``boolean``
+Default
+    ``true``
+Description
+    Show output of spawned subprocesses.
 
 
 exec.session
@@ -10504,6 +10526,7 @@ Example
     * ``"print Hello World"``
     * ``"raise AbortExtraction an error occured"``
     * ``"flag file = terminate"``
+    * ``"keyword title Hello World"``
     * ``["print Exiting", "exit 1"]``
 Description
     An Action_ is parsed as `Action Type`
@@ -10552,6 +10575,8 @@ Description
         | Expected syntax is ``<flag>[ = <value>]`` (e.g. ``post = stop``)
         | ``<flag>`` can be one of ``file``, ``post``, ``child``, ``download``
         | ``<value>`` can be one of ``stop``, ``abort``, ``terminate``, ``restart``, ``skip`` (default ``stop``)
+    ``keyword``:
+        Set a `keyword <extractor.*.keywords_>`__ value
     ``wait``:
         | Sleep for a given Duration_ or
         | wait until Enter is pressed when no argument was given.

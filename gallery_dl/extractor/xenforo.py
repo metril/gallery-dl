@@ -42,14 +42,19 @@ class XenforoExtractor(BaseExtractor):
         ).findall
 
         embeds = self.config("embeds", True)
+        quotes = self.config("quoted", False)
         attachments = self.config("attachments", True)
 
         root = self.root
         base = root if (pos := root.find("/", 8)) < 0 else root[:pos]
         for post in self.posts():
-            urls = extract_urls(post["content"])
-            if embeds and "data-s9e-mediaembed-iframe=" in post["content"]:
-                self._extract_embeds(urls, post)
+            content = post["content"]
+            if not quotes:
+                content = self._remove_quotes(content)
+
+            urls = extract_urls(content)
+            if embeds and "data-s9e-mediaembed-iframe=" in content:
+                self._extract_embeds(urls, post, content)
             if attachments and post["attachments"]:
                 self._extract_attachments(urls, post)
 
@@ -155,6 +160,9 @@ class XenforoExtractor(BaseExtractor):
 
                 url, media = extr_media(
                     base + href, href[href.rfind("/", 0, -1)+1:-1])
+                if url.endswith("/register/full"):
+                    self._warn_auth()
+                    continue
                 if not meta and name:
                     text.nameext_from_name(text.unescape(name), media)
 
@@ -163,7 +171,10 @@ class XenforoExtractor(BaseExtractor):
 
     def request_page(self, url):
         try:
-            return self.request(url)
+            response = self.request(url)
+            if response.history and response.url.endswith("/register"):
+                self._require_auth(response)
+            return response
         except self.exc.HttpError as exc:
             if exc.status == 403 and b">Log in<" in exc.response.content:
                 self._require_auth(exc.response)
@@ -254,6 +265,15 @@ class XenforoExtractor(BaseExtractor):
                 return
 
             page = self.request_page(url).text
+
+    def _remove_quotes(self, content):
+        while "<blockquote" in content:
+            beg = content.index("<blockquote")
+            end = content.index("</blockquote", beg)
+            for _ in range(content.count("<blockquote", beg+11, end)):
+                end = content.index("</blockquote", end+13)
+            content = content[:beg] + content[end+13:]
+        return content
 
     def _extract_error(self, html):
         if msg := (text.extr(html, "blockMessage--error", "</") or
@@ -381,9 +401,9 @@ class XenforoExtractor(BaseExtractor):
         for att in text.extract_iter(post["attachments"], "<li", "</li>"):
             urls.append((None, find(att)[1], None, None))
 
-    def _extract_embeds(self, urls, post):
+    def _extract_embeds(self, urls, post, content):
         for embed in text.extract_iter(
-                post["content"], "data-s9e-mediaembed-iframe='", "'"):
+                content, "data-s9e-mediaembed-iframe='", "'"):
             data = {}
             key = None
             for value in util.json_loads(embed):
@@ -419,7 +439,7 @@ class XenforoExtractor(BaseExtractor):
         return url + "full", media
 
     def _extract_media_ex(self, url, file):
-        page = self.request(url).text
+        page = self.request_page(url).text
 
         schema = self._extract_jsonld(page)
         main = schema["mainEntity"]
@@ -453,6 +473,12 @@ class XenforoExtractor(BaseExtractor):
             ("username & password", "authenticated cookies"), None,
             None if response is None else self._extract_error(response.text))
 
+    def _warn_auth(self):
+        try:
+            self._require_auth()
+        except Exception as exc:
+            self.log.warning(exc)
+
     def _validate(self, response):
         if response.status_code == 403 and b">Log in<" in response.content:
             self._require_auth(response)
@@ -485,13 +511,17 @@ BASE_PATTERN = XenforoExtractor.update({
         "root": "https://forums.socialmediagirls.com",
         "pattern": r"forums\.socialmediagirls\.com",
     },
+    "blacktowhite": {
+        "root": "https://www.blacktowhite.net",
+        "pattern": r"(?:www\.)?blacktowhite\.net",
+    },
 })
 
 
 class XenforoPostExtractor(XenforoExtractor):
     subcategory = "post"
     pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?threads"
-               r"/[^/?#]+/#?post-|/posts/)(\d+)")
+               r"/[^/?#]+/(?:page-\d+)?#?post-|/posts/)(\d+)")
     example = "https://simpcity.cr/threads/TITLE.12345/post-54321"
 
     def posts(self):
