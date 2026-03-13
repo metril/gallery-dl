@@ -43,7 +43,7 @@ class DeviantartExtractor(Extractor):
         self.flat = self.config("flat", True)
         self.extra = self.config("extra", False)
         self.quality = self.config("quality", "100")
-        self.original = self.config("original", True)
+        self.original = self.config("original", False)
         self.previews = self.config("previews", False)
         self.intermediary = self.config("intermediary", True)
         self.comments_avatars = self.config("comments-avatars", False)
@@ -70,6 +70,7 @@ class DeviantartExtractor(Extractor):
 
         if self.intermediary:
             self.intermediary_subn = text.re(r"(/f/[^/]+/[^/]+)/v\d+/.*").subn
+        self.blur_sub = text.re(r",blur_\d+").sub
 
         if isinstance(self.original, str) and \
                 self.original.lower().startswith("image"):
@@ -192,7 +193,7 @@ class DeviantartExtractor(Extractor):
                 content = self._extract_content(deviation)
                 yield self.commit(deviation, content)
 
-            elif deviation["is_downloadable"]:
+            elif self.original and deviation["is_downloadable"]:
                 content = self.api.deviation_download(deviation["deviationid"])
                 deviation["is_original"] = True
                 yield self.commit(deviation, content)
@@ -468,6 +469,7 @@ class DeviantartExtractor(Extractor):
             if self.quality:
                 content["src"] = self.quality_sub(
                     self.quality, content["src"], 1)
+            content["src"] = self.blur_sub("", content["src"], 1)
 
         return content
 
