@@ -91,6 +91,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
+<tr id="allporncomic" title="allporncomic">
+    <td>AllPornComic</td>
+    <td>https://allporncomic.com/</td>
+    <td>Chapters, Manga, Tag Searches</td>
+    <td></td>
+</tr>
 <tr id="arcalive" title="arcalive">
     <td>Arcalive</td>
     <td>https://arca.live/</td>
@@ -570,6 +576,12 @@ Consider all listed sites to potentially be NSFW.
     <td>https://www.iwara.tv/</td>
     <td>Favorites, Followers, Followed Users, individual Images, Playlists, Search Results, Tag Searches, User Profiles, User Images, User Playlists, User Videos, Videos</td>
     <td>Supported</td>
+</tr>
+<tr id="joyreactor" title="joyreactor">
+    <td>JoyReactor</td>
+    <td>https://joyreactor.com/</td>
+    <td>Posts, Search Results, Tag Searches, User Profiles</td>
+    <td></td>
 </tr>
 <tr id="kaliscan" title="kaliscan">
     <td>KaliScan</td>
@@ -1762,12 +1774,6 @@ Consider all listed sites to potentially be NSFW.
 <tr id="reactor" title="reactor">
     <td>Reactor</td>
     <td>http://reactor.cc/</td>
-    <td>Posts, Search Results, Tag Searches, User Profiles</td>
-    <td></td>
-</tr>
-<tr id="joyreactor" title="joyreactor">
-    <td>JoyReactor</td>
-    <td>http://joyreactor.cc/</td>
     <td>Posts, Search Results, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
