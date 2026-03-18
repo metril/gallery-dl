@@ -135,17 +135,23 @@ class JoyreactorExtractor(Extractor):
             interval=False)["data"]
 
     def _pagination(self, url, opname, variables):
-        data = None
+        data = path = None
 
         while True:
             html = self.request(url).text
-            html_posts = html.split('class="content"')[1:]
+            html_posts = html.split('class="content"')
+            del html_posts[0]
+
+            if path is None and ('class="expand-wrapper relative">'
+                                 '<div class="absolute' in html_posts[0]):
+                del html_posts[0]
 
             pgn = text.extr(html, 'ant-pagination-next', "</li>")
             path = text.extr(pgn, 'href="', '"')
 
             if self.metadata:
-                variables["page"] = text.parse_int(path[path.rfind("/")+1:])+1
+                variables["page"] = (text.parse_int(path[path.rfind("/")+1:])+1
+                                     if path else None)
                 data = self._request_graphql(opname, variables)
                 data_posts = data.popitem()[1]["postPager"]["posts"]
                 yield from zip(html_posts, data_posts)
@@ -153,7 +159,7 @@ class JoyreactorExtractor(Extractor):
                 for post in html_posts:
                     yield post, None
 
-            if path.endswith("/1/rev"):
+            if not path or not path.endswith("/1/rev"):
                 break
             url = self.root + path
 
