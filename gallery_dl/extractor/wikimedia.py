@@ -227,6 +227,11 @@ BASE_PATTERN = WikimediaExtractor.update({
         "api-path": "/w/api.php",
         "useragent": "Googlebot-Image/1.0",
     },
+    "mgewiki": {
+        "root": "https://mgewiki.moe",
+        "pattern": r"(?:www\.)?mgewiki\.moe",
+        "api-path": "/api.php",
+    },
 })
 
 
@@ -247,6 +252,8 @@ class WikimediaArticleExtractor(WikimediaExtractor):
             path = path[3:]
         if path.startswith("wiki/"):
             path = path[5:]
+        elif path.startswith("index.php/"):
+            path = path[10:]
         self.path = text.unquote(path)
 
         pre, sep, _ = path.partition(":")
