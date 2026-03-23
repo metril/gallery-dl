@@ -47,14 +47,15 @@ class TwitterExtractor(Extractor):
         self.cards_blacklist = self.config("cards-blacklist")
         self.videos_files = self.config("videos", True)
         self.videos_previews = self.config("previews", False)
-        self.videos_ytdl = self.videos_files == "ytdl"
-        self.videos = self.videos_files or self.videos_previews
+        self.videos_ytdl = (self.videos_files == "ytdl")
+        self.videos = (self.videos_files or self.videos_previews)
 
         if not self.config("transform", True):
             self._transform_community = \
                 self._transform_tweet = \
                 self._transform_user = util.identity
 
+        self.api = TwitterAPI(self)
         self._cursor = None
         self._user = None
         self._user_obj = None
@@ -74,7 +75,6 @@ class TwitterExtractor(Extractor):
 
     def items(self):
         self.login()
-        self.api = TwitterAPI(self)
         metadata = self.metadata()
         seen_tweets = set() if self.config("unique", True) else None
 
@@ -155,6 +155,7 @@ class TwitterExtractor(Extractor):
 
         if self.cards and "card" in tweet:
             try:
+                tweet["id_str"] = data["id_str"]
                 self._extract_card(tweet, files)
             except Exception as exc:
                 self.log.traceback(exc)
@@ -216,7 +217,8 @@ class TwitterExtractor(Extractor):
 
             if "video_info" in media:
                 if self.videos_ytdl:
-                    url = f"ytdl:{self.root}/i/web/status/{tweet['id_str']}"
+                    url = (f"ytdl:{self.root}/i/web/status/"
+                           f"{tweet.get('id_str') or tweet['rest_id']}")
                     file = {"url": url, "extension": "mp4"}
                 elif self.videos_files:
                     video_info = media["video_info"]
@@ -581,7 +583,6 @@ class TwitterExtractor(Extractor):
         if lget("withheld_scope"):
             self.log.warning("'%s'", lget("description"))
 
-        entities = legacy["entities"]
         self._user_cache[uid] = udata = {
             "id"              : text.parse_int(uid),
             "name"            : core.get("screen_name"),
@@ -611,17 +612,17 @@ class TwitterExtractor(Extractor):
                 "_normal.", ".")
 
         descr = legacy["description"]
-        if urls := entities["description"].get("urls"):
-            for url in urls:
-                try:
-                    descr = descr.replace(url["url"], url["expanded_url"])
-                except KeyError:
-                    pass
+        if entities := legacy.get("entities"):
+            if urls := entities["description"].get("urls"):
+                for url in urls:
+                    try:
+                        descr = descr.replace(url["url"], url["expanded_url"])
+                    except KeyError:
+                        pass
+            if "url" in entities:
+                url = entities["url"]["urls"][0]
+                udata["url"] = url.get("expanded_url") or url.get("url")
         udata["description"] = descr
-
-        if "url" in entities:
-            url = entities["url"]["urls"][0]
-            udata["url"] = url.get("expanded_url") or url.get("url")
 
         if self.config("metadata-user", False) and (about := self.cache(
                 self.api.user_about_account, udata["name"]).get(
@@ -1020,7 +1021,7 @@ class TwitterListMembersExtractor(TwitterExtractor):
 
     def items(self):
         self.login()
-        return self._users_result(TwitterAPI(self).list_members(self.user))
+        return self._users_result(self.api.list_members(self.user))
 
 
 class TwitterFollowingExtractor(TwitterExtractor):
@@ -1030,7 +1031,6 @@ class TwitterFollowingExtractor(TwitterExtractor):
     example = "https://x.com/USER/following"
 
     def items(self):
-        self.api = TwitterAPI(self)
         self.login()
         return self._users_result(self.api.user_following(self.user))
 
@@ -1042,7 +1042,6 @@ class TwitterFollowersExtractor(TwitterExtractor):
     example = "https://x.com/USER/followers"
 
     def items(self):
-        self.api = TwitterAPI(self)
         self.login()
         return self._users_result(self.api.user_followers(self.user))
 
@@ -1190,13 +1189,11 @@ class TwitterInfoExtractor(TwitterExtractor):
     example = "https://x.com/USER/info"
 
     def items(self):
-        api = TwitterAPI(self)
-
         screen_name = self.user
         if screen_name.startswith("id:"):
-            user = self.cache(api.user_by_rest_id, screen_name[3:])
+            user = self.cache(self.api.user_by_rest_id, screen_name[3:])
         else:
-            user = self.cache(api.user_by_screen_name, screen_name)
+            user = self.cache(self.api.user_by_screen_name, screen_name)
 
         return iter(((Message.Directory, "", self._transform_user(user)),))
 
