@@ -273,7 +273,7 @@ class DeviantartExtractor(Extractor):
                 )):
                     filename = deviation["content"]["src"].split("/")[5]
                     deviation["index_base36"] = filename.partition("-")[0][1:]
-                    deviation["index"] = id_from_base36(
+                    deviation["index"] = util.b36decode(
                         deviation["index_base36"])
                 else:
                     deviation["index"] = text.parse_int(
@@ -282,7 +282,7 @@ class DeviantartExtractor(Extractor):
                 deviation["index"] = 0
                 deviation["index_base36"] = "0"
         if "index_base36" not in deviation:
-            deviation["index_base36"] = base36_from_id(deviation["index"])
+            deviation["index_base36"] = util.b36encode(deviation["index"])
 
         if self.user:
             deviation["username"] = self.user
@@ -1052,18 +1052,15 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
                r"|(?:https?://)?fav\.me/d([0-9a-z]+)")  # base36
     example = "https://www.deviantart.com/UsER/art/TITLE-12345"
 
-    def __init__(self, match):
-        DeviantartExtractor.__init__(self, match)
-        self.type = match[3]
-        self.deviation_id = \
-            match[4] or match[5] or id_from_base36(match[6])
-
     def deviations(self):
+        _, _, type, did1, did2, did3 = self.groups
+        deviation_id = did1 or did2 or util.b36decode(did3)
+
         if self.user:
             url = (f"{self.root}/{self.user}"
-                   f"/{self.type or 'art'}/{self.deviation_id}")
+                   f"/{type or 'art'}/{deviation_id}")
         else:
-            url = f"{self.root}/view/{self.deviation_id}/"
+            url = f"{self.root}/view/{deviation_id}/"
 
         page = self._limited_request(url, notfound=True).text
         uuid = text.extr(page, '"deviationUuid\\":\\"', '\\')
@@ -1784,20 +1781,6 @@ class DeviantartEclipseAPI():
         params = {"username": user}
         return self._call(endpoint, params)
 
-    def user_watching(self, user, offset=0):
-        gruserid, moduleid = self._ids_watching(user)
-
-        endpoint = "/_puppy/gruser/module/watching"
-        params = {
-            "gruserid"     : gruserid,
-            "gruser_typeid": "4",
-            "username"     : user,
-            "moduleid"     : moduleid,
-            "offset"       : offset,
-            "limit"        : 24,
-        }
-        return self._pagination(endpoint, params)
-
     def _call(self, endpoint, params):
         url = "https://www.deviantart.com" + endpoint
         params["csrf_token"] = self.csrf_token or self._fetch_csrf_token()
@@ -1841,37 +1824,12 @@ class DeviantartEclipseAPI():
             else:
                 params["offset"] = int(params["offset"]) + len(results)
 
-    def _ids_watching(self, user):
-        url = f"{self.extractor.root}/{user}/about"
-        page = self.request(url).text
-
-        gruser_id = text.extr(page, ' data-userid="', '"')
-
-        pos = page.find('\\"name\\":\\"watching\\"')
-        if pos < 0:
-            raise self.extractor.exc.NotFoundError("'watching' module ID")
-        module_id = text.rextr(page, '\\"id\\":', ',', pos).strip('" ')
-
-        self._fetch_csrf_token(page)
-        return gruser_id, module_id
-
     def _fetch_csrf_token(self, page=None):
         if page is None:
             page = self.request(self.extractor.root + "/").text
         self.csrf_token = token = text.extr(
             page, "window.__CSRF_TOKEN__ = '", "'")
         return token
-
-
-_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
-
-
-def id_from_base36(base36):
-    return util.bdecode(base36, _ALPHABET)
-
-
-def base36_from_id(deviation_id):
-    return util.bencode(int(deviation_id), _ALPHABET)
 
 
 def eclipse_media(media, format="preview"):
