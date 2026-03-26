@@ -7716,6 +7716,17 @@ Description
     Extract files from quoted content.
 
 
+extractor.xfolio.fullsize
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download posts' files as `Full Size Download` ZIP container
+    if available and purchased.
+
+
 extractor.ytdl.cmdline-args
 ---------------------------
 Type
@@ -9723,10 +9734,12 @@ ugoira.mkvmerge-mtime
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
     Set the `date` segment information field
     of files processed with ``mkvmerge``.
+Note:
+    Requires ``mkvmerge`` version 95.0 or higher
 
 
 ugoira.mkvmerge-output
